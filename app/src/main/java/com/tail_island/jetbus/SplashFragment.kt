@@ -7,8 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
+import androidx.room.Room
 import com.tail_island.jetbus.databinding.FragmentSplashBinding
-import com.tail_island.jetbus.model.WebService
+import com.tail_island.jetbus.model.*
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -45,35 +46,61 @@ class SplashFragment: Fragment() {
             addConverterFactory(GsonConverterFactory.create())
         }.build().create(WebService::class.java)
 
+        val database = Room.databaseBuilder(requireContext(), AppDatabase::class.java, "jetbus.db").build()
+
         thread {
             try {
-                getWebServiceResultBody { webService.busstopPole(consumerKey) }?.let { busStopPoleJsonArray ->
-                    for (busStopPoleJsonObject in busStopPoleJsonArray.map { it.asJsonObject }.filter { it.get("odpt:operator").asString == "odpt.Operator:Toei" }.take(10)) {
-                        Log.d("SplashFragment", "${busStopPoleJsonObject.get("owl:sameAs")}")
-                        Log.d("SplashFragment", "${busStopPoleJsonObject.get("dc:title")}")
-                        Log.d("SplashFragment", "${busStopPoleJsonObject.get("odpt:kana")}")
+                Log.d("SplashFragment", "Start.")
+
+                database.getTimeTableDetailDao().clear()
+                database.getTimeTableDao().clear()
+                database.getRouteBusStopPoleDao().clear()
+                database.getRouteDao().clear()
+                database.getBusStopPoleDao().clear()
+                database.getBusStopDao().clear()
+
+                val busStopPoleJsonArray = getWebServiceResultBody { webService.busstopPole(consumerKey)     } ?: return@thread
+                val routeJsonArray       = getWebServiceResultBody { webService.busroutePattern(consumerKey) } ?: return@thread
+
+                for (busStopPoleJsonObject in busStopPoleJsonArray.map { it.asJsonObject }.filter { it.get("odpt:operator").asString == "odpt.Operator:Toei" }) {
+                    val busStop = database.getBusStopDao().getByName(busStopPoleJsonObject.get("dc:title").asString) ?: run {
+                        BusStop(
+                            busStopPoleJsonObject.get("dc:title").asString,
+                            busStopPoleJsonObject.get("odpt:kana")?.asString
+                        ).also {
+                            database.getBusStopDao().add(it)
+                        }
+                    }
+
+                    BusStopPole(
+                        busStopPoleJsonObject.get("owl:sameAs").asString,
+                        busStop.name
+                    ).also {
+                        database.getBusStopPoleDao().add(it)
                     }
                 }
 
-                getWebServiceResultBody { webService.busroutePattern(consumerKey) }?.let { busroutePatternJsonArray ->
-                    for (busroutePatternJsonObject in busroutePatternJsonArray.map { it.asJsonObject }.filter { it.get("odpt:operator").asString == "odpt.Operator:Toei" }.take(10)) {
-                        Log.d("SplashFragment", "${busroutePatternJsonObject.get("owl:sameAs")}")
-                        Log.d("SplashFragment", "${busroutePatternJsonObject.get("dc:title")}")
+                // Routeを登録します。
+                for (routeJsonObject in routeJsonArray.map { it.asJsonObject}.filter { it.get("odpt:operator").asString == "odpt.Operator:Toei" }) {
+                    val route = Route(
+                        routeJsonObject.get("owl:sameAs").asString,
+                        routeJsonObject.get("dc:title").asString
+                    ).also {
+                        database.getRouteDao().add(it)
+                    }
 
-                        for (busstopPoleOrderJsonObject in busroutePatternJsonObject.get("odpt:busstopPoleOrder").asJsonArray.take(10).map { it.asJsonObject }) {
-                            Log.d("SplashFragment", "${busstopPoleOrderJsonObject.get("odpt:index")}")
-                            Log.d("SplashFragment", "${busstopPoleOrderJsonObject.get("odpt:busstopPole")}")
-                        }
-
-                        getWebServiceResultBody { webService.bus(consumerKey, busroutePatternJsonObject.get("owl:sameAs").asString) }?.let { buses ->
-                            for (bus in buses.take(10)) {
-                                Log.d("SplashFragment", bus.id)
-                                Log.d("SplashFragment", bus.routeId)
-                                Log.d("SplashFragment", bus.fromBusStopPoleId)
-                            }
+                    for (routeBusStopPoleJsonObject in routeJsonObject.get("odpt:busstopPoleOrder").asJsonArray.map { it.asJsonObject }) {
+                        RouteBusStopPole(
+                            route.id,
+                            routeBusStopPoleJsonObject.get("odpt:index").asInt,
+                            routeBusStopPoleJsonObject.get("odpt:busstopPole").asString
+                        ).also {
+                            it.id = database.getRouteBusStopPoleDao().add(it)
                         }
                     }
                 }
+
+                Log.d("SplashFragment", "Finish.")
 
             } catch (e: IOException) {
                 Log.e("SplashFragment", "${e.message}")
