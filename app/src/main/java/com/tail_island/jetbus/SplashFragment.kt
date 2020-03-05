@@ -7,17 +7,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
-import androidx.room.Room
 import com.tail_island.jetbus.databinding.FragmentSplashBinding
 import com.tail_island.jetbus.model.*
 import retrofit2.Call
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Named
 import kotlin.concurrent.thread
 
 class SplashFragment: Fragment() {
+    @Inject @field:Named("consumerKey") lateinit var consumerKey: String
+    @Inject lateinit var webService: WebService
+    @Inject lateinit var database: AppDatabase
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        (requireActivity().application as App).component.inject(this)
+
         return FragmentSplashBinding.inflate(inflater, container, false).apply {
             bookmarksButton.setOnClickListener {
                 findNavController().navigate(SplashFragmentDirections.splashFragmentToBookmarksFragment())
@@ -38,15 +43,6 @@ class SplashFragment: Fragment() {
 
     override fun onStart() {
         super.onStart()
-
-        val consumerKey = getString(R.string.consumerKey)
-
-        val webService = Retrofit.Builder().apply {
-            baseUrl("https://api.odpt.org")
-            addConverterFactory(GsonConverterFactory.create())
-        }.build().create(WebService::class.java)
-
-        val database = Room.databaseBuilder(requireContext(), AppDatabase::class.java, "jetbus.db").build()
 
         thread {
             try {
