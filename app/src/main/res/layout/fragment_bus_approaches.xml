@@ -5,19 +5,47 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".DepartureBusStopFragment">
 
+    <data>
+        <variable name="viewModel" type="com.tail_island.jetbus.view_model.BusApproachesViewModel" />
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
+            android:id="@+id/departureBusStopNameTextView"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:text="BusApproachesFragment" />
+            app:layout_constraintEnd_toEndOf="parent"
+            android:text='@{viewModel.departureBusStopName}' />
+
+        <TextView
+            android:id="@+id/arrivalBusStopNameTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/departureBusStopNameTextView"
+            app:layout_constraintStart_toStartOf="@id/departureBusStopNameTextView"
+            app:layout_constraintEnd_toEndOf="@id/departureBusStopNameTextView"
+            android:text='@{viewModel.arrivalBusStopName}' />
+
+        <TextView
+            android:id="@+id/routeNamesTextView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintTop_toBottomOf="@id/arrivalBusStopNameTextView"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@id/arrivalBusStopNameTextView"
+            app:layout_constraintEnd_toEndOf="@id/arrivalBusStopNameTextView"
+            android:text='@{viewModel.routeNames}' />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

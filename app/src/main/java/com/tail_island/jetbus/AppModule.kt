@@ -2,11 +2,15 @@ package com.tail_island.jetbus
 
 import android.app.Application
 import android.content.Context
+import androidx.lifecycle.ViewModel
 import androidx.room.Room
 import com.tail_island.jetbus.model.AppDatabase
+import com.tail_island.jetbus.model.Repository
 import com.tail_island.jetbus.model.WebService
+import com.tail_island.jetbus.view_model.BusApproachesViewModel
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.IntoMap
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -42,4 +46,9 @@ class AppModule(private val application: Application) {
         )
         addConverterFactory(GsonConverterFactory.create())
     }.build().create(WebService::class.java)
+
+    @Provides
+    @IntoMap
+    @ViewModelKey(BusApproachesViewModel::class)
+    fun provideBusApproachesViewModel(repository: Repository) = BusApproachesViewModel(repository) as ViewModel
 }

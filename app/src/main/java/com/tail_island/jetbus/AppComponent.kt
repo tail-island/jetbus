@@ -7,4 +7,5 @@ import javax.inject.Singleton
 @Component(modules = [AppModule::class])
 interface AppComponent {
     fun inject(splashFragment: SplashFragment)
+    fun inject(busApproachesFragment: BusApproachesFragment)
 }
