@@ -9,24 +9,34 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/textView"
+        <ImageView
+            android:id="@+id/icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="16dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:text="SplashFragment" />
+            android:layout_marginBottom="8dp"
+            app:layout_constraintStart_toStartOf="@id/nowDownloadingTextView"
+            app:layout_constraintEnd_toEndOf="@id/nowDownloadingTextView"
+            app:layout_constraintBottom_toTopOf="@id/nowDownloadingTextView"
+            android:contentDescription="@string/app_name"
+            android:src="@mipmap/ic_launcher_round" />
 
-        <Button
-            android:id="@+id/bookmarksButton"
+        <TextView
+            android:id="@+id/nowDownloadingTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/textView"
-            app:layout_constraintStart_toStartOf="@id/textView"
-            android:text="BOOKMARKS" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="バス停と路線の情報を取得しています……" />
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="@id/nowDownloadingTextView"
+            app:layout_constraintEnd_toEndOf="@id/nowDownloadingTextView"
+            app:layout_constraintTop_toBottomOf="@id/nowDownloadingTextView" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

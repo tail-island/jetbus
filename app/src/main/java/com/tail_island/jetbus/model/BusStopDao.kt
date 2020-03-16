@@ -16,6 +16,9 @@ interface BusStopDao {
     @Query("SELECT * FROM BusStop WHERE name = :name LIMIT 1")
     fun getByName(name: String): BusStop?
 
+    @Query("SELECT COUNT(*) FROM BusStop")
+    fun getCount(): Int
+
     @Query(
         """
             SELECT DISTINCT ArrivalBusStop.*

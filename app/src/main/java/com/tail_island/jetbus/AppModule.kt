@@ -8,6 +8,8 @@ import com.tail_island.jetbus.model.AppDatabase
 import com.tail_island.jetbus.model.Repository
 import com.tail_island.jetbus.model.WebService
 import com.tail_island.jetbus.view_model.BusApproachesViewModel
+import com.tail_island.jetbus.view_model.MainViewModel
+import com.tail_island.jetbus.view_model.SplashViewModel
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoMap
@@ -51,4 +53,14 @@ class AppModule(private val application: Application) {
     @IntoMap
     @ViewModelKey(BusApproachesViewModel::class)
     fun provideBusApproachesViewModel(repository: Repository) = BusApproachesViewModel(repository) as ViewModel
+
+    @Provides
+    @IntoMap
+    @ViewModelKey(MainViewModel::class)
+    fun provideMainViewModel(repository: Repository) = MainViewModel(repository) as ViewModel
+
+    @Provides
+    @IntoMap
+    @ViewModelKey(SplashViewModel::class)
+    fun provideSplashViewModel(repository: Repository) = SplashViewModel(repository) as ViewModel
 }
