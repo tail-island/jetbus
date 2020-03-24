@@ -14,7 +14,7 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/departureBusStopNameTextView"
+            android:id="@+id/departureBusStopAndArrivalBusStopTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -23,17 +23,17 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:text='@{viewModel.departureBusStopName}' />
+            android:text='@{String.format("%s %s %s", viewModel.departureBusStopName, @string/start_to_end_arrow, viewModel.arrivalBusStopName)}' />
 
-        <TextView
-            android:id="@+id/arrivalBusStopNameTextView"
-            android:layout_width="0dp"
+        <ImageView
+            android:id="@+id/bookmarkImageView"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/departureBusStopNameTextView"
-            app:layout_constraintStart_toStartOf="@id/departureBusStopNameTextView"
-            app:layout_constraintEnd_toEndOf="@id/departureBusStopNameTextView"
-            android:text='@{viewModel.arrivalBusStopName}' />
+            android:layout_marginEnd="16dp"
+            app:layout_constraintTop_toTopOf="@id/departureBusStopAndArrivalBusStopTextView"
+            app:layout_constraintBottom_toBottomOf="@id/departureBusStopAndArrivalBusStopTextView"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:src='@{viewModel.bookmark != null ? @drawable/ic_bookmark_on : @drawable/ic_bookmark_off}' />
 
         <TextView
             android:id="@+id/routeNamesTextView"
@@ -41,10 +41,10 @@
             android:layout_height="0dp"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
-            app:layout_constraintTop_toBottomOf="@id/arrivalBusStopNameTextView"
+            app:layout_constraintTop_toBottomOf="@id/departureBusStopAndArrivalBusStopTextView"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@id/arrivalBusStopNameTextView"
-            app:layout_constraintEnd_toEndOf="@id/arrivalBusStopNameTextView"
+            app:layout_constraintStart_toStartOf="@id/departureBusStopAndArrivalBusStopTextView"
+            app:layout_constraintEnd_toEndOf="@id/departureBusStopAndArrivalBusStopTextView"
             android:text='@{viewModel.routeNames}' />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -19,6 +19,9 @@ interface BusStopDao {
     @Query("SELECT COUNT(*) FROM BusStop")
     fun getCount(): Int
 
+    @Query("SELECT * FROM BusStop ORDER BY phoneticName")
+    fun getObservables(): LiveData<List<BusStop>>
+
     @Query(
         """
             SELECT DISTINCT ArrivalBusStop.*

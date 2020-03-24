@@ -57,7 +57,7 @@
                     android:layout_marginBottom="16dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:textSize="10sp"
-                    android:text="本アプリが使用する公共交通データは、公共交通オープンデータセンターにおいて提供されるものです。\n\n公共交通事業者により提供されたデータを元にしていますが、必ずしも正確／完全なものとは限りません。本アプリの表示内容について、公共交通事業者に直接問い合わせないでください。\n\n本アプリに関するお問い合わせはrojima1@gmail.comにお願いします。" />
+                    android:text="@string/odpt_caution" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -7,9 +7,7 @@ import androidx.room.Room
 import com.tail_island.jetbus.model.AppDatabase
 import com.tail_island.jetbus.model.Repository
 import com.tail_island.jetbus.model.WebService
-import com.tail_island.jetbus.view_model.BusApproachesViewModel
-import com.tail_island.jetbus.view_model.MainViewModel
-import com.tail_island.jetbus.view_model.SplashViewModel
+import com.tail_island.jetbus.view_model.*
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoMap
@@ -51,8 +49,23 @@ class AppModule(private val application: Application) {
 
     @Provides
     @IntoMap
+    @ViewModelKey(ArrivalBusStopViewModel::class)
+    fun provideArrivalBusStopViewModel(repository: Repository) = ArrivalBusStopViewModel(repository) as ViewModel
+
+    @Provides
+    @IntoMap
+    @ViewModelKey(BookmarksViewModel::class)
+    fun provideBookmarksViewModel(repository: Repository) = BookmarksViewModel(repository) as ViewModel
+
+    @Provides
+    @IntoMap
     @ViewModelKey(BusApproachesViewModel::class)
     fun provideBusApproachesViewModel(repository: Repository) = BusApproachesViewModel(repository) as ViewModel
+
+    @Provides
+    @IntoMap
+    @ViewModelKey(DepartureBusStopViewModel::class)
+    fun provideDepartureBusStopViewModel(repository: Repository) = DepartureBusStopViewModel(repository) as ViewModel
 
     @Provides
     @IntoMap

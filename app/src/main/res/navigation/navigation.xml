@@ -21,7 +21,7 @@
     <fragment
         android:id="@+id/bookmarksFragment"
         android:name="com.tail_island.jetbus.BookmarksFragment"
-        android:label="ブックマーク"
+        android:label="@string/bookmarks"
         tools:layout="@layout/fragment_bookmarks">
 
         <action
@@ -37,7 +37,7 @@
     <fragment
         android:id="@+id/departureBusStopFragment"
         android:name="com.tail_island.jetbus.DepartureBusStopFragment"
-        android:label="出発バス停"
+        android:label="@string/departure_bus_stop"
         tools:layout="@layout/fragment_departure_bus_stop">
 
         <action
@@ -49,7 +49,7 @@
     <fragment
         android:id="@+id/arrivalBusStopFragment"
         android:name="com.tail_island.jetbus.ArrivalBusStopFragment"
-        android:label="到着バス停"
+        android:label="@string/arrival_bus_stop"
         tools:layout="@layout/fragment_arrival_bus_stop">
 
         <argument
@@ -66,7 +66,7 @@
     <fragment
         android:id="@+id/busApproachesFragment"
         android:name="com.tail_island.jetbus.BusApproachesFragment"
-        android:label="バス接近情報"
+        android:label="@string/bus_approaches"
         tools:layout="@layout/fragment_bus_approaches">
 
         <argument

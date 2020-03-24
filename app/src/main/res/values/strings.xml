@@ -1,6 +1,16 @@
 <resources>
     <string name="app_name">jetbus</string>
+    <string name="re_get_bus_stop_and_route_information">バス停と路線のデータを再取得</string>
+    <string name="odpt_caution">本アプリが使用する公共交通データは、公共交通オープンデータセンターにおいて提供されるものです。\n\n公共交通事業者により提供されたデータを元にしていますが、必ずしも正確／完全なものとは限りません。本アプリの表示内容について、公共交通事業者に直接問い合わせないでください。\n\n本アプリに関するお問い合わせはrojima1@gmail.comにお願いします。</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="downloading_bus_stop_and_route_information">バス停と路線の情報を取得しています……</string>
+
+    <string name="bookmarks">ブックマーク</string>
+    <string name="start_to_end_arrow">→</string>
+
+    <string name="departure_bus_stop">出発バス停</string>
+
+    <string name="arrival_bus_stop">出発バス停</string>
+
+    <string name="bus_approaches">バス接近情報</string>
 </resources>

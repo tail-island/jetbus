@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group>
-        <item android:id="@+id/clearDatabase" android:title="バス停と路線のデータを再取得" />
+        <item android:id="@+id/clearDatabase" android:title="@string/re_get_bus_stop_and_route_information" />
     </group>
 </menu>

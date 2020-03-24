@@ -13,27 +13,26 @@
             android:id="@+id/icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
             app:layout_constraintStart_toStartOf="@id/nowDownloadingTextView"
             app:layout_constraintEnd_toEndOf="@id/nowDownloadingTextView"
             app:layout_constraintBottom_toTopOf="@id/nowDownloadingTextView"
-            android:contentDescription="@string/app_name"
             android:src="@mipmap/ic_launcher_round" />
 
         <TextView
             android:id="@+id/nowDownloadingTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:text="バス停と路線の情報を取得しています……" />
+            android:text="@string/downloading_bus_stop_and_route_information" />
 
         <ProgressBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="@id/nowDownloadingTextView"
             app:layout_constraintEnd_toEndOf="@id/nowDownloadingTextView"
             app:layout_constraintTop_toBottomOf="@id/nowDownloadingTextView" />

@@ -98,6 +98,19 @@ class Repository @Inject constructor(private val database: AppDatabase, private 
         }
     }
 
+    suspend fun toggleBookmark(departureBusStopName: String, arrivalBusStopName: String) = withContext(Dispatchers.IO) {
+        val bookmark = database.getBookmarkDao().get(departureBusStopName, arrivalBusStopName)
+
+        if (bookmark == null) {
+            database.getBookmarkDao().add(Bookmark(departureBusStopName, arrivalBusStopName))
+        } else {
+            database.getBookmarkDao().remove(bookmark)
+        }
+    }
+
+    fun getObservableBookmarks() = database.getBookmarkDao().getObservables()
+    fun getObservableBookmarkByDepartureBusStopNameAndArrivalBusStopName(departureBusStopName: String, arrivalBusStopName: String) = database.getBookmarkDao().getObservableByDepartureBusStopNameAndArrivalBusStopName(departureBusStopName, arrivalBusStopName)
+    fun getObservableBusStops() = database.getBusStopDao().getObservables()
     fun getObservableBusStopsByDepartureBusStopName(departureBusStopName: String) = database.getBusStopDao().getObservablesByDepartureBusStopName(departureBusStopName)
     fun getObservableRoutesByDepartureBusStopNameAndArrivalBusStopName(departureBusStopName: String, arrivalBusStopName: String) = database.getRouteDao().getObservablesByDepartureBusStopNameAndArrivalBusStopName(departureBusStopName, arrivalBusStopName)
 }

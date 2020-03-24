@@ -1,22 +1,36 @@
 package com.tail_island.jetbus.view_model
 
 import androidx.lifecycle.*
+import com.tail_island.jetbus.model.Bookmark
 import com.tail_island.jetbus.model.Repository
 import com.tail_island.jetbus.model.Route
+import kotlinx.coroutines.launch
 
 class BusApproachesViewModel(private val repository: Repository): ViewModel() {
     val departureBusStopName = MutableLiveData<String>()
 
-    val arrivalBusStops = Transformations.switchMap(departureBusStopName) { arrivalBusStopNameValue ->
-        repository.getObservableBusStopsByDepartureBusStopName(arrivalBusStopNameValue)
-    }
+    val arrivalBusStopName = MutableLiveData<String>()
 
-    val arrivalBusStopName = Transformations.map(arrivalBusStops) { arrivalBusStopsValue ->
-        if (arrivalBusStopsValue.isEmpty()) {
-            return@map null
+    val bookmark = MediatorLiveData<Bookmark?>().apply {
+        var source: LiveData<Bookmark?>? = null
+
+        fun update() {
+            val departureBusStopNameValue = departureBusStopName.value ?: return
+            val arrivalBusStopNameValue   = arrivalBusStopName.value   ?: return
+
+            source?.let {
+                removeSource(it)
+            }
+
+            source = repository.getObservableBookmarkByDepartureBusStopNameAndArrivalBusStopName(departureBusStopNameValue, arrivalBusStopNameValue).also {
+                addSource(it) { sourceValue ->
+                    value = sourceValue
+                }
+            }
         }
 
-        arrivalBusStopsValue[0.until(arrivalBusStopsValue.size).random()].name
+        addSource(departureBusStopName) { update() }
+        addSource(arrivalBusStopName)   { update() }
     }
 
     val routes = MediatorLiveData<List<Route>>().apply {
@@ -43,5 +57,14 @@ class BusApproachesViewModel(private val repository: Repository): ViewModel() {
 
     val routeNames = Transformations.map(routes) { routesValue ->
         routesValue.map { it.name }.joinToString("\n")
+    }
+
+    fun toggleBookmark() {
+        viewModelScope.launch {
+            val departureBusStopNameValue = departureBusStopName.value ?: return@launch
+            val arrivalBusStopNameValue   = arrivalBusStopName.value   ?: return@launch
+
+            repository.toggleBookmark(departureBusStopNameValue, arrivalBusStopNameValue)
+        }
     }
 }
