@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group>
-        <item android:id="@+id/clearDatabase" android:title="@string/re_get_bus_stop_and_route_information" />
+        <item android:id="@+id/clearDatabase" android:title="@string/clear_database" />
+        <item android:id="@+id/clearBookmarks" android:title="@string/clear_bookmarks" />
     </group>
 </menu>

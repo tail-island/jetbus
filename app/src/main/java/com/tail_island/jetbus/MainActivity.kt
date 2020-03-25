@@ -38,6 +38,13 @@ class MainActivity: AppCompatActivity() {
 
                         true
                     }
+                    R.id.clearBookmarks -> run {
+                        lifecycleScope.launch {
+                            viewModel.clearBookmarks()
+                        }
+
+                        true
+                    }
                     else -> false
 
                 }.also {

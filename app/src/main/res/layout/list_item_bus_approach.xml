@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable name="item" type="com.tail_island.jetbus.model.BusApproach" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/routeNameTextView"
+            app:layout_constraintBottom_toBottomOf="@id/leftBusStopNameTextView"
+            android:src="@drawable/ic_bus" />
+
+        <TextView
+            android:id="@+id/routeNameTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintStart_toEndOf="@id/imageView"
+            app:layout_constraintEnd_toStartOf="@id/willArriveAfterTextView"
+            app:layout_constraintTop_toTopOf="parent"
+            android:text="@{item.routeName}" />
+
+        <TextView
+            android:id="@+id/leftBusStopNameTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/routeNameTextView"
+            app:layout_constraintEnd_toEndOf="@id/routeNameTextView"
+            app:layout_constraintTop_toBottomOf="@id/routeNameTextView"
+            android:text='@{String.format("%sを通過", item.leftBusStopName)}' />
+
+        <TextView
+            android:id="@+id/willArriveAfterTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/routeNameTextView"
+            app:layout_constraintBottom_toBottomOf="@id/leftBusStopNameTextView"
+            android:textColor="@color/colorAccent"
+            android:textSize="28sp"
+            android:text='@{item.willArriveAfter == null ? "-" : String.format("%d 分", safeUnbox(item.willArriveAfter) / 60)}' />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/leftBusStopNameTextView" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

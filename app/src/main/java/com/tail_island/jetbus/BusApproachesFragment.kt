@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
+import com.tail_island.jetbus.adapter.BusApproachAdapter
 import com.tail_island.jetbus.databinding.FragmentBusApproachesBinding
 import com.tail_island.jetbus.view_model.BusApproachesViewModel
 import javax.inject.Inject
@@ -31,6 +33,14 @@ class BusApproachesFragment: Fragment() {
             bookmarkImageView.setOnClickListener {
                 this@BusApproachesFragment.viewModel.toggleBookmark()
             }
-       }.root
+
+            recyclerView.adapter = BusApproachAdapter().apply {
+                this@BusApproachesFragment.viewModel.busApproaches.observe(viewLifecycleOwner, Observer {
+                    noBusApproachesTextView.visibility = if (it.isEmpty()) { View.VISIBLE } else { View.GONE }
+
+                    submitList(it)
+                })
+            }
+        }.root
     }
 }

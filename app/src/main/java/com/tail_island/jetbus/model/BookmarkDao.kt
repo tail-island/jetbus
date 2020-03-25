@@ -14,6 +14,9 @@ interface BookmarkDao {
     @Delete
     fun remove(bookmark: Bookmark)
 
+    @Query("DELETE FROM Bookmark")
+    fun clear()
+
     @Query("SELECT * FROM Bookmark WHERE departureBusStopName = :departureBusStopName AND arrivalBusStopName = :arrivalBusStopName LIMIT 1")
     fun get(departureBusStopName: String, arrivalBusStopName: String): Bookmark?
 
