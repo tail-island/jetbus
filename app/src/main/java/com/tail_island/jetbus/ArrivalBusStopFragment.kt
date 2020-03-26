@@ -9,7 +9,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.LinearSmoothScroller
 import com.tail_island.jetbus.adapter.BusStopAdapter
 import com.tail_island.jetbus.adapter.IndexAdapter
 import com.tail_island.jetbus.databinding.FragmentArrivalBusStopBinding
