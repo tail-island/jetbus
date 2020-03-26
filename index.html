@@ -628,7 +628,7 @@ border-color: #4078c0;
   <![endif]-->
   <meta name="title" content="Androidアプリ開発ガイド">
   <meta name="description" content="Androidアプリ開発の、多分最も簡単じゃないかなーと思う作り方のガイド。">
-  <meta name="keywords" content="Android, Kotlin, Jetpack">
+  <meta name="keywords" content="Android, Kotlin, Android Jetpack">
 </head>
 <body>
 <article class="markdown-body">
@@ -636,14 +636,14 @@ border-color: #4078c0;
 <p>上司の問い掛けにノータイムで断りをいれて、でもしがないサラリーマンの私の我儘が通るはずなんかなくて、Androidアプリの開発があまりに辛くて滂沱のごとく涙したあの日の私。私の立場は当時と同じヒラのままですし、やっぱり上司の命令には逆らえないのですけど、Androidアプリの開発は大きく変わりました。</p>
 <p>「Androidアプリの開発を、ぜひワタクシメに！」</p>
 <p>今の私は、Androidアプリの開発の仕事大歓迎です。だって、今時のAndroidアプリ開発って、とても楽チンで美味しい仕事なんだもの。そう、Android Jetpackを使うならね。あと、Kotlinとコルーチンも。……え？　信じられない？　わかりました。実際にアプリを作って、その楽チンさを証明しましょう。</p>
-<h1 id="androidアプリ開発が面倒だった理由とその対策">Androidアプリ開発が面倒だった理由と、その対策</h1>
+<h1 id="androidアプリ開発が面倒だった理由と公式による対策">Androidアプリ開発が面倒だった理由と、公式による対策</h1>
 <p>さて、Androidアプリの開発が面倒なのは、大昔の貧弱なスマートフォンのリソースでも動作するように初期のバージョンが作成されたためだと考えます。そして、複数のメーカーの様々なAndroid端末があったので後方互換性を考慮しなければならなくて、初期バージョンの古い設計を引きずらざるを得なかったためでしょう。</p>
-<p>たとえば、Androidアプリの基本的な構成単位である<code>Activity</code>は、いつ終了させられてもよいように作らなければなりません。少ないメモリを有効活用するためには、バックグラウンドの<code>Activity</code>を終了させてメモリを解放させることが重要ですから。でも、だからといって、ただ終了させるのでは次にアプリがフォアグラウンドになった時に処理を継続できなくなってしまう。だから、<code>onSavedInstanceState()</code>で状態を退避できて<code>onRestoreInstanceState()</code>で状態を復帰できるようにしよう。待てよ、これが前提なのだから、端末を縦から横に回転したときに画面のレイアウトをやり直すようなCPUを消費する処理はやめて、<code>Activity</code>を再生成してしまうことにしよう。このような流れで出来上がったのが、<code>Activity</code>のライフサイクルという、あの複雑怪奇な図です。</p>
+<p>たとえば、Androidアプリの基本的な構成単位である<code>Activity</code>は、いつ終了させられてもよいように作らなければなりません。少ないメモリを有効活用するためには、バックグラウンドの<code>Activity</code>を終了させてメモリを解放させることが重要ですからね。でも、だからといって、ただ終了させるのでは次にアプリがフォアグラウンドになった時に処理を継続できなくなってしまいます。だから、<code>onSavedInstanceState()</code>で状態を退避できて<code>onRestoreInstanceState()</code>で状態を復帰できるようにしよう。待てよ、これが前提なのだから、端末を縦から横に回転したときに画面のレイアウトをやり直すようなCPUを消費する処理はやめて、<code>Activity</code>を再生成してしまうことにしよう。たぶんこのような流れで出来上がったのが、<code>Activity</code>のライフサイクルという、あの複雑怪奇な図です。</p>
 <p>図</p>
 <p>この面倒な図を正確に理解していないと、Androidアプリの開発はできないらしい。でも、メモリが豊富な今時のスマートフォンなら、こんな仕組みは無駄なのではないでしょうか？　LinuxでもMac OSでもWindowsでも、こんな考慮はしていませんよね？</p>
-<p>でも、後方互換性を考えると、APIを丸ごと書き換えるのは困難です。だから、APIの上にライブラリの層を被せることにしましょう。先ほどの問題は<code>Activity</code>そのものではなく、<code>Activity</code>の「状態」の問題なので、状態だけを抽出して、その状態については<code>Activity</code>が破棄されても破棄されないようにすればよい。そのクラスの名前はそう、MVVM（Model View ViewModel）アーキテクチャの<code>ViewModel</code>から借りてこよう。そして、プログラミング業界ではオブジェクトの生成から破棄までをライフサイクルという言葉で表現するので、ライブラリ名はLifecycleとしよう。ほら、これで、あの複雑怪奇なライフサイクルを（それほど）意識しないで済むようになって、開発は楽チンになりました。</p>
-<p>でもちょっと待って。画面回転の問題は<code>Fragment</code>で解決できるのではという、従来のAndroid開発に詳しい方がいらっしゃるかもしれません。でもね、<code>Fragment</code>を使う時って、画面遷移はどうしていました？　Androidそのものは<code>Activity</code>が遷移していくように作られていて、だから<code>Fragment</code>を含む<code>Activity</code>が遷移していくように作ることになって、結果として<code>Activity</code>と<code>Fragment</code>にコードが分散して見通しが悪くなるだけになっていませんでしたか？　この問題は<code>Fragment</code>が遷移する仕組みを導入することで解消できるわけで、その仕組みをシンプルなコードで実現可能にしてくれるライブラリがNavigationです。これから先の人生では<code>Fragment</code>のことだけを考えれば済むというわけ。気難しいActivityさんと離れられて、さらに楽チンです。</p>
-<p>データの管理も大変でした。RDBMS（Relational Database Management System）のSQLiteをAndroidシステムに組み込んでくれたのはとてもありがたいのですけど、そのアクセスには素のSQLを使えってのはいただけません。オブジェクト指向のObjectとRDBMSのRelationをマップする、O/Rマッパーが欲しい。ならば与えようってことでRoomという公式のO/Rマッパーが提供されて、ライブラリ選択に頭を悩ます必要がなくなって楽チン。</p>
+<p>でも、後方互換性を考えると、APIを丸ごと書き換えるのは困難です。だから、APIの上にライブラリの層を被せることにしましょう。先ほどの問題は<code>Activity</code>そのものではなく、<code>Activity</code>の「状態」の問題なので、状態だけを抽出して、その状態については<code>Activity</code>が破棄されても破棄されないようにすればよい。そのクラスの名前はそう、MVVM（Model-View-ViewModel）アーキテクチャの<code>ViewModel</code>から借りてこよう。そして、プログラミング業界ではオブジェクトの生成から破棄までをライフサイクルという言葉で表現するので、ライブラリ名はLifecycleとしよう。ほら、これで、あの複雑怪奇なライフサイクルを（それほど）意識しないで済むようになって、開発は楽チンになりました。</p>
+<p>でもちょっと待って。画面回転の問題は<code>Fragment</code>で解決できるのではという、従来のAndroid開発に詳しい方がいらっしゃるかもしれません。でもね、<code>Fragment</code>を使う時って、画面遷移はどうしていました？　Androidそのものは<code>Activity</code>が遷移していくように作られていて、だから<code>Fragment</code>を含む<code>Activity</code>が遷移していくように作ることになって、結果として<code>Activity</code>と<code>Fragment</code>にコードが分散して見通しが悪くなるだけになっていませんでしたか？　この問題は<code>Fragment</code>が遷移する仕組みで解消できるわけで、その仕組みをシンプルなコードで実現可能にしてくれるライブラリがNavigationです。これから先の人生では<code>Fragment</code>のことだけを考えれば済むというわけ。気難しいActivityさんと離れられて、さらに楽チンです。</p>
+<p>データの管理も大変でした。RDBMS（Relational Database Management System）のSQLite3をAndroidシステムに組み込んでくれたのはとてもありがたいのですけど、そのアクセスには素のSQLを使えってのはいただけません。オブジェクト指向のObjectとRDBMSのRelationをマップする、O/Rマッパーが欲しい。ならば与えようってことでRoomという公式のO/Rマッパーが提供されて、ライブラリ選択に頭を悩ます必要がなくなって楽チン。</p>
 <p>本項では紹介しませんけど、これ以外にも便利機能はいっぱいあって、Googleは<a href="https://developer.android.com/jetpack">Android Jetpack</a>としてまとめて提供しています。バックグラウンド・ジョブ管理のWorkManagerとか、面倒でしょうがなかったカメラ制御を楽にしてくれるCameraXなんてのもあります。新機能をなかなか取り入れられない、過去に縛られたダサいAPIとはこれでオサラバできるんです。</p>
 <p>あと、Support Libraryも。Androidでは端末が最新OSにバージョン・アップされていることを期待できないので、OSそのものに新しい機能が組み入れられてもすぐに使うことはできません。だから、Support Libraryという形で、OSとは別に機能を提供してきました。ところが、このSupport Libraryにもバージョンの不整合という問題がでてしまったんです。<code>android.support.v4</code>とか<code>android.support.v7</code>とかね。これはもう心機一転してやりなおそうってことで、<code>androidx</code>で始まる新しいライブラリ群にまとめなおされました。前述したLifecycleやNavigationも、実は<code>androidx</code>ファミリーの一員なんです。Lifecycleは<code>androidx.lifecycle</code>ですし、Navigationは<code>androidx.navigation</code>です。当然、新しい<code>androidx.*</code>では、LifecycleやNavigationなどのJetpackの機能を前提にした機能強化がなされていて、これでもう本当に楽チンです。</p>
 <p>ただね、<code>androidx.*</code>は、それぞれがそれぞれを前提としているので、整合性を保って良い感じに組み合わせて使わなければならないんですよ。個々の要素を理解するだけでは不十分で、どのように組み合わせるべきかを理解することが重要なんです。だから、Googleは<a href="https://developer.android.com/jetpack/docs/guide?hl=ja">アプリのアーキテクチャ・ガイド</a>というアプリ全体をどのように作るのかのガイドと、<a href="https://github.com/googlesamples/android-sunflower">Sunflower</a>というサンプル・アプリを提供しています。これらはとても良いモノなのですけど、私には、Jetpackに都合が良い美しい世界にとどまっていて、現実の様々な問題への対応が不十分なように感じられます。あと、いくらなんでも読者への前提が厳しすぎますよ、これ。ガイドの序文に「Androidフレームワークの基本について熟知していることを前提としています」って書いてありますけど、Jetpack以降は無駄になるような古い知識をとりあえず習得してこいってのは酷いと思うよね？</p>
@@ -651,11 +651,11 @@ border-color: #4078c0;
 <h1 id="サンプルアプリ">サンプル・アプリ</h1>
 <p>私が欲しいからという理由で、東京の都営バスの車両の接近情報を表示するアプリを作成します（私が生まれ育った群馬県で力合わせる200万人をはじめとする地方在住のみなさま、ごめんなさい）。というのもですね、都営バスは<a href="https://tobus.jp/">tobus.jp</a>というサイトで車両接近情報を提供していて、このサイトはグラフィカルでとてもよくできているんですけど、提供側の都営バスの論理からか情報が路線単位なんですよ。で、私の住んでいるアパートの周りにはいくつかのバス停があってそれぞれ路線が異なるので、会社から帰るときには複数の路線の車両接近情報を調べなければならなくてこれが実にかったるい。</p>
 <p>図</p>
-<p>なので、複数の路線の車両の接近情報を集めて表示するアプリを作成します。タイミングがよいことに、2019年5月31日に、<a href="https://metro.tokyo.jp.tosei/hodohappyo/press/2019/05/31/04.html">都営交通の運行情報等をオープンデータとして提供開始します</a>というニュースがありました。<a href="https://developer.odpt.org">公共交通オープンデータセンター開発者サイト</a>でユーザー登録すれば、誰でも無料でデータを使用できます（利用者への通知が必要などの、いくつかの制約はありますけど）。Webサイトのクローリングが不要なのでアプリ開発は容易だろうから、サンプル・アプリに適しているんじゃないかな。</p>
+<p>なので、複数の路線の車両の接近情報を集めて表示するアプリを作成します。タイミングが良いことに、2019年5月31日に、<a href="https://metro.tokyo.jp.tosei/hodohappyo/press/2019/05/31/04.html">都営交通の運行情報等をオープンデータとして提供開始します</a>というニュースがありました。<a href="https://developer.odpt.org">公共交通オープンデータセンター開発者サイト</a>でユーザー登録すれば、誰でも無料でデータを使用できます（利用者への通知が必要などの、いくつかの制約はありますけど）。Webサイトのクローリングが不要なのでアプリ開発は容易だろうから、サンプル・アプリに適しているんじゃないかな。</p>
 <p>具体化しましょう。出発バス停を指定して、到着バス停を指定すると、それらのバス停を結ぶ全ての路線の接近情報が一覧表示されます。あと、毎回出発バス停と到着バス停を選ぶのでは面倒すぎるので、ブックマークの機能を持たせます。以下のような感じ。</p>
 <p>図</p>
 <p>本ガイドでは、このアプリをちゃちゃっと作っていきます。</p>
-<p>最終的なコードは、<a href="https://github.com/tail-island/jetbus/">GitHub</a>で公開しています。必要に応じて参照してみてください。ただし、このコードをビルドして動かすには、公共交通オープンデータセンター開発者サイトにユーザー登録すると貰えるアクセス・トークンをが必要です。コードをcloneしたら<code>./app/src/main/res/values</code>ディレクトリに<code>odpt.xml</code>を作成し、以下を参考に<code>consumerKey</code>を設定してください。</p>
+<p>最終的なコードは、<a href="https://github.com/tail-island/jetbus/">GitHub</a>で公開しています。必要に応じて参照してみてください。ただし、このコードをビルドして動かすには、後の章で説明する公共交通オープンデータセンター開発者サイトにユーザー登録すると貰えるアクセス・トークンをが必要です。コードをcloneしたら<code>./app/src/main/res/values</code>ディレクトリに<code>odpt.xml</code>を作成し、以下を参考に<code>consumerKey</code>を設定してください。</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;utf-8&quot;<span class="kw">?&gt;</span></span>
 <span id="cb1-2"><a href="#cb1-2"></a><span class="kw">&lt;resources&gt;</span></span>
 <span id="cb1-3"><a href="#cb1-3"></a>    <span class="kw">&lt;string</span><span class="ot"> name=</span><span class="st">&quot;consumerKey&quot;</span><span class="kw">&gt;</span>公共交通オープンデータセンターから取得したアクセス・トークン<span class="kw">&lt;/string&gt;</span></span>
@@ -678,8 +678,8 @@ border-color: #4078c0;
 <h2 id="jetpackの組み込み">Jetpackの組み込み</h2>
 <p>Jetpackをビルド・システムのGradleに組み込む方法は、各ライブラリのリリース・ノートに書いてあります。たとえばNavigationなら、<a href="https://developer.android.com/jetpack/androidx/releases/navigation">https://developer.android.com/jetpack/androidx/releases/navigation</a>です。基本はこのリリース・ノートの記載に従うのですけど、いくつか注意点があります。</p>
 <ul>
-<li>ライブラリ名-ktxという名前のライブラリがある場合は、¥<em>-ktxを指定してください。¥</em>-ktxは、Kotlinならではの便利機能が入ったライブラリです。Kotlin向けの機能が入っていない基本バージョンのライブラリは、依存関係があるので自動で組み込まれます。</li>
-<li>Jetpackではコード生成を多用しているのですけど、KotlinやJavaではコード生成の制御にアノテーション（annotation。クラスやメソッドの前に書く<code>@Foo</code>みたいなアレ）を使用していて、Javaの場合はGradleのビルド・スクリプトに<code>annotationProcessor</code>と書きます。Kotlinの場合は、Kotlin Annotation Processor Toolの略で<code>kapt</code>と書いてください。リリース・ノートに<code>annotationProcessor</code>の記述があったあとに、Kotlinではkaptを使ってねという知っている人しかわからない意味不明なコメントが書いてある場合は、<code>kapt</code>の出番となります。</li>
+<li>ライブラリ名-ktxという名前のライブラリがある場合は、*-ktxを指定してください。*-ktxは、Kotlinならではの便利機能が入ったバージョンのライブラリです。Kotlin向けの機能が入っていない基本バージョンのライブラリは、依存関係があるので自動で組み込まれます。</li>
+<li>Jetpackではコード生成を多用しているのですけど、KotlinやJavaではコード生成の制御にアノテーション（annotation。クラスやメソッドの前に書く<code>@Foo</code>みたいなアレ）を使用していて、Javaの場合はGradleのビルド・スクリプトに<code>annotationProcessor</code>と書きます。Kotlinの場合は、Kotlin Annotation Processor Toolの略で<code>kapt</code>と書いてください。リリース・ノートに<code>annotationProcessor</code>の記述があったあとに、Kotlinではkaptを使ってねという知っている人しかわからない意味不明なコメントが書いてある場合は、<code>kapt</code>の出番です。</li>
 </ul>
 <p>と、以上の注意を踏まえて、Android Studioの[Project]ビューのbuild.gradeをダブル・クリックして開いて、修正してみましょう。</p>
 <p>図</p>
@@ -768,17 +768,17 @@ dependencies {
 }</code></pre>
 <p>これで、デモ・アプリに必要なJetpackのライブラリの組み込みが完了しました。やっとプログラミングです。最初は、作成してやった感が大きそうな、画面まわりをやってみましょう。</p>
 <h1 id="navigation">Navigation</h1>
-<p>まぁ、画面といっても、かっこいい画面を作るほうではなく、ダミー画面を使用した画面遷移の実装という、見栄えがあまりよくない部分のプログラミングだけどな。Navigationが火を吹きますよ。</p>
+<p>まぁ、画面といっても、かっこいい画面を作るほうではなく、ダミー画面を使用した画面遷移の実装という、見栄えがあまりよくない部分のプログラミングだけどな。画面<em>遷移</em>なので、Navigationが火を吹きますよ。</p>
 <h2 id="activityとfragmentとnavigation"><code>Activity</code>と<code>Fragment</code>とNavigation</h2>
 <p>さて、例によって歴史の話から。<code>Acticity</code>と<code>Fragment</code>の話、あと、Navigationが作られた経緯です。</p>
 <p><code>Activity</code>ってのは、ぶっちゃけアプリの画面1つ分です。で、一般にアプリは複数の<code>Activity</code>で構成されます。Androidはアプリ間連携（アプリを操作していたら別のアプリの画面に遷移して、で、戻るボタンで最初のアプリに戻れる）ができるところがとても素晴らしいと私は思っているのですけど、この機能は<code>Activity</code>の遷移として実現されています。同様に、アプリ内でも<code>Activity</code>の遷移で画面遷移を実現していました。</p>
 <p>で、大昔のスマートフォンのアプリの単純な画面だったらこれであまり問題なかったんですけど、高機能なアプリを作ったりタブレットのような大きな画面を効率よく使おうとしたりする場合は、この方式だとコードの重複という問題が発生してしまうんです。タブレットの大きな画面では、左に一覧表示して、右にその詳細を表示するような画面が考えられます。でも、スマートフォンの小さな画面では、一覧表示する画面と、それとは別の詳細を表示する画面に分かれて、画面遷移する形で表現しなければなりません。</p>
 <p>図</p>
 <p>これを<code>Activity</code>で実現しようとすると、タブレット用の<code>Activity</code>を1つと、スマートフォン用の<code>Acticvity</code>を2つ作らなければなりません。そして、ほとんどのコードは重複してしまうでしょう。UIの問題なら<code>View</code>（UIコンポーネント）で解決すれば……って思うかもしれませんけど、画面に表示するデータをデータベースから取得してくるような機能を<code>View</code>に持たせるのは、<code>View</code>の責任範囲を逸脱しているのでダメです。</p>
-<p>ではどうすればよいかというと、<code>Activity</code>の構成要素になりえる「何か」を追加してあげればよいわけ。この「何か」こそが、<code>Fragment</code>なのです。</p>
+<p>ではどうすればよいかというと、<code>Activity</code>の構成要素になりえる「何か」を追加してあげればよい。この「何か」こそが、<code>Fragment</code>なのです。</p>
 <p>でもね、コードの重複が発生しないようなケースで<code>Fragment</code>を使って<code>Activity</code>で画面遷移をさせると、<code>Activity</code>のコードの多くを<code>Fragment</code>に移して、で、<code>Activity</code>に<code>Fragment</code>を管理するコードを追加して、そしてもちろん<code>Fragment</code>にも自分自身の初期化処理等が必要となって、結局、コード量が増えただけで誰も得しないという状況になってしまうんです。</p>
-<p>これでは無意味なので、1つの<code>Activity</code>の中で、複数の<code>Fragment</code>が遷移するというプログラミング・スタイルが編み出されました。このスタイルを実現するのが<code>FragmentTransaction</code>というAPIで、<code>Acticity</code>から<code>Fragment</code>を削除したり追加したり入れ替えたりできます。なんと[戻る]ボタンへの対応機能付き……なのですけど、高機能な分だけ使い方が複雑で、<code>Activity</code>の遷移（<code>Intent</code>のインスタンスを引数に<code>startActivity()</code>するだけ）と比べると面倒だったんです。</p>
-<p>なので、Navigationが作成されました。GUIツール（私はほとんど使わないけど）で画面遷移を定義できるかっこいいライブラリです。ただ単に<code>FragmentTransaction</code>を呼び出しているだけな気もしますけど、まぁ、いろいろ楽チンなのでよし。SafeArgsという便利機能もありますしね。</p>
+<p>これでは無意味なので、1つの<code>Activity</code>の中で、複数の<code>Fragment</code>が遷移するというプログラミング・スタイルが編み出されました。このスタイルを実現するのが<code>FragmentTransaction</code>というAPIで、<code>Acticity</code>から<code>Fragment</code>を削除したり追加したり入れ替えたりできます。なんと[戻る]ボタンへの対応機能付き……なのですけど、高機能な分だけ使い方が複雑で、<code>Activity</code>の遷移（<code>Intent</code>のインスタンスを引数に<code>startActivity()</code>するだけ）と比べると面倒だったんですよ。</p>
+<p>なので、Navigationが作成されました。GUIツール（私はほとんど使わないけど）で画面遷移を定義できるかっこいいライブラリです。ただ単に<code>FragmentTransaction</code>を呼び出しているだけな気もしますけど、まぁ、いろいろ楽チンなので良し。SafeArgsという便利機能もありますしね。</p>
 <h2 id="プロジェクトにfragmentを追加する">プロジェクトにFragmentを追加する</h2>
 <p>以上により、画面遷移は<code>Fragment</code>遷移ということになりました。だから、プロジェクトに<code>Activity</code>ではなく<code>Fragment</code>を追加しましょう。jetbusに必要な<code>Fragment</code>は、以下の5つとなります。</p>
 <ul>
@@ -883,16 +883,16 @@ dependencies {
 <span id="cb4-79"><a href="#cb4-79"></a>    <span class="kw">&lt;/fragment&gt;</span></span>
 <span id="cb4-80"><a href="#cb4-80"></a></span>
 <span id="cb4-81"><a href="#cb4-81"></a><span class="kw">&lt;/navigation&gt;</span></span></code></pre></div>
-<p>どのような<code>Fragment</code>があるのかを、XMLのタグで表現します。<code>&lt;fragment&gt;</code>タグでですね。<code>android:name</code>属性で<code>Fragment</code>を実装するクラスを、<code>android:label</code>属性で画面に表示するタイトルを設定します。<code>tools:layout</code>属性は、GUIツールでグラフィカルに表示する場合向けの、プレビュー用のレイアウトの指定です。</p>
+<p>どのような<code>Fragment</code>があるのか、XMLのタグで表現します。<code>&lt;fragment&gt;</code>タグでですね。<code>android:name</code>属性で<code>Fragment</code>を実装するクラスを、<code>android:label</code>属性で画面に表示するタイトルを設定します。<code>tools:layout</code>属性は、GUIツールでグラフィカルに表示する場合向けの、プレビュー用のレイアウトの指定です。</p>
 <p><code>&lt;fragment&gt;</code>タグの中の<code>&lt;action&gt;</code>タグは、画面遷移を表現します。<code>app:destination</code>属性は、遷移先を指定します。<code>arrivalBusStopFragmentToBusApproachesFragment</code>で指定されている<code>app:popUpTo</code>属性は、[戻る]ボタンが押された場合の行き先を指定しています。出発バス停を選んで、到着バス停を選んで、バスの接近情報が表示されたあとに[戻る]ボタンを押す場合は、多分その路線の情報はもういらない場合でしょうから、<code>app:popUpTo</code>属性を使用してブックマーク画面まで一気に戻るようにしました。</p>
 <p><code>&lt;fragment&gt;</code>の中の<code>&lt;argument&gt;</code>は、フラグメントに遷移する際のパラメーターです。選択された出発バス停を使って到着バス停の選択肢を抽出しないと、到着バス停を選ぶところで路線がつながっていないバス停が表示されてしまうでしょ？　だから、<code>arrivalBusStopFragment</code>では<code>departureBusStopName</code>というパラメーターを指定しました。</p>
 <p>あとはそう、<code>android:id</code>の説明を忘れていました。AndroidのリソースのXMLでは、<code>@+id/</code>の後に続ける形で識別子を設定します。上のXMLの<code>android:id=&quot;@+id/splashFragment&quot;</code>みたいな感じ。<code>@+id/</code>の部分が何だか分からなくて気持ち悪いという方のために補足しておくと、Androidアプリの開発ではR.javaというファイルが内部で自動生成されていて、R.javaの中にリソースの識別子が32bit整数で定義されています。XMLのような文字列の識別子では照合作業でCPUを大量に消費してしまうからという貧乏実装、でも、CPUを消費するということは電池を消費するということで、電池は今でもとても貴重な資源なので今でも素晴らしい実装です。このR.idにIDを追加して適当な32bit整数を割り振っておいてくださいねって指示が、<code>@+id/</code>なんです。ちなみに、割り振られた32bit整数を参照してくださいってのは<code>@id/</code>です。<code>&lt;action&gt;</code>の中の<code>app:destination=&quot;@id/bookmarksFragment&quot;</code>みたいな感じになります。</p>
 <h2 id="layout">layout</h2>
-<p>続けて、作成した<navigation>を使うように、画面を定義していきましょう。画面遷移をXMLで表現したように、Androidアプリの開発では、画面の構造もXMLで表現します。文字列を表示するなら<code>&lt;TextView ... /&gt;</code>みたいな感じです。で、この画面定義の際に重要な属性は<code>androud:layout_width</code>と<code>android:layout_height</code>です。</p>
+<p>続けて、作成した&lt;navigation&gt;を使うように、画面を定義していきましょう。画面遷移をXMLで表現したように、Androidアプリの開発では、画面の構造もXMLで表現します。文字列を表示するなら<code>&lt;TextView ... /&gt;</code>みたいな感じです。で、この画面定義の際に重要な属性は<code>androud:layout_width</code>と<code>android:layout_height</code>です。</p>
 <p><code>android:layout_width</code>と<code>android:layout_height</code>は、UIコンポーネントの幅と高さとなります。ここに指定するのは、具体的な大きさ（<code>64dp</code>など）か、<code>match_parent</code>、<code>wrap_content</code>になります。<code>match_parent</code>は階層上の親と同じところまで大きくするようにとの指示、<code>wrap_content</code>はコンテンツが入る大きさでお願いしますという指示です。</p>
 <h2 id="constraintlayout">ConstraintLayout</h2>
 <p>あと、AndroidのUIコンポーネントでは、他のコンポーネントを子要素として持てるものを<code>ViewGroup</code>、<code>ViewGroup</code>を継承して何らかのレイアウト機能を追加したものをLayoutと呼びます。Layoutには、後述するApp barを作るための<code>AppBarLayout</code>のような目的に特化したものと、<code>LinearLayout</code>(縦や横に直線状に並べる）のような汎用的なものがあります。で、今ここで話題にしたいのは、汎用的なほうのLayout。</p>
-<p>貧弱なCPUを考慮した結果だと思う（作るのが面倒だったからだとは思いたくない）のですけど、Android SDKはとても単純な機能のLayoutしか提供しません。直線状に並べる<code>LinearLayout</code>とか並べないで重ねる<code>FrameLayout</code>みたいなのとか。これらの単純なLayoutの組み合わせで複雑なレイアウトを実現するのがAndroidアプリ開発者の腕の見せ所……だったのは遠い昔の話で、今は、<code>androidx.constraintlayout.widget.ConstraintLayout</code>だけを覚えれば大丈夫になりました。</p>
+<p>貧弱なCPUを考慮した結果だと思う（作るのが面倒だったからだとは思いたくない）のですけど、AndroidのAPIはとても単純な機能のLayoutしか提供しません。直線状に並べる<code>LinearLayout</code>とか並べないで重ねる<code>FrameLayout</code>みたいなのとか。これらの単純なLayoutの組み合わせで複雑なレイアウトを実現するのがAndroidアプリ開発者の腕の見せ所……だったのは遠い昔の話で、今は、<code>androidx.constraintlayout.widget.ConstraintLayout</code>だけを覚えれば大丈夫になりました。</p>
 <p><code>ConstraintLayout</code>は、コンポーネントの位置を他のコンポーネントとの関係で表現します。「住所入力欄は名前入力欄の下」みたいな感じですね。具体的には、<code>app:layout_constraintTop_toBottomOf=&quot;@id/nameTextField&quot;</code>のようになります。左右については少し注意が必要で、アラビア語のように右から左に書く言語にも対応するために、LeftとRightではなくStartとEndで表現します。「住所入力欄のStartは名前入力欄のStartに合わせる」なら、<code>app:layout_constraintStart_toStartOf=&quot;@id/nameTextField&quot;</code>にするというわけ。</p>
 <h2 id="navhostfragmentを追加する">NavHostFragmentを追加する</h2>
 <p>これで一般論が終わりました。Projectビューの[app] - [res] - [layout]の下の「activityu_main.xml」を開いて、[Text]タブを選択して、以下を入力してください。</p>
@@ -913,11 +913,11 @@ dependencies {
 <span id="cb5-15"><a href="#cb5-15"></a><span class="ot">        app:defaultNavHost=</span><span class="st">&quot;true&quot;</span> <span class="kw">/&gt;</span></span>
 <span id="cb5-16"><a href="#cb5-16"></a></span>
 <span id="cb5-17"><a href="#cb5-17"></a><span class="kw">&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;</span></span></code></pre></div>
-<p>注目していただきたいのは<code>&lt;fragment&gt;</code>タグの<code>android:name</code>属性のところ。<code>android:name</code>属性で実装のクラスを指定できるのはnavigationのときと同じで、今回のXMLで指定しているのは「androidx.navigation.fragment.NavHostFragment」です。Googleの人が作ってくれたクラスですな。このクラスが何なのかリファレンスで調べてみるとNavigationのためのエリアを提供すると書いてありますので、ここにNavigation配下の画面が表示されるようになったわけ。あとは、<code>app:navGraph</code>属性で先程作成したnavigation.xmlを指定して、<code>app:defaultNavHost</code>属性でデフォルトに指定しておきます。</p>
+<p>注目していただきたいのは<code>&lt;fragment&gt;</code>タグの<code>android:name</code>属性のところ。<code>android:name</code>属性で実装のクラスを指定できるのはnavigationのときと同じで、今回のXMLで指定しているのは「androidx.navigation.fragment.NavHostFragment」で、Googleの人が作ったクラスです。このクラスが何なのかリファレンスで調べてみるとNavigationのためのエリアを提供すると書いてありますので、ここにNavigation配下の画面が表示されるようになったわけ。あとは、<code>app:navGraph</code>属性で先程作成したnavigation.xmlを指定して、<code>app:defaultNavHost</code>属性でデフォルトに指定しておきます。</p>
 <p>次は、ダミーの画面レイアウトを作りましょう。そうしておかないと、遷移したのかどうか分からないですもんね。</p>
 <h2 id="layout再び">layout、再び</h2>
 <p>さて、これから<code>Fragment</code>向けのダミーのlayoutを作成していくわけですけど、その際に、Android Studioが自動で生成したXMLとはルート要素を変更します。Android Studioが生成したXMLではルート要素は具体的な<code>Layout</code>（私の環境では<code>FrameLayout</code>でした）だったのですけど、これを<code>&lt;layout&gt;</code>タグに変更します。</p>
-<p>なんでこんなことをするのかというと、後で説明するデータ・バインディングをやりたいから。データ・バインディングをやる際には<code>&lt;data&gt;</code>タグでデータを指定するのですけど、<code>&lt;FrameLayout&gt;</code>タグの下には<code>&lt;data&gt;</code>タグを書けませんもんね。あと、ルート要素を<code>&lt;layout&gt;</code>タグにしておくと、Bindingクラスが生成されるようになってプログラミングがちょっと楽になるというのがあります。Bindingクラスについては後述することにして、代表例として、fragment_bookmarks.xmlを載せます。</p>
+<p>なんでこんなことをするのかというと、後の章で説明するデータ・バインディングをやりたいから。データ・バインディングをやる際には<code>&lt;data&gt;</code>タグでデータを指定するのですけど、<code>&lt;FrameLayout&gt;</code>タグの下には<code>&lt;data&gt;</code>タグを書けませんもんね。あと、ルート要素を<code>&lt;layout&gt;</code>タグにしておくと、Bindingクラスが生成されるようになってプログラミングがちょっと楽になるというのがあります。Bindingクラスについては後述することにして、代表例として、fragment_bookmarks.xmlを載せます。</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;utf-8&quot;<span class="kw">?&gt;</span></span>
 <span id="cb6-2"><a href="#cb6-2"></a><span class="kw">&lt;layout</span></span>
 <span id="cb6-3"><a href="#cb6-3"></a><span class="ot">    xmlns:android=</span><span class="st">&quot;http://schemas.android.com/apk/res/android&quot;</span></span>
@@ -987,7 +987,7 @@ dependencies {
 <span id="cb7-22"><a href="#cb7-22"></a>    }</span>
 <span id="cb7-23"><a href="#cb7-23"></a>}</span></code></pre></div>
 <p>importの最後で<code>com.tail_island.jetbus.databinding.FragmentBookmarksBinding</code>をインポートしていますけど、この<code>FragmentBookmarksBinding</code>クラスは、先程fragment_bookmarks.xmlのルート要素を<code>&lt;layout&gt;</code>タグに変更したことで生成されたクラスです（XMLのファイル名からクラス名を決定するので、<code>BookmarksFragmentBinding</code>ではなくて<code>FragmentBookmarksBinding</code>になります。不整合がキモチワルイけど、Android Studioのデフォルトはこのファイル名なのでしょうがない……）。あと、もしコードを書いているときにAndroid Studioがそんなクラスはないよと文句をつけてきたら、レイアウトXMLの変更を忘れたか、レイアウトXMLの変更後にビルドをしていないか（ビルドのときに自動生成されます）です。確認してみてください。</p>
-<p>次。<code>Fragment</code>を初期化する処理は、コンストラクタではなく、<code>onCreateView()</code>メソッドの中に書くことに注意してください。<code>Fragment</code>は画面と結び付けられていて、画面というのは複雑で初期化が大変なソフトウェア部品です。だから、初期化のステージに合わせて、小刻みにメソッドが呼ばれる方式が採用されました。<code>Fragment</code>を作成するときに呼ばれる<code>onCreate()</code>メソッドとか、<code>Fragment</code>の<code>View</code>を生成するときに呼ばれる<code>onCreateView()</code>メソッドとか。で、一般に<code>Fragment</code>の初期化というのは画面の初期化なので、画面を構成する<code>View</code>がない状態では初期化の作業ができません。だから、<code>onCreate()</code>メソッドではなくて、<code>onCreateView()</code>メソッドに初期化のコードを書きます。</p>
+<p>次。<code>Fragment</code>を初期化する処理は、コンストラクタではなく、<code>onCreateView()</code>メソッドの中に書くことに注意してください。<code>Fragment</code>は画面と結び付けられていて、画面というのは複雑で初期化が大変なソフトウェア部品です。だからAndroidでは、初期化のステージに合わせて小刻みにメソッドが呼ばれる方式が採用されました。<code>Fragment</code>を作成するときに呼ばれる<code>onCreate()</code>メソッドとか、<code>Fragment</code>の<code>View</code>を生成するときに呼ばれる<code>onCreateView()</code>メソッドとか。で、一般に<code>Fragment</code>の初期化というのは画面の初期化なので、画面を構成する<code>View</code>がない状態では初期化の作業ができません。だから、<code>onCreate()</code>メソッドではなくて、<code>onCreateView()</code>メソッドに初期化のコードを書きます。</p>
 <p>さて、<code>onCreateView()</code>メソッドでやらなければならない作業は、<code>Fragment</code>の<code>View</code>の生成です。Android Studioが生成する<code>Fragment</code>のコードでは、引数で渡ってくる<code>inflater: LayoutInflater</code>の<code>inflate()</code>メソッドをレイアウトXMLを引数にして呼び出すコードが生成されるのですけど、将来のデータ・バインディングのために、<code>FragmentBookmarksBinding</code>の<code>inflate()</code>メソッドを使用します。で、<code>...Binding</code>の<code>inflate()</code>メソッドで生成されるのは<code>...Binding</code>なので、<code>View</code>である<code>root</code>プロパティを返します。コードにすると、こんな感じ。</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">return</span> FragmentBookmarksBinding.inflate(inflater, container, <span class="kw">false</span>).root</span></code></pre></div>
 <h2 id="スコープ関数">スコープ関数</h2>
@@ -1000,8 +1000,8 @@ dependencies {
 <span id="cb9-6"><a href="#cb9-6"></a></span>
 <span id="cb9-7"><a href="#cb9-7"></a><span class="kw">return</span> binding.root</span></code></pre></div>
 <p><code>...Binding</code>では、レイアウトXMLで定義されたUIコンポーネントを<code>android:id</code>と同じプロパティ名で参照するためのコードが生成されていますから、<code>binding.departureBusStopButton</code>で画面のボタンを参照できます。ボタンがクリックされたときのリスナーを設定するメソッドは<code>setOnClickListener()</code>で、その引数は関数です。で、関数はラムダ式で定義することができます。あと、Kotlinには、最後のパラメータがラムダ式の場合はそのパラメーターはカッコの外に指定するという慣習があります。さらに、ラムダ式だけを引数にする場合は、括弧を省略できる。というわけで、上のようなシンプルなコードになるわけです。</p>
-<p>ただね、このようなコードはよく見るのですけど、実はこれ、とても悪いコードなんです。その理由は、ローカル変数（val binding）を使っているから（グローバル変数を使えと言っているわけじゃないですよ、念の為）。</p>
-<p>ローカル変数は、そのブロックを抜けるまで有効です。長期間に渡ってコードに影響を与えるというわけ。<code>val</code>にしてイミュータブル（不変）にした場合でも、状態遷移という影響は減るけれども変数があることを覚えておかなければならないのは一緒で、コードを読むのが大変になってしまう。私のような、記憶力が衰えまくっているおっさんには、ローカル変数は辛いんですよ。だから、変数のスコープを小さくします。関数の最初で変数を宣言しなければならなかくてその変数が関数の最後まで有効な大昔のプログラミング言語より、どこでも変数を宣言できてブロックが終わると変数のスコープが切れる今どきの言語の方が使いやすいですよね？　変数のスコープは、小さければ小さいほど良いんです。</p>
+<p>ただね、このようなコードはよく見るのですけど、実はこれ、とても悪いコードなんです。その理由は、ローカル変数（<code>val binding</code>）を使っているから（グローバル変数を使えと言っているわけじゃないですよ、念の為）。</p>
+<p>ローカル変数は、そのブロックを抜けるまで有効です。長期間に渡ってコードに影響を与えるというわけ。<code>val</code>にしてイミュータブル（不変）にした場合でも、状態遷移という影響は減るけれども変数があることを覚えておかなければならないのは一緒で、コードを読むのが大変になってしまう。私のような記憶力が衰えまくっているおっさんには、ローカル変数は辛いんですよ。だから、変数のスコープを小さくします。関数の最初で変数を宣言しなければならなかくてその変数が関数の最後まで有効な大昔のプログラミング言語より、どこでも変数を宣言できてブロックが終わると変数のスコープが切れる今どきの言語の方が使いやすいですよね？　変数のスコープは、小さければ小さいほど良いんです。</p>
 <p>と、このような、変数のスコープを小さく、かつ、分かりやすい形で制御したい場合に使えるKotlinの便利ライブラリが、スコープ関数なんです。</p>
 <p>たとえば、<code>foo()</code>の戻り値を使用したい場合は、</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb10-1"><a href="#cb10-1"></a><span class="kw">val</span> <span class="va">x</span> = foo()</span>
@@ -1010,7 +1010,7 @@ dependencies {
 <p>と書くのではなくて、</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb11-1"><a href="#cb11-1"></a>foo().let { it.bar() }</span></code></pre></div>
 <p>と書きます。<code>let()</code>スコープ関数は、自分自身を引数にしたラムダ式を呼び出すというわけ。あ、ラムダ式の中の<code>it</code>は、ラムダ式のパラメーターを宣言しなかった場合の暗黙の名前です。<code>let()</code>スコープ関数は自分自身を引数にしますから、この場合の<code>it</code>は<code>foo()</code>の戻り値になります。</p>
-<p>他のスコープ関数には、<code>apply()</code>（<code>this</code>を自分自身に設定したラムダ式を呼び出して、自分自身を返す。初期化等で便利）、<code>also()</code>（自分自身を引数にしたラムダ式を呼び出して、自分自身を返す。自分自身を使う他のオブジェクトの初期化等で便利）、<code>run()</code>（自分自身を<code>this</code>にしたラムダ式を実行して、ラムダ式の戻り値を返す。その場でメソッドを定義する感じ）があります。とにかく便利なので、ぜひ使い倒してください。</p>
+<p>他のスコープ関数には、<code>apply()</code>（<code>this</code>を自分自身に設定したラムダ式を呼び出して、自分自身を返す。初期化等で便利）、<code>also()</code>（自分自身を引数にしたラムダ式を呼び出して、自分自身を返す。自分自身を使う他のオブジェクトの初期化等で便利）、<code>run()</code>（自分自身を<code>this</code>にしたラムダ式を実行して、ラムダ式の戻り値を返す。その場で関数を定義して実行感じ）があります。とにかく便利ですから、ぜひ使い倒してください。</p>
 <p>というわけで、今回は<code>apply()</code>を使用して、<code>FragmentBookmarksBinding</code>のボタンへのリスナー登録という初期化処理を書きます。</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb12-1"><a href="#cb12-1"></a><span class="kw">return</span> FragmentBookmarksBinding.inflate(inflater, container, <span class="kw">false</span>).apply {</span>
 <span id="cb12-2"><a href="#cb12-2"></a>    departureBusStopButton.setOnClickListener {</span>
@@ -1021,16 +1021,16 @@ dependencies {
 <h2 id="画面遷移">画面遷移</h2>
 <p>Navigationでの画面の遷移は、<code>findNavController()</code>で取得できる<code>NavController</code>クラスの<code>navigate()</code>メソッドで実施します。リファレンスを見てみると<code>navigation()</code>メソッドにはオーバーロードされた様々なバリエーションがあって、色々な引数を取れるようになっています。今回、この中で注目していただきたいのは、<code>NavDirections</code>を引数に取るバージョンです。ナビゲーションのXMLで<code>&lt;action&gt;</code>を作成するとこのNavDirectionsが自動生成されるので、とても簡単に呼び出せます。というわけで、画面遷移のコードは以下のようになります。</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb13-1"><a href="#cb13-1"></a>findNavController().navigate(BookmarksFragmentDirections.bookmarksFragmentToDepartureBusStopFragment())</span></code></pre></div>
-<p>あと、記憶力が良い方は、ナビゲーションのXMLを作成したときに、<code>&lt;argument&gt;</code>で<code>Fragment</code>への遷移のパラメーターを定義したことを覚えているかもしれません。<code>&lt;argument&gt;</code>を定義しておくと、<code>NavDirections</code>を生成するときにパラメーターを追加してくれます。記憶力が壊滅している私のようなおっさんの場合でも、パラメーターを指定しないとコンパイル・エラーになるから思い出せますな。というわけで、以下のようなコードになります。</p>
+<p>あと、記憶力が良い方は、ナビゲーションのXMLを作成したときに、<code>&lt;argument&gt;</code>で<code>Fragment</code>への遷移のパラメーターを定義したことを覚えているかもしれません。<code>&lt;argument&gt;</code>を定義しておくと、<code>NavDirections</code>を生成するときにパラメーターを追加してくれます。記憶力が壊滅している私のようなおっさんの場合でも、パラメーターを指定しないとコンパイル・エラーになるから思い出せますな。というわけで、バス接近情報に画面遷移する場合は以下のようなコードになります。</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb14-1"><a href="#cb14-1"></a>findNavController().navigate(</span>
 <span id="cb14-2"><a href="#cb14-2"></a>    BookmarksFragmentDirections.bookmarksFragmentToBusApproachesFragment(<span class="st">&quot;日本ユニシス本社前&quot;</span>, <span class="st">&quot;深川第八中学校前&quot;</span>)</span>
 <span id="cb14-3"><a href="#cb14-3"></a>)</span></code></pre></div>
-<p>プログラムを書く以外はどこもかしこも満遍なくダメダメだねと評判の私ごときを雇ってくださっている奇特な会社から家まで帰るルートですな。</p>
+<p>引数は、プログラムを書く以外はあまねくダメダメと評判のこんな私を雇ってくれる奇特な会社から家まで帰るルートですな。</p>
 <h2 id="navigationを試してみる">Navigationを試してみる</h2>
 <p>こんな感じですべての<code>Fragment</code>をプログラミングして、動かしてみると以下のようになります。</p>
 <p>動画</p>
 <p>[到着バス停]画面から[バス接近情報]画面に遷移した後、[戻る]ボタンを押すとレイアウトのXMLの<code>app:popUpTo</code>属性が効いて、[ブックマーク一覧]画面に戻ってくれていてとても嬉しい。</p>
-<p>でも、なんか画面が寂しい気がします……。どうにかならないかな？　大体、ナビゲーションのXMLでわざわざ設定した<code>android:label</code>属性はどうなったんでしょうか？　どの画面でも、画面上部には「jetbus」って表示されているんだけど。</p>
+<p>でも、なんか画面が寂しい気がします……。どうにかならないかな？　あと、ナビゲーションのXMLでわざわざ設定した<code>android:label</code>属性はどうなったのでしょうか？　どの画面でも、画面上部には「jetbus」って表示されているんだけど。</p>
 <h2 id="app-barとnavigation-drawer">App barとNavigation drawer</h2>
 <p>さて、AndroidアプリのUIは、<a href="https://material.io">Material Design</a>というデザイン・ガイドに従うことになっています。このMaterial Designにはいろいろなコンポーネントがあるのですけど、App barというコンポーネントで画面の情報を表示して、Navigation drawerでメニューを実現する方式が一般的みたいです。</p>
 <p>図</p>
@@ -1103,8 +1103,8 @@ dependencies {
 <span id="cb15-65"><a href="#cb15-65"></a>    <span class="kw">&lt;/androidx.drawerlayout.widget.DrawerLayout&gt;</span></span>
 <span id="cb15-66"><a href="#cb15-66"></a></span>
 <span id="cb15-67"><a href="#cb15-67"></a><span class="kw">&lt;/layout&gt;</span></span></code></pre></div>
-<p>……長くてごめんなさい。でも、思い出してください。我々はNavigationを使用していますので、画面といえば<code>Fragment</code>なわけです。<code>Activity</code>はアプリ全体でこれ一つだけ。なので、まぁ、一回だけならば長くても許容できるかなぁと。次のアプリの開発でも、ほぼコピー＆ペーストでいけますし。私もこれ、コピペで作成して、<code>&lt;NavigationView&gt;</code>の子要素の部分を付け加えただけで作っています。本アプリで子要素を追加するという面倒な作業が追加になった理由は、<a href="https://www.odpt.org/">公共交通オープンデータセンター</a>からデータを取得する際には「本アプリが使用する……」のような通知を書く必要があったためです。</p>
-<p>でも、あれ？　<code>&lt;com.google.android.material.navigation.NavigationView&gt;</code>タグの属性を見ていくと、<code>app:headerLayout=&quot;@layout/item_navigation_header&quot;</code>や<code>app:menu=&quot;@menu/menu_navigation&quot;</code>と書いてあって、こんなリソースは無いとエラーになっています。以下の図のようにNavigation drawerはヘッダーとメニューとそれ以外で構成されていて、それ以外は子要素で定義したので、残りのヘッダーとメニューを定義しなければならないんですね。</p>
+<p>……長くてごめんなさい。でも、思い出してください。我々はNavigationを使用していますので、画面といえば<code>Fragment</code>なわけです。<code>Activity</code>はアプリ全体でこれ一つだけ。なので、まぁ、一回だけならば長くても許容できるかなぁと。次のアプリの開発でも、ほぼコピー＆ペーストでいけますしね。私もこれ、コピペで作成して、<code>&lt;NavigationView&gt;</code>の子要素の部分を付け加えただけで作っています。本アプリで子要素を追加するという面倒な作業が追加になった理由は、<a href="https://www.odpt.org/">公共交通オープンデータセンター</a>からデータを取得する際には上のコード中の「本アプリが使用する……」のような通知を書く必要があったためです。</p>
+<p>でも、あれ？　<code>&lt;com.google.android.material.navigation.NavigationView&gt;</code>タグの属性を見ていくと、<code>app:headerLayout=&quot;@layout/item_navigation_header&quot;</code>や<code>app:menu=&quot;@menu/menu_navigation&quot;</code>と書いてあって、こんなリソースは無いとエラーになっています。以下の図のようにNavigation drawerはヘッダーとメニューとそれ以外で構成されていて、それ以外は子要素で定義したので、ヘッダーとメニューを定義しなければならないんですね。</p>
 <p>図</p>
 <p>というわけで、ヘッダーを作成します。プロジェクトを右クリックして、[New] - [Android Resource File]メニューを選択し、[File name]に「item_navigation_header」を入力して[Resource type]を「Layout」に設定し、作成されたitem_navigation_header.xmlに以下を入力します。</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb16-1"><a href="#cb16-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;utf-8&quot;<span class="kw">?&gt;</span></span>
@@ -1149,7 +1149,7 @@ dependencies {
 <span id="cb17-6"><a href="#cb17-6"></a><span class="kw">&lt;/menu&gt;</span></span></code></pre></div>
 <p><a href="https://www.odpt.org/">公共交通オープンデータセンター</a>から取得したデータのキャッシュが古くなった場合に、再取得するためのメニューですね。</p>
 <p>いろいろと作業してきましたけど、ごめんなさい、でもまだ終わりません。元の画面でもApp barっぽいのがあったのに、activity_main.xmlに新たに<code>&lt;com.google.android.material.appbar.AppBarLayout&gt;</code>が追加されたことが不思議ではありませんでしたか？　こんなことをした理由は、元の画面でのApp barっぽいのは制御ができない（少なくとも私は制御のやり方をしらない）から。だから、新しいのを追加したわけですな。</p>
-<p>新しいのを追加した以上は古いのを削除しなければならないわけで、そのためにはAndroidManifest.xmlを修正します。</p>
+<p>新しいのを追加した以上は古いのを削除しなければならないわけで、そのためにAndroidManifest.xmlを修正します。</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb18-1"><a href="#cb18-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;utf-8&quot;<span class="kw">?&gt;</span></span>
 <span id="cb18-2"><a href="#cb18-2"></a><span class="kw">&lt;manifest</span></span>
 <span id="cb18-3"><a href="#cb18-3"></a><span class="ot">    xmlns:android=</span><span class="st">&quot;http://schemas.android.com/apk/res/android&quot;</span></span>
@@ -1245,7 +1245,7 @@ dependencies {
 <span id="cb20-48"><a href="#cb20-48"></a>}</span></code></pre></div>
 <p>このコードは少し複雑ですから、解説を。</p>
 <p>NavigationとNavigation drwerとApp barはとても良くできていて、上のコードのように<code>NavigationUI.setupWithNavController()</code>で結合できるのですけど、少しだけ、AndroidのAPIとの不整合があります。不整合その1は、Navigation drawerが開いているときに[戻る]ボタンが押されたときの動作です。Navigation drawerが表示されるというのは<code>&lt;com.google.android.material.navigation.NavigationView&gt;</code>に画面遷移したように見えるのですけど、内部的には画面遷移になっていないので、[戻る]ボタンを押してもNavigation drawerは閉じられません。これではユーザーが混乱しますから、<code>onBackPressed()</code>をオーバーライドして「Navigation drawerが開いている場合は閉じる」処理を追加しました。不整合その2は、本アプリでは、NavigationのXMLでのトップ／レベルの画面は<code>SplashFragment</code>なのですけど、アプリ的には<code>BookmarksFragment</code>がトップ・レベルであることです。なので、上のコードの<code>AppBarConfiguration(setOf(R.id.bookmarksFragment), ...)</code>でトップ・レベルの指定をしているのですけど、やっぱり[戻る]ボタンでの動作がおかしくなっちゃう。<code>BookmarksFragment</code>ではApp barの左がハンバーガー・アイコンになって戻れない様になっていて正しいのですけど、[戻る]ボタンを押すと<code>SplashFragment</code>に戻ってしまいます。なのでやっぱり、<code>onBackPressed()</code>の中に遷移を制御する処理を追加しました。</p>
-<p>で、<code>onBackPressed()</code>はメソッドですから、<code>onCreate()</code>と<code>Binding</code>を共有したい場合は属性を追加しなければなりません。なので<code>binding</code>という属性を追加したのですけど、この<code>binding</code>は、<code>onCreate()</code>が呼ばれるまで値を設定できないという問題があります。しょうがないので最初は<code>null</code>を設定する……のは、KotlinのようなNull安全を目指している言語では悪手です。今回のように、<code>binding</code>の値が設定される前に使用されないことを保証できる（<code>onBackPressed()</code>は<code>onCreate()</code>が終わった後にしか呼び出されないので、保証できます）場合は、プログラマーの責任で属性を<code>lateinit</code>として定義できます。<code>lateinit</code>にすると初期値を設定しなくてよいので、ほら、<code>binding</code>の型を<code>null</code>を許容「しない」<code>ActivityMainBinding</code>に設定できました。</p>
+<p>で、<code>onBackPressed()</code>はメソッドですから、<code>onCreate()</code>と<code>Binding</code>を共有したい場合は属性を追加しなければなりません。だから<code>binding</code>という属性を追加しなければならないのですけど、この<code>binding</code>は、<code>onCreate()</code>が呼ばれるまで値を設定できないという問題があります。しょうがないので最初は<code>null</code>を設定する……のは、KotlinのようなNull安全を目指している言語では悪手です。今回のように、<code>binding</code>の値が設定される前に使用されないことを保証できる（<code>onBackPressed()</code>は<code>onCreate()</code>が終わった後にしか呼び出されないので、保証できます）場合は、プログラマーの責任で属性を<code>lateinit</code>として定義できます。<code>lateinit</code>にすると初期値を設定しなくてよいので、ほら、<code>binding</code>の型を<code>null</code>を許容「しない」<code>ActivityMainBinding</code>に設定できました。</p>
 <p>あと、上のコードでやっているのは、<code>SplashFragment</code>でApp barを消しています。何もしないとApp barに[戻る]アイコンが表示されてしまいますし、調べた限りでは、他のアプリでもスプラッシュ画面にはApp barがありませんでしたから。</p>
 <p>ともあれ、これで作業完了のはず。試してみましょう</p>
 <p>動画</p>
@@ -1286,12 +1286,12 @@ dependencies {
 </ul>
 <p>バスの運行情報がありますから、バスの車両の接近情報は表示できそうですね。なんかいろいろ細かいことが書いてありますけど、習うより慣れろってことで、Webブラウザを開いて、まずはバス停を取得してみましょう。「<a href="https://api.odpt.org/api/v4/odpt:BusstopPole?acl:consumerKey=ACL\_CONSUMERKEY&amp;odpt:operator=odpt.Operator:Toei" class="uri">https://api.odpt.org/api/v4/odpt:BusstopPole?acl:consumerKey=ACL\_CONSUMERKEY&amp;odpt:operator=odpt.Operator:Toei</a>」（ACL_CONSUMERKEYの部分には、ユーザー登録で取得したアクセストークンをコピー＆ペーストしてください）を開いてみます。なるほどバス停のデータが取得できている……のですけど、検索しても、こんなダラダラ生きている私を雇用してくださってるとてもありがたい「日本ユニシス本社前」という、私が会社からの帰りに使うバス停が見つかりませんでした。</p>
 <p>図</p>
-<p>データが欠落しているのは、API仕様の[1.3. インターフェース]の中の[1.3.1. 留意点]に「APIによって出力される結果がシステムの上限件数を超える場合、上限件数以下にフィルターされた結果が返る」とあって、リンクを辿って調べてみたら、その上限件数は1,000件だったためです（2019年8月現在）。<code>odpt:BusstopPole</code>はバス停ではなくてバス停の標柱（方面ごとに立っているアレ）で大量なので、余裕で1,000件を超えてしまって切り捨てられちゃったみたい。</p>
+<p>データが欠落しているのは、API仕様の[1.3. インターフェース]の中の[1.3.1. 留意点]に「APIによって出力される結果がシステムの上限件数を超える場合、上限件数以下にフィルターされた結果が返る」とあって、リンクを辿って調べてみたら、その上限件数は1,000件だったためです（2020年3月現在）。<code>odpt:BusstopPole</code>はバス停ではなくてバス停の標柱（方面ごとに立っているアレ）で大量なので、余裕で1,000件を超えてしまって切り捨てられちゃったみたい。</p>
 <p>というわけで、データ検索APIではなくて、データダンプAPIを使いましょう。「<a href="https://api.odpt.org/api/v4/odpt:BusstopPole.json?acl:consumerKey=ACL\_CONSUMERKEY" class="uri">https://api.odpt.org/api/v4/odpt:BusstopPole.json?acl:consumerKey=ACL\_CONSUMERKEY</a>」（URIに「.json」が追加されました。あと、先ほどと同様に、ACL_CONSUMERKEYの部分には、ユーザー登録で取得したアクセストークンをコピー＆ペーストしてください）を開いて、データの取得が完了するまで、しばし待ちます。日本全国津々浦々のバス停の標柱全てという大量のデータなので、時間がかかるんですよ……。はい、今度は、「日本ユニシス本社前」のデータが見つかりました。</p>
 <p>図</p>
 <p>ドキュメントによれば、<code>odpt:BusstopPole</code>と<code>odpt:BusroutePattern</code>は<code>owl:sameAs</code>属性で互いに紐付けられるので、出発バス停の標柱群（一つのバス停に複数の標柱がある）と到着バス停の標柱群を指定すれば、その両方に紐付いている<code>odpt:BusroutePattern</code>を抽出することで路線を見つけることができそう。ただ、<code>odpt:BusroutePattern</code>の検索APIのクエリー・パラメーターには<code>odpt:BusstopPole</code>がなかったので、抽出は自前のコードでやらなければなりませんけどね。どうせ抽出を自前のコードでやるのであれば、<code>odpt:BusroutePattern</code>もデータダンプAPIでまるっと取得してしまうことにしましょう。</p>
 <p>次。<code>odpt:Bus</code>です。APIの[4.ODPT Bus API]の中の[4.2.パス]を読むと、<code>odpt:BusroutePattern</code>をクエリー・パラメーターにとることができて、[1.4. データ検索API (/v4/RDF_TYPE?)]の中の[1.4.1. フィルター処理]によれば、カンマ区切りにすればOR条件での検索になるらしい。これなら、複数の路線のバスの運行情報を一発で取得できる……のですけど、[4.3. 定義]の中の[4.3.1. odpt:Bus]の記述によれば、どのバス停を通過したのかは分かるけど、あとどれくらいで今私の目の前にあるバス停に到着するのかは分からないみたい。なので、<code>odpt:BusTimetable</code>も取得して、時刻表からバス停とバス停の間の時間を調べて、それを足し合わせて到着までの予想時間としましょう。だから、<code>odpt:BusTimetable</code>を取得する処理も作らないとね。</p>
-<p>あと、API仕様にはバスの現在の位置によって<code>odpt:fromBusstopPole</code>属性（直近に通過した、あるいは停車中のバス停）と<code>odpt:BusstopPole</code>（次に到着するバス停）の情報がいろいろ変わると書いてあるのですけど、都営バスの実際のデータを取得して調べてみると、どうも現在位置がどうであれ<code>odpt:fromBusstopPole</code>属性と<code>odpt:toBusstopPole</code>属性の両方が設定されているみたい。ならば手を抜いて<code>odpt:fromBusstopPole</code>属性だけを見ればいいかなぁと。さらに、<code>odpt:BusTimetable</code>の<code>odpt:calendar</code>属性（平日時刻表とか休日時刻表とか）は[2.3. 定義]の中の[2.3.1. odpt:Calendar]に書いてある汎用データを使用していませんでした。なんだか、都営バス独自の特殊なデータが並んでいやがります……。まぁ、今回の<code>odbt:BusTimetable</code>の使用目的は到着時間を計算するための元ネタでしかありませんから、<code>odpt:calendar</code>も無視することにしましょう。プログラムが簡単になるし。</p>
+<p>あと、API仕様にはバスの現在の位置によって<code>odpt:fromBusstopPole</code>属性（直近に通過した、あるいは停車中のバス停）と<code>odpt:BusstopPole</code>（次に到着するバス停）の情報がいろいろ変わると書いてあるのですけど、都営バスの実際のデータを取得して調べてみると、どうも現在位置がどうであれ<code>odpt:fromBusstopPole</code>属性と<code>odpt:toBusstopPole</code>属性の両方が設定されているみたい。ならば手を抜いて<code>odpt:fromBusstopPole</code>属性だけを見ればいいかなぁと。さらに、<code>odpt:BusTimetable</code>の<code>odpt:calendar</code>属性（平日時刻表とか休日時刻表とか）は[2.3. 定義]の中の[2.3.1. odpt:Calendar]に書いてある汎用データを使用していませんでした。なんだか、都営バス独自の特殊なデータが並んでいやがります……。まぁ、今回の<code>odbt:BusTimetable</code>の使用目的は到着時間を計算するための元ネタでしかありませんから、<code>odpt:calendar</code>も無視することにしましょう。プログラムが簡単になるしね。</p>
 <p>そうそう、<code>odpt:BusstopPole</code>と<code>odpt:BusroutePattern</code>、<code>odpt:BusTimetable</code>は、データの取得に時間がかかる上にほとんど変更がない情報ですから、RDBMSにキャッシュすることにしましょう。RDBMSを使えば、突き合わせの処理が楽になりますしね。</p>
 <h2 id="webサービスの定義">Webサービスの定義</h2>
 <p>やることが決まりましたので、Webサービスの定義を作りましょう。でもその前に、データ受け渡しのためのクラスを作成します。まずは、<code>odpt:Bus</code>を表現するクラスを作成します。モデルを入れるための<code>model</code>パッケージを作成して、その中にBus.ktファイルを作成して、以下のコードを入力してください。</p>
@@ -1414,7 +1414,7 @@ dependencies {
 <p>１つ目は、<code>!!</code>。文法的には<code>null</code>の可能性があるように見えるかもしれないけれど、<code>null</code>でないことを我々プログラマーが保証してやるぜって場合です。<code>var x: Foo? = null; x.bar()</code>はコンパイル・エラーになりますけど、<code>var x: Foo? = null; x!!.bar()</code>ならコンパイルは通ります。もちろん、実行時に<code>NullPointerException</code>が出るでしょうけど。</p>
 <p>2つ目は、<code>?.</code>。<code>null</code>ならばメソッドを呼び出さないで<code>null</code>を返して、そうでなければメソッドを実行してその戻り値を返すという記法です。<code>var x: Foo? = null; var y = x?.bar()</code>は、コンパイルも通りますし<code>NullPointerException</code>も出ません。<code>bar()</code>は実行されず、<code>y</code>には<code>null</code>がセットされます。</p>
 <p>3つ目は、<code>?:</code>。<code>?.</code>の反対で、<code>null</code>の場合に実行させたい処理を記述できます。<code>var x: Foo ?= null; var y = x?.bar() ?: &quot;BAR&quot;</code>なら、<code>y</code>の値は<code>null</code>ではなく「BAR」になります。</p>
-<p>これらの記法ともはや見慣れたスコープ関数を組み合わせれば、先程のコードはもっときれいになります。たとえば、こんな感じ。</p>
+<p>これらの記法ともはや見慣れたスコープ関数を組み合わせれば、先程のコードはもっときれいになります。そう、こんな感じ。</p>
 <div class="sourceCode" id="cb26"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb26-1"><a href="#cb26-1"></a>run {</span>
 <span id="cb26-2"><a href="#cb26-2"></a>    <span class="kw">val</span> <span class="va">response</span> = webService.busstopPole(consumerKey).execute()</span>
 <span id="cb26-3"><a href="#cb26-3"></a></span>
@@ -1445,7 +1445,7 @@ dependencies {
 <span id="cb27-8"><a href="#cb27-8"></a></span>
 <span id="cb27-9"><a href="#cb27-9"></a>    <span class="kw">return</span> response.body()</span>
 <span id="cb27-10"><a href="#cb27-10"></a>}</span></code></pre></div>
-<p>引数は関数です。このような関数を引数にする関数を高階関数と呼びます。Kotlinでは、<code>(引数) -&gt; 戻り値</code>で関数の型を表現できて、上のコードの<code>&lt;T&gt;</code>の部分はテンプレートです。呼び出し側はこんな感じです。</p>
+<p>引数は関数です。このような関数を引数にする関数を高階関数と呼びます。Kotlinでは、<code>(引数) -&gt; 戻り値</code>で関数そのものの型を表現できて、上のコードの<code>&lt;T&gt;</code>の部分はテンプレートです。呼び出し側はこんな感じ。</p>
 <div class="sourceCode" id="cb28"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb28-1"><a href="#cb28-1"></a>getWebServiceResultBody { webService.busstopPole(consumerKey) }?.let { busStopPoleJsonArray -&gt;</span>
 <span id="cb28-2"><a href="#cb28-2"></a>    <span class="cf">for</span> (busStopPoleJsonObject <span class="kw">in</span> busStopPoleJsonArray.map { it.asJsonObject }.filter { it.<span class="kw">get</span>(<span class="st">&quot;odpt:operator&quot;</span>).asString == <span class="st">&quot;odpt.Operator:Toei&quot;</span> }.take(<span class="dv">10</span>)) {</span>
 <span id="cb28-3"><a href="#cb28-3"></a>        Log.d(<span class="st">&quot;SplashFragment&quot;</span>, <span class="st">&quot;${busStopPoleJsonObject.get(&quot;</span>owl:sameAs<span class="st">&quot;)}&quot;</span>)</span>
@@ -1494,17 +1494,17 @@ dependencies {
 <p>絵</p>
 <p>うん、正しくデータを取れていますね。Retrofit2ならWebサービス呼び出しはとても楽チン。</p>
 <h1 id="room">Room</h1>
-<p>前章で取得した公共交通オープンデータセンターのデータは、取得に時間がかかる上に変更が少ないので、RDBMSにキャッシュするとしていました。というわけで、Android OS内蔵のSQLiteへの抽象化レイヤを提供するRoomを使用してみます。そこそこ便利ですよ。</p>
+<p>前章で取得した公共交通オープンデータセンターのデータは、取得に時間がかかる上に変更が少ないので、RDBMSにキャッシュするとしていました。というわけで、Android OS内蔵のSQLite3への抽象化レイヤを提供するRoomを使用してみます。そこそこ便利ですよ。</p>
 <h2 id="roomが他のorマッピングツールとは異なるところ">Roomが、他のO/Rマッピング・ツールとは異なるところ</h2>
 <p>さて、O/Rマッピングというと、データを表現するクラスを元にテーブルが生成され（もしくは、テーブル定義からクラスが生成され）、黙っていてもINSERTやUPDATE、DELETEをするメソッドが自動生成され、さらに、条件を指定するSELECTがメソッド呼び出しで実施できるようになって、ついにはテーブルとテーブルの間の関連を辿るメソッドが魔法のように現れる重厚長大なツールを想像するかもしれません。</p>
 <p>でも、ごめんなさい、Roomは違うんです。それも、悪い意味で。</p>
 <p>まず、テーブルとテーブルの間の関連を辿ることはできません。Roomでは、テーブル単位での操作しかできないんです。もちろん理由はあって、データベースの操作という重い処理を、UI制御を担当するメイン・スレッドでやるわけにはいかないためです。メイン・スレッドの中で関連を辿るメソッドを呼んだらデータベース・アクセスが動いてUIが止まってしまう……なんてのは困りますもんね。</p>
-<p>あと、条件を指定してのSELECTでは、条件を指定する部分はSQL文を文字列としてベタ打ちしなければなりません。呼び出す側からはオブジェクト指向っぽく見えるけど、実装する側からはゴリゴリSQLなんです。まぁ、SQL文を書くのは面倒に感じますけど、<code>find(column: String, value: Int)</code>みたいな変なメソッドしか提供されなくて効率が悪いSQLが実行されちゃうよりはマシかですけど。後で説明しますけど、テーブルとテーブルの間の関連を辿る機能がない問題も、SQL文をベタ書きできるならあまり問題にはなりませんし。</p>
+<p>あと、条件を指定してのSELECTでは、条件を指定する部分はSQL文を文字列としてベタ打ちしなければなりません。呼び出す側からはオブジェクト指向っぽく見えるけど、実装する側からはゴリゴリSQLなんです。まぁ、SQL文を書くのは面倒に感じますけど、<code>find(column: String, value: Int)</code>みたいなボロっちいメソッドしか提供されなくて効率が悪いSQLが実行されちゃうよりはマシですけど。後で説明しますけど、テーブルとテーブルの間の関連を辿る機能がない問題も、SQL文をベタ書きできるならあまり問題にはなりませんし。</p>
 <p>一般的なO/Rマッピング・ツールの残りの機能は提供されるのですけど、残っているのは、アノテーションをつけることでINSERTやUPDATE、DELETEが自動生成されるのと、データを表現するクラスを書けばテーブルが生成されることだけです。ぶっちゃけ、Roomが提供する機能はこれだけなんですよ。</p>
 <p>と、ここまでを読んで「そんなヘッポコなのはO/Rマッピング・ツールじゃない」と思われたかもしれませんけど、O/Rマッピングとはオブジェクトとリレーションのマッピングで、この「リレーション」というのはリレーショナル・データベース用語ではテーブルのことなんです（テーブルとテーブルの間の関連は、リレーション<em>シップ</em>）。だから、RoomをO/Rマッピングと呼んでも、言葉の意味では問題ないかなぁ。</p>
-<p>まぁ、いろいろとひどいことを書きましたけど、実は私はRoomが好きです。「こういうのでいいんだよ。こういうので」ってヤツですな。他のO/Rマッピング・ツールがオーバースペックなだけ。ほら、前の章でJSONそのものを表現するJsonObjectを使った場合（<code>obpt:BusstopPole</code>や<code>odpt:BusroutePattern</code>の場合）より、JSONのデータをクラスにマッピングさせた場合（<code>odpt:Bus</code>の場合）のほうがコードが簡単だったでしょ？　あれと同じで、テーブルのレコードをインスタンスにマップしてくれるだけでも、プログラミングはとても楽になるんです。単純な機能しかないので使うの簡単ですし、SQLベタ書きなのでリレーショナル・データベースの機能を引き出しやすいですしね。</p>
+<p>まぁ、いろいろとひどいことを書きましたけど、私はRoomが好きです。「こういうのでいいんだよ。こういうので」ってヤツですな。他のO/Rマッピング・ツールがオーバースペックなだけ。ほら、前の章でJSONそのものを表現するJsonObjectを使った場合（<code>obpt:BusstopPole</code>や<code>odpt:BusroutePattern</code>の場合）より、JSONのデータをクラスにマッピングさせた場合（<code>odpt:Bus</code>の場合）のほうがコードが簡単だったでしょ？　あれと同じで、テーブルのレコードをインスタンスにマップしてくれるだけでも、プログラミングはとても楽になるんです。単純な機能しかないので使うの簡単ですし、SQLベタ書きなのでリレーショナル・データベースの機能を引き出しやすいですしね。</p>
 <h2 id="データ構造の設計">データ構造の設計</h2>
-<p>と、他のO/Rマッピング・ツール経験者への言い訳が終わったところで、作業に入りましょう。まずは、データ構造の設計です。私はいきなりコードを書き出すタイプの人間ですけど、そんな私でもプログラミング前にデータ構造だけは設計します。ER図かUMLのクラス図を描くだけですけどね。こんなの。</p>
+<p>と、他のO/Rマッピング・ツール経験者への言い訳が終わったところで、作業に入りましょう。まずは、データ構造の設計です。私は設計文書を書かないでいきなりコードを書き出すタイプの人間ですけど、そんな私でもプログラミング前にデータ構造だけは設計します。ER図かUMLのクラス図を描くだけですけどね。こんなの。</p>
 <p>絵</p>
 <p>今回はER図にしてみました。手書きのなぐり書きですけど、設計はこれで十分。だって、これでアプリが機能を提供できるかを確認できますから。試しにやってみましょう。到着バス停を指定する画面を作れるか、確認してみます。</p>
 <p>出発バス停を指定する画面ではしょうがないのですべてのバス停を表示しますけど、今確認している到着バス停を選ぶ画面では、出発バス停とつながっている（乗り換え無しで行ける）バス停だけを表示して欲しいですよね？　この機能を実現できるかを確認します。</p>
@@ -1617,7 +1617,7 @@ dependencies {
 <span id="cb36-16"><a href="#cb36-16"></a>    fun getByName(name: String): BusStop?</span>
 <span id="cb36-17"><a href="#cb36-17"></a>}</span></code></pre></div>
 <p>データ・アクセス・オブジェクトであることを指示するために<code>@Dao</code>アノテーションを追加して、データの追加と更新、削除のメソッドには<code>@Inert</code>と<code>@Update</code>、<code>@Delete</code>を追加します。今回は公共交通オープンデーターセンターから取得したデータを追加するだけなので<code>@Insert</code>アノテーションのみ。メソッドの引数はエンティティ・オブジェクトにします。</p>
-<p><code>@Query</code>アノテーションは、メソッドが呼ばれたらSQLを実行するようにとの指示です。どんなSQLでもオッケー、Queryという名前を無視して検索ではないSQLを指定しても大丈夫です。上のコードの<code>clear()</code>メソッドがそれですね。公共交通オープンデータセンターのデータと再同期するときのために、<code>clear()</code>ではすべてのデータを消す<code>DELETE FROM BusStop</code>を実行するように指示しています。</p>
+<p><code>@Query</code>アノテーションは、メソッドが呼ばれたらSQLを実行するようにとの指示です。どんなSQLでもオッケーで、Queryという名前を無視して検索ではないSQLを指定しても大丈夫です。上のコードの<code>clear()</code>メソッドがそれですね。公共交通オープンデータセンターのデータと再同期するときのために、<code>clear()</code>ではすべてのデータを消す<code>DELETE FROM BusStop</code>を実行するように指示しています。</p>
 <p>あとは、バス停の名前を指定して<code>BusStop</code>を取得するための<code>getByName()</code>メソッドを作成しました。メソッドの引数をSQLに渡す場合は、上のコードのように<code>:パラメーター名</code>とします。<code>name = :name</code>のところですね。<code>BusStop.name</code>は主キーなので1件しか存在しないのですけど、念の為<code>LIMIT 1</code>を指定しみました。<code>LIMIT</code>の分で最適化とかが働くといいなぁ……。そうそう、存在しない<code>name</code>が指定された場合に備えるために、戻り値の型は<code>null</code>を許容する<code>BusStop?</code>にしています。</p>
 <p>で、他のデータ・アクセス・オブジェクトもほぼ同様の作り方で作成できるのですけど、エンティティ・オブジェクトで<code>@PrimaryKey(autoGenerate = true)</code>とした場合は、少しだけ注意が必要です。というのも、新しいエンティティ・オブジェクトを作成してそれをINSERTした場合、自動生成された主キーが分からないと二度とそのオブジェクトにアクセスできなくなっちゃうんです（検索して取得しようにも、主キー以外で検索したのでは一意になる保証がないですもんね）。というわけで、<code>@PrimaryKey(autoGenerate = true)</code>な<code>RouteBusStopPole</code>向けの<code>RouteBusStopPoleDao</code>は、以下のようなコードになります。</p>
 <div class="sourceCode" id="cb37"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb37-1"><a href="#cb37-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
@@ -1738,10 +1738,10 @@ dependencies {
 <p>絵</p>
 <p>はい。成功です。Room簡単ですな。</p>
 <h2 id="データベースをダウンロードして正しく動いたのか確認してみる">データベースをダウンロードして、正しく動いたのか確認してみる</h2>
-<p>……ごめんなさい。ログに「Finish.」という文字が出たからRoomを正しく使えたと思えってのは、あまりに乱暴でしたね。もう少しきちんと確認します。</p>
+<p>……ごめんなさい。ログに「Finish.」という文字が出たからRoomを正しく使えたと思えってのは、あまりに乱暴でしたね。もう少しきちんと確認しましょう。</p>
 <p>スマートフォン上に生成されたデータベースのファイルは、AndroidStudioを使用してダウンロードする事ができます。Android Studioで[Device File Explorer]を開いて、data/data/com.tail_island.jetbus/databases」を開くと、その下に「jetbus.db」というファイルがあります。これ、SQLite3のファイルなんですよ。このファイルを右クリックして、[Save As...]メニューでローカルに保存します。</p>
 <p>絵</p>
-<p>ダウンロードしたデータベースのファイルの中を見て、正しく動作したのかを確認してみましょう。sqlite3コマンドでデータベースを開いて<code>SELECT * FROM BusStop LIMIT 10;</code>を実行して、はい、たしかにバス停が保存されています。この章の前で書いた、出発バス停名と到着バス停名から<code>Route</code>を取得するSQLも実行してみます。うん、上りか下りなのかの判別まで含めてうまく行っています。やっぱり、Room簡単ですな。</p>
+<p>ダウンロードしたデータベースのファイルの中を見て、正しく動作したのかを確認してみます。sqlite3コマンドでデータベースを開いて<code>SELECT * FROM BusStop LIMIT 10;</code>を実行して、はい、たしかにバス停が保存されています。この章の前で書いた、出発バス停名と到着バス停名から<code>Route</code>を取得するSQLも実行してみます。うん、上りか下りなのかの判別まで含めてうまく行っています。やっぱり、Room簡単ですな。</p>
 <p>絵</p>
 <h1 id="dagger">Dagger</h1>
 <p>このあたりで少し冷静になってこれまでに作成したコードを見直してみると、なんだか、<code>SplashFragment</code>があまりに汚い……。ちょっとWebサービス呼び出してみようかなってたびに、前準備として以下のコード書くなんてやってられないですよね？</p>
@@ -1786,10 +1786,10 @@ dependencies {
 <p>コードをこんな感じに変更して、単体テスト用の<code>ComponentB</code>のモックを用意して、それを使って単体テストします。使用するオブジェクトを実行時に設定することで、オブジェクトを自由に組み合わせられるようにしているわけですな。で、この組み合わせる部分を自動化したり柔軟にしてくれるのが、Daggerを始めとするDependency Injectionツールなんです。</p>
 <p>ただ、個人的には、Dependency Injectionはあまり好きではありません。だって、インターフェイスを書くのが面倒なんだもん。動的型付けのプログラミング言語（実行時に型チェックされる言語。JavaScriptとか私が大好きなClojureとか）では<code>interface</code>を書かなくてよいから使うし、関数型プログラミング言語（Haskellとか私が愛してやまないClojureとか）なら関数を組み合わせる関数合成を当たり前に使うけど、静的型付けのプログラミング言語（JavaとかKotlinとか。C++は静的型付だけど<code>template</code>を使えばコード上では動的に型付けできるから別）でのDependency Injectionはベネフィットよりもコストが大きいと感じちゃう。</p>
 <h2 id="dependency-injectionツールを敢えて誤用する">Dependency Injectionツールを敢えて誤用する</h2>
-<p>Dependency Injectionのメリットは、オブジェクト間の結合度が減ること。オブジェクト間の結合を変更可能にする技術は、静的型付けのオブジェクト指向プログラミング言語ではインターフェイス。でもインターフェイスを書くのは面倒なので、Dependency Injectionは諦めてオブジェクト間の結合度が増えるのは我慢する。でも、Dependency InjectionツールであるDaggerは使う。これがここまでの私の主張。……無茶苦茶ですがな。</p>
+<p>Dependency Injectionのメリットは、オブジェクト間の結合度が減ること。オブジェクト間の結合を変更可能にする技術は、静的型付けのオブジェクト指向プログラミング言語ではインターフェイス。でもインターフェイスを書くのは面倒なので、Dependency Injectionは諦めてオブジェクト間の結合度が増えても我慢する。でも、Dependency InjectionツールであるDaggerは使う。これがここまでの私の主張。……無茶苦茶ですがな。</p>
 <p>なんでこんな無茶な主張になるのかというと、私はただ単に属性に値を設定する便利ツールとしてDaggerを使っているからです。Adnroidアプリの場合、前述したRoomの<code>Database</code>のように<code>Context</code>を引数にしないと実現できない処理が多数存在します。これを関数の引数として表現すると呼び出せる場所が限られてしまってよくない。属性にしてコンストラクタで設定する方式も、<code>Fragment</code>や<code>Activity</code>の生成はAndroidがやるので手を出せないから実現不能です。でも、Daggerを使えば属性を設定できるんですよ。<code>Context</code>をDaggerの中で引き回せば、<code>Fragment</code>や<code>Activity</code>以外でも<code>Context</code>を必要とする属性の設定をやりたい放題にできます。</p>
 <p>もちろん、インターフェイスを書いていませんから、オブジェクト間の結合度は大きいままです。Dependency Injectionというのは実はデザイン・パターンで、Dependency Injectionツールはそれを実現する手段の一つ。私の意識が高ければツールへの依存性も減らして独自にDependency Injectionパターンを実装するでしょうし、道具が作成された目的を無視して使用するなんてことは絶対にやらないのでしょうけど、残念なことに私は底辺なのでDependency Injectionツールの誤用くらい全然オッケー。苦情は、結合度が異常に高いAndroidのAPIを最初に作った人に言ってください。</p>
-<p>ただね、Daggerを使っておけば、本来のDependency Injectionパターンが必要になったときに取り入れやすいと思うんですよ。意識が高い人は、どうかその前準備をしているんだと考えてください。</p>
+<p>ただね、Daggerを使っておけば、本来のDependency Injectionパターンが必要になったときに取り入れやすいと思うんですよ。意識が高い人は、その前準備をしているんだと考えてご容赦ください。</p>
 <h2 id="daggerの組み込み">Daggerの組み込み</h2>
 <p>まずは、Daggerを組み込むためにbuild.gradleを変更してください。</p>
 <pre class="gradle"><code>dependencies {
@@ -1965,8 +1965,8 @@ dependencies {
 <p><code>requireActivity()</code>で取得した<code>Activity</code>を経由して<code>Application</code>を取得して、そこからDaggerの<code>Component</code>を取得して自分自身を引数に<code>inject()</code>します……って、これ、結局<code>Context</code>の代わりに<code>Application</code>が必要になっただけじゃん！　Daggerで楽するために単純作業に耐えてきたのに、ベネフィットは複数の属性を1行で設定できるようになっただけ？</p>
 <p>こんなの絶対おかしいよ……とどこぞの魔法少女のように絶望したかもしれませんけど、安心してください、幸いなことにDaggerには救いがあります。どう救われるのかは、次に説明するLifecycleの中で！</p>
 <h1 id="lifecycle">Lifecycle</h1>
-<p>と、かなり強引な引きで始めてみたLifecycleなのですけど、ごめんなさい、やたらと書くことが多いので、Daggerの世界が救われるのはこの章の半ばまでお預けです。</p>
-<p>考えてみれば、Androidアプリの開発が大変だった一番大きな理由は、本校の最初の方で述べたライフサイクルの管理が大変なためなんです。やたらと複雑な<code>Activity</code>のライフサイクルから、もうとにかく逃げたい。そのために状態をViewModelに分離したというわけ。なので、ViewModelとはなんぞやというアーキテクチャーの話をしなければなりません。あと、<code>Activity</code>や<code>Fragment</code>の状態の変化に合わせて正しく動作するには、データの変更を監視する方式が定まっていないとダメ。そうでなければ、状態の変化に対応するための制御を入れられないですもんね。だから、その手段であるLiveDataについての説明も必要です。で、LiveDataは前述したRoomといい感じに協調して動作するように作られているのでデータベースの話まで戻らなくちゃなりません。Roomで不足しているように感じた機能が、LiveDataと組み合わせると不足していたのではなくて無いことこそが正しいとなるのでとても面白いですよ。</p>
+<p>と、かなり強引な引きで始めてみたLifecycleなのですけど、ごめんなさい、やたらと書くことが多いので、Daggerの世界が救われるのはこの章の最後です。</p>
+<p>考えてみれば、Androidアプリの開発が大変だった一番大きな理由は、本稿の最初の方で述べたライフサイクルの管理が大変なためなんです。やたらと複雑な<code>Activity</code>のライフサイクルから、もうとにかく逃げたい。そのために状態をViewModelに分離したというわけ。なので、ViewModelとはなんぞやというアーキテクチャーの話をしなければなりません。あと、<code>Activity</code>や<code>Fragment</code>の状態の変化に合わせて正しく動作するには、データの変更を監視する方式が定まっていないとダメ。そうでなければ、状態の変化に対応するための制御を入れられないですもんね。だから、その手段であるLiveDataについての説明も必要です。で、LiveDataは前述したRoomといい感じに協調して動作するように作られているのでデータベースの話まで戻らなくちゃなりません（Roomで不足しているように感じた機能が、LiveDataと組み合わせると不足していたのではなくて無いことこそが正しいとなるのでとても面白いですよ）。</p>
 <p>覚悟してください。この章はとても長いですよ……。</p>
 <h2 id="mvvmmodel-view-viewmodelアーキテクチャとは">MVVM（Model-View-ViewModel）アーキテクチャとは？</h2>
 <p>Android Jetpackでは、MVVMアーキテクチャを使うことが推奨されています。このMVVMアーキテクチャを理解するには、その前段であるMVC（Model-View-Controller）アーキテクチャの知識があると楽。しかも、Android JetpackのMVVMアーキテクチャは、普通のMVVMアーキテクチャとは少し違っていたりします。</p>
@@ -1987,8 +1987,8 @@ dependencies {
 <h3 id="android-jetpackでのmodel-view-viewmodelアーキテクチャ">Android JetpackでのModel-View-ViewModelアーキテクチャ</h3>
 <p>Android Jetpackでは、もう一つ層を追加することを提案しています。それがRepositoryです。</p>
 <p>絵</p>
-<p>Androidが動作するスマートフォンやタブレット、ウェアラブル・デバイスは、インターネットとの親和性が高いデバイスです。だから、我々が作成するアプリもインターネットと頻繁に通信する可能性や高い。しかもローカルのファイルやデータベースだって使用するわけで、だから、モデルはWebサービスに基づく場合とデータベースやファイルに基づく場合がありえます。これらがバラバラのままだと管理が大変になってしまうので、Repositoryという層を追加してViewModelはRepositoryだけに依存しましょうという感じ。</p>
-<p>で、本来のMVVMのModelはビジネス・ロジックを含む分厚い層で、Android Jetpackのドキュメントでも図だけはそんな感じに書いてあるのですけど、実際としては、ただのRoomによるDAO（Data Access Object）とEntity、Retrofit2によるWebサービスになります。だって、ModelというのはReposirotyでラップできるようなレベルなんですしね。後述するLiveDataとRoomを組み合わせれば、データベースの変更がViewModelに通知されて楽ちんだし。結果としてViewModelは少し大きくなるけど、Android JetpackだとViewModel上にロジックを書くのがやたらと楽だしね。</p>
+<p>Androidが動作するスマートフォンやタブレット、ウェアラブル・デバイスは、インターネットとの親和性が高いデバイスです。だから、我々が作成するアプリもインターネットと頻繁に通信する可能性が高い。しかもローカルのファイルやデータベースだって使用するわけで、だから、モデルはWebサービスに基づく場合とデータベースやファイルに基づく場合がありえます。これらがバラバラのままだと管理が大変になってしまうので、Repositoryという層を追加して一本化してViewModelはRepositoryだけに依存しましょうという感じ。</p>
+<p>で、本来のMVVMのModelはビジネス・ロジックを含む分厚い層で、Android Jetpackのドキュメントでも図だけはそんな感じに書いてあるのですけど、実際としては、ただのRoomによるDAO（Data Access Object）とEntity、Retrofit2によるWebサービスになります（たぶん）。だって、ModelというのはReposirotyでラップできるようなレベルなんですしね。後述するLiveDataとRoomを組み合わせれば、データベースの変更がViewModelに通知されて楽チンだし。結果としてViewModelは少し大きくなるけど、Android JetpackならViewModel上にロジックを書くのがやたらと楽だしね。</p>
 <p>MVVMアーキテクチャ原理派の方々はこんなやり方は認めないのでしょうけど、楽にコードを書けるのだから私的には全然オッケー。</p>
 <h2 id="livedata">LiveData</h2>
 <p>というわけで長いMVVMアーキテクチャの説明が終わったのでさっそくViewModelを作る……前に、MVVMアーキテクチャではViewModelからViewへの情報の伝達は通知で実現されることになっていたことを思い出してください。</p>
@@ -2064,6 +2064,7 @@ dependencies {
 <span id="cb54-27"><a href="#cb54-27"></a>        }.root</span>
 <span id="cb54-28"><a href="#cb54-28"></a>    }</span>
 <span id="cb54-29"><a href="#cb54-29"></a>}</span></code></pre></div>
+<p>TODO: observeとObserverの説明を追加する！</p>
 <p>はい、これで作業終了。<code>MutableLiveData</code>に値を設定するには、メイン・スレッドからの場合は<code>value</code>プロパティ、他のスレッドからの場合は<code>postValue()</code>メソッドを使用します。スレッドを作成して5秒経ったら、私の両親が「お前をまだクビにしてないんだから度量が大きい会社だな」と評価した会社の前にあるバス停が設定され、画面に表示されます。</p>
 <p>で、ここで試していただきたいのですけど、バス接近情報を表示する画面に遷移したら、5秒経つ前にホーム画面を表示してアプリをバックグラウンドに移動させてみてください。バックグラウンドに移ったので画面を更新する必要はなくて、だから<code>Observer</code>の呼び出しは無駄です。LiveDataはこのことを知っていて、しかも、<code>Fragment</code>がどのような状態にあるのかを<code>viewLifecycleOwner</code>を経由して知ることができるので、変更を通知しなくなるんです。その証拠に、ほら、logcatを見てください「departureBusStopName.observe()」が表示されていないでしょ？　で、アプリをフォアグランドに戻すと、すぐにlogcatに「departureBusStopName.observe()」が表示されて、私の会社の前にあるバス停の名前が画面に表示される。 というわけで、ほら、LiveDataのおかげで<code>Activity</code>や<code>Fragment</code>のライフサイクルがどうなっているのかを考えながらプログラミングする手間はほぼなくなりました！</p>
 <h3 id="livedataとroomを組み合わせる">LiveDataとRoomを組み合わせる</h3>
@@ -2097,7 +2098,7 @@ dependencies {
 <span id="cb55-25"><a href="#cb55-25"></a>    )</span>
 <span id="cb55-26"><a href="#cb55-26"></a>    <span class="kw">fun</span> <span class="fu">getObservablesByDepartureBusStopName</span>(<span class="va">departureBusStopName</span>: <span class="dt">String</span>): <span class="dt">LiveData</span>&lt;<span class="dt">List</span>&lt;<span class="dt">BusStop</span>&gt;&gt;</span>
 <span id="cb55-27"><a href="#cb55-27"></a>}</span></code></pre></div>
-<p>SQLが複雑に見えますけど、BusStop（到着）→BusStopPole（到着）→RouteBusStopPole（到着）→Route→RouteBusStopPole（出発）→BusStopPole（出発）→BusStop（出発）と<code>INNER JOIN</code>で辿っているだけ。Roomの解説の章でダウンロードしたSQLite3のデータベース・ファイルを使って実際に試しながらやれば、容易に作成できるでしょう。</p>
+<p>SQLが複雑に見えますけど、BusStop（到着）→BusStopPole（到着）→RouteBusStopPole（到着）→Route→RouteBusStopPole（出発）→BusStopPole（出発）→BusStop（出発）と<code>INNER JOIN</code>で辿っているだけ。Roomの解説の章でダウンロードしたSQLite3のデータベース・ファイルを使って実際に試しながらやれば、そんなに難しくないはず。</p>
 <p>で、このコードの重要なところは、<code>getObservablesByDepartureBusStopName()</code>メソッドの返り値の「型」です。普通にRoomを使う場合の返り値の型は<code>List&lt;BusStop&gt;</code>になるのですけど、上のコードでは<code>LiveData&lt;List&lt;BusStop&gt;&gt;</code>になっています。この小さな変更だけで、LiveData対応のデータ・アクセスのメソッドが生成されるんです。</p>
 <p>次の作業は、<code>App</code>へのRoomで作成するLiveData型のプロパティ追加なのですけど、そのためには<code>AppDatabase</code>が必要なので、まずは<code>AppCompoenent</code>に<code>fun inject(app: App)</code>を追加します。そのうえで、<code>App</code>を以下に修正してください。</p>
 <div class="sourceCode" id="cb56"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb56-1"><a href="#cb56-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus</span></span>
@@ -2207,8 +2208,8 @@ dependencies {
 <span id="cb58-30"><a href="#cb58-30"></a>        component.inject(<span class="kw">this</span>)</span>
 <span id="cb58-31"><a href="#cb58-31"></a>    }</span>
 <span id="cb58-32"><a href="#cb58-32"></a>}</span></code></pre></div>
-<p><code>Transformations</code>の<code>switchMap()</code>メソッドは、１つ目の引数で指定した<code>LiveData</code>が変更になったら、2つ目の引数のラムダ式の結果がセットされる<code>LiveData</code>を返します。なお、今回はラムダ式が<code>LiveData</code>を返すので<code>switchMap()</code>を使用しましたが、<code>Transformations</code>には、<code>LiveData</code>ではない返り値を使う場合向けの<code>map()</code>というメソッドもあります。</p>
-<p>で、この<code>Transformations</code>を使うと、Roomにテーブルとテーブルの間を辿る機能がないことが気にならなくなります。たとえば注文と注文明細を表示するような場合は、注文と注文明細を<code>Transformations</code>でつないで、注文と関係づけられた注文明細を取得するデータ・アクセス・オブジェクトのメソッドを書けばいいんですから。というわけで、Roomは前に書いたような「こういうのでいいんだよ。こういうので」と表現されるような機能が貧弱なO/Rマッピング・ツールではなくて、不要な機能がついていないとても洗練された非常に出来が良いO/Rマッピング・ツールなんです。「Roomは機能が貧弱で」とのたまうRoomの説明を書いていたときの私みたいな人がいたら、分かってないなぁと鼻で笑ってやってください。</p>
+<p><code>Transformations</code>の<code>switchMap()</code>メソッドは、１つ目の引数で指定した<code>LiveData</code>が変更になったら、2つ目の引数のラムダ式の結果がセットされる<code>LiveData</code>を返します。なお、今回はラムダ式が<code>LiveData</code>を返すので<code>switchMap()</code>を使用しましたが、<code>Transformations</code>には、<code>LiveData</code>ではない返り値を使う場合向けの<code>map()</code>というメソッドもありますのでいい感じに使い分けてください。</p>
+<p>で、この<code>Transformations</code>を使うと、Roomにテーブルとテーブルの間を辿る機能がないことが気にならなくなります。たとえば注文と注文明細を表示するような場合は、注文と注文明細を<code>Transformations</code>でつないで、注文と関係づけられた注文明細を取得するデータ・アクセス・オブジェクトのメソッドを書けばいいんですから。というわけで、Roomは前に書いたような「こういうのでいいんだよ。こういうので」と表現されるような機能が貧弱なO/Rマッピング・ツールではなくて、不要な機能がついていないとても洗練された最高に出来が良いO/Rマッピング・ツールなんです。もし「Roomは機能が貧弱で」とのたまうRoomの説明を書いていたときの私みたいな人がいたら、分かってないなぁと鼻で笑ってやってください。</p>
 <p>最後。せっかく<code>departureBusStopName</code>が変更になったら<code>arrivalBusStops</code>が変更されるようになったのですから、<code>BusApproachesFragment</code>を修正して画面も変更されるようにしましょう。</p>
 <div class="sourceCode" id="cb59"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb59-1"><a href="#cb59-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;utf-8&quot;<span class="kw">?&gt;</span></span>
 <span id="cb59-2"><a href="#cb59-2"></a><span class="kw">&lt;layout</span></span>
@@ -2287,7 +2288,7 @@ dependencies {
 <p>5秒たったら<code>departureBusStopName</code>を「日本ユニシス本社前」に設定して、また5秒たったら<code>departureBusStopName</code>を私のアパートの最寄りバス停である「深川第八中学校前」に変更するわけですな。<code>SplashFragment</code>でlogcatに「Finish.」が表示されるまで待って（そうしないとデータベースの更新と<code>departureBusStopName</code>の更新が合わさって変な動きになっちゃう）、バス接近情報の画面に遷移します。</p>
 <p>5秒後に「日本ユニシス本社前」とつながっているバス停の一覧が表示されて、さらに5秒たったら画面が「深川第八中学校前」とそこにつながっているバス停の一覧に変更されたでしょ？　はい、これで終わり。<code>Transformations</code>は実に便利ですな。</p>
 <h3 id="mediatorlivedata"><code>MediatorLiveData</code></h3>
-<p>でも、あれ、ユーザーIDとパスワードが入力されたらログインして認証済みかどうかの<code>LiveData</code>を更新するような場合はどうするのでしょうか？　今回のアプリだと、出発バス停と到着バス停からルートを取得するような場合です。<code>Transformations</code>は1つの<code>LiveData</code>しか監視できないですよね？　それでは、要件を満たせません。</p>
+<p>でも、あれ、ユーザーIDとパスワードが入力されたらログインして認証済みかどうかの<code>LiveData</code>を更新するような場合、複数の値を監視しなければならない場合はどうするのでしょうか？　今回のアプリだと、出発バス停と到着バス停からルートを取得するような場合です。<code>Transformations</code>は1つの<code>LiveData</code>しか監視できないですよね？　それでは、要件を満たせません。</p>
 <p>というわけで、そんな場合は<code>MediatorLiveData</code>を使いましょう。出発バス停の名称と到着バス停の名称からルートを取得する処理を作りたいので、まずはルートを取得するメソッドを<code>RouteDao</code>に追加します。</p>
 <div class="sourceCode" id="cb61"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb61-1"><a href="#cb61-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
 <span id="cb61-2"><a href="#cb61-2"></a></span>
@@ -2366,10 +2367,10 @@ dependencies {
 <span id="cb62-50"><a href="#cb62-50"></a>    ...</span></code></pre></div>
 <p>うぉ、面倒臭そう……なので、少し解説を。</p>
 <p><code>departureBusStopName</code>（出発バス停名称）が変更になったら、<code>arrivalBusStops</code>（到着バス停のリスト）を設定するところまでは前にやりました。今回は<code>arrivalBusStopName</code>（到着バス停名称）も必要なので、<code>Transformations</code>の<code>map()</code>メソッドを使用して<code>arrivalBusStops</code>が変更になったらその中の一つをランダムに選ぶようにしました。</p>
-<p>で、<code>routes</code>（ルートのリスト）が問題の<code>MediatorLiveData</code>です。<code>MediatorLiveData</code>では、監視対象の<code>LiveData</code>を<code>addSource()</code>メソッドで追加できます。<code>addSource()</code>メソッドの2つ目の引数はラムダ式で、監視対象が変更になった場合に実行する処理です。今回は、その直前に定義している<code>update()</code>関数を呼び出しています。で、<code>MediatorLiveData</code>の値を変更したい場合は、<code>value</code>プロパティに値を設定すればよくて、監視対象の<code>LiveData</code>の値は<code>LiveData</code>の<code>value</code>プロパティで取得できるのですけど、残念なことに<code>RouteDao</code>に定義したのは<code>LiveData&lt;List&lt;Route&gt;&gt;</code>を返すメソッドで、そのままでは<code>value</code>に設定できません。</p>
+<p>で、<code>routes</code>（ルートのリスト）が問題の<code>MediatorLiveData</code>です。<code>MediatorLiveData</code>では、監視対象の<code>LiveData</code>を<code>addSource()</code>メソッドで追加できます。<code>addSource()</code>メソッドの2つ目の引数はラムダ式で、監視対象が変更になった場合に実行する処理です。今回は、その直前に定義している<code>update()</code>関数を呼び出しています。で、<code>MediatorLiveData</code>の値を変更したい場合は、<code>value</code>プロパティに値を設定すればよくて、監視対象の<code>LiveData</code>の値は<code>LiveData</code>の<code>value</code>プロパティで取得できるのですけど、残念なことに<code>RouteDao</code>に定義したのは<code>LiveData&lt;List&lt;Route&gt;&gt;</code>を返すメソッドですから、そのままでは<code>value</code>に設定できません。</p>
 <p>だから、<code>getObservablesByDepartureBusStopNameAndArrivalBusStopName()</code>の返り値を格納するための<code>source</code>変数を作成して、設定と同時に<code>also</code>で<code>addSource()</code>して<code>value</code>に値を設定するようにしています。<code>source</code>が複数になると動作がおかしくなりますから、<code>source?.let</code>で過去に設定した<code>source</code>がある場合は<code>removeSource()</code>しています。</p>
 <p>あと、<code>update()</code>の中でエルビス演算子（<code>:?</code>）を使用しているのは、<code>LiveData</code>のテンプレート引数が<code>null</code>を許容しない型であったとしても、値がまだ設定されていない場合は<code>value</code>プロパティの値が<code>null</code>になってしまうためです。出発バス停名称と到着バス停名称の両方が揃った場合に初めて処理を実施するというわけですな。</p>
-<p>……とまぁ、異常に複雑で、これを少しでも簡単にするには「<code>RouteDao</code>に<code>LiveData</code>を返さないメソッドを定義する」という手があるのですけど、場合によって作り方を変更するのは混乱の元になるので避けたい。まぁ、複雑だとはいっても毎回同じなのでいつかは見慣れるでしょうから、ごめんなさい、このままで。こーゆーもんなんだと飲み込んでください。で、誰かライブラリ化してくれないかなぁ。KotlinにLISPやRustのマクロがあれば、こんな場合にも簡単にライブラリ化できるのに……。</p>
+<p>……とまぁ、異常に複雑で、これを少しでも簡単にするには「<code>RouteDao</code>に<code>LiveData</code>を返さないメソッドを定義する」という手があるのですけど、場合によって作り方を変更するのは混乱の元になるので避けたい。まぁ、複雑だとはいっても毎回同じなのでいつかは見慣れるでしょうから、ごめんなさい、このままで。こーゆーもんなんだと無理に飲み込んでください。誰かライブラリ化してくれないかなぁ。KotlinにLISPやRustのマクロがあれば、こんな場合にも簡単にライブラリ化できるのに……。</p>
 <p>ともあれ、面倒くさいのはここまでで終わり。あとは、これまでと同じです。レイアウトのXMLをいい感じに修正して……</p>
 <div class="sourceCode" id="cb63"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb63-1"><a href="#cb63-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;utf-8&quot;<span class="kw">?&gt;</span></span>
 <span id="cb63-2"><a href="#cb63-2"></a><span class="kw">&lt;layout</span></span>
@@ -2520,8 +2521,8 @@ dependencies {
 <span id="cb65-51"><a href="#cb65-51"></a></span>
 <span id="cb65-52"><a href="#cb65-52"></a><span class="kw">&lt;/layout&gt;</span></span></code></pre></div>
 <p><code>&lt;data&gt;</code>タグの中の<code>&lt;variable&gt;</code>タグで、このレイアウトで扱うデータを定義します。今回は<code>App</code>のプロパティを使用して画面を表示するので、<code>App</code>にします。</p>
-<p>で、<code>android:text</code>属性の値の<code>@{...}</code>の部分がバインディング先の指定です。<code>app.departureBusStopName</code>は<code>LiveData</code>型だけど文字列型にしなくていいの？　とお考えになった方がいらっしゃるかもしれませんが、データ・バインディングは<code>LiveData</code>対応ですのでこれで大丈夫なんです。</p>
-<p>ただ、良いことばかり続くわけではないのが世の常です。<code>routeNamesTextView</code>の<code>android:text</code>プロパティを見てください。<code>map()</code>や<code>joinToString()</code>を使わずに、まだ定義してない<code>App</code>の<code>routeNames</code>プロパティをバインディングしています。というのもですね、データ・バインディングの<code>@{...}</code>の中ってKotlinのコードを書けないんですよ。詳しい言語仕様は<a href="https://developer.android.com/topic/libraries/data-binding/expressions?hl=ja">レイアウトとバインディング式</a>に書いてあるので見ていただきたいのですけど、たとえばKotlinの<code>if</code>は式なので、Kotlinのプログラマーは<code>val x = if (condition) &quot;OK&quot; else &quot;BAD&quot;</code>のように書くのに慣れていますけど、データ・バインディングのときは昔懐かしい三項演算子（<code>condition ? &quot;OK&quot; : &quot;BAD&quot;</code>）で書かないとダメだったりするんです。</p>
+<p>で、<code>android:text</code>属性の値の<code>@{...}</code>の部分がバインディング先の指定です。<code>app.departureBusStopName</code>は<code>LiveData</code>型だけど文字列型にしなくていいの？　とお考えになった方がいらっしゃるかもしれませんけど、データ・バインディングは<code>LiveData</code>対応ですのでこれで大丈夫なんです。</p>
+<p>ただ、良いことばかり続くわけではないのが世の常です。<code>routeNamesTextView</code>の<code>android:text</code>プロパティを見てください。<code>map()</code>や<code>joinToString()</code>を使わずに、まだ定義してない<code>App</code>の<code>routeNames</code>プロパティをバインディングしています。なんでこんなことをしているかというと、データ・バインディングの<code>@{...}</code>の中ってKotlinのコードを書けないんためです。詳しい言語仕様は<a href="https://developer.android.com/topic/libraries/data-binding/expressions?hl=ja">レイアウトとバインディング式</a>に書いてあるので見ていただきたいのですけど、たとえばKotlinの<code>if</code>は式なので、Kotlinのプログラマーは<code>val x = if (condition) &quot;OK&quot; else &quot;BAD&quot;</code>のように書くのに慣れていますけど、データ・バインディングのときは昔懐かしい三項演算子（<code>condition ? &quot;OK&quot; : &quot;BAD&quot;</code>）で書かないとダメだったりします。</p>
 <p>やってられないので、あっさり諦めて<code>App</code>にプロパティを追加しました。<code>App</code>に追加というとやっちゃいけないことのように感じられますけど、本章の最後までやればViewModelへの追加となります。ViewModelはViewのためのものなのですから、この程度は良いんじゃないかなぁと。ViewModelがViewを呼び出すのはダメですけど、Viewのことを考えながらViewModelを作るのはアリなのですから。もちろん、こんなプロパティは無いほうがいいのですけど、でも、言語仕様がアレなんだもん。</p>
 <div class="sourceCode" id="cb66"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb66-1"><a href="#cb66-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus</span></span>
 <span id="cb66-2"><a href="#cb66-2"></a></span>
@@ -2576,10 +2577,10 @@ dependencies {
 <span id="cb67-29"><a href="#cb67-29"></a>        }.root</span>
 <span id="cb67-30"><a href="#cb67-30"></a>    }</span>
 <span id="cb67-31"><a href="#cb67-31"></a>}</span></code></pre></div>
-<p>不要になった<code>observe()</code>メソッドの呼び出しをまるっと削除して、データ・バインディングが<code>LiveData</code>を監視できるように<code>lifeCycleOwner</code>プロパティを設定して、あと、<code>&lt;data&gt;</code>タグで設定した<code>app</code>プロパティを設定しているだけ。<code>thread { ... }</code>の部分はテスト用のコードで本番ではなくなりますから、かなりシンプルなコードです。こんな単純になっても、今までと同じ動作をしてくれるんですよ。</p>
+<p>不要になった<code>observe()</code>メソッドの呼び出しをまるっと削除して、データ・バインディングが<code>LiveData</code>を監視できるように<code>lifeCycleOwner</code>プロパティを設定して、あと、<code>&lt;data&gt;</code>タグで設定した<code>app</code>プロパティを設定しているだけ。<code>thread { ... }</code>の部分はテスト用のコードなので最後にはなくなりますから、かなりシンプルなコードですよね？　こんな単純になっても、今までと同じ動作をしてくれるんですよ。</p>
 <p>うん、LiveDataとデータ・バインディングは、コード量を激減させてくれて素晴らしいですな。</p>
 <h2 id="repository">Repository</h2>
-<p>やっとLiveDataが終わりましたから、あとはRepositoryを作るだけでViewModelを作れます。とはいっても、ただ普通に<code>class</code>を作るだけで、とある事情（後述するコルーチンを使わないと書きづらい）でWebサービス側はとりあえず作らないので、とても簡単なんですけどね。</p>
+<p>やっとLiveDataが終わりましたから、あとはRepositoryを作るだけでViewModelを作れます。とはいっても、ただ普通に<code>class</code>を作るだけで、とある事情（後の章で説明するコルーチンを使わないと書きづらい）でWebサービス側はとりあえず作らないから、やたらと簡単なんですけどね。</p>
 <div class="sourceCode" id="cb68"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb68-1"><a href="#cb68-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
 <span id="cb68-2"><a href="#cb68-2"></a></span>
 <span id="cb68-3"><a href="#cb68-3"></a><span class="kw">import</span> <span class="im">javax.inject.Inject</span></span>
@@ -2643,7 +2644,7 @@ dependencies {
 <span id="cb69-48"><a href="#cb69-48"></a>}</span></code></pre></div>
 <p>……ここまでもったいぶっておいて何なのですけど、前述したように<code>ViewModel</code>を継承するようにして、これまでとりあえずAppに書いていたコードを移動させ、<code>AppDatabase</code>ではなく<code>Repository</code>のメソッドを呼び出すように修正しただけです。</p>
 <h2 id="viewmodelをdaggerから取得する"><code>ViewModel</code>をDaggerから取得する</h2>
-<p>では、ViewModelを使ってみましょう。ドキュメントの<a href="https://developer.android.com/topic/libraries/architecture/viewmodel?hl=ja">ViewModelの概要</a>を見ると、なるほど、<code>ViewModelProviders.of(this)[BusApproachesViewModel::class.java]</code>でインスタンスを取得できるのね……って、これではインスタンス生成が自動化されていて手が出せないので、<code>Repository</code>を引数にしてコンストラクタを呼び出すことできないじゃん！</p>
+<p>では、ViewModelを使ってみましょう。ドキュメントの<a href="https://developer.android.com/topic/libraries/architecture/viewmodel?hl=ja">ViewModelの概要</a>を見てみると、なるほど、<code>ViewModelProviders.of(this)[BusApproachesViewModel::class.java]</code>でインスタンスを取得できるのね……って、これではインスタンス生成が自動化されていて手が出せないので、<code>Repository</code>を引数にしてコンストラクタを呼び出すことできないじゃん！</p>
 <p>同じ問題は<code>Activity</code>や<code>Fragment</code>で経験済みで、あのときはDaggerによるDependency Injectionで解決できました。でも、<code>ViewModel</code>からは<code>App</code>にアクセスできないので、同じ解決策は使えません……。</p>
 <p>幸いなことに、Daggerは有名なプロダクトですから、いろいろな人が使い方を調べて解説を書いてくださっています。その一つが<a href="https://qiita.com/superman9387/items/bea94e4316c2ccf8fb68">ViewModelをDagger2でDIする</a>です。ありがてぇ。というわけで、ここに書いてある通りにすればオッケー。ちなみに、難しすぎて私は中身を理解できてません。たぶん、<code>ViewModelPrividesr</code>をいい感じに騙しているんだと思う。</p>
 <p>というわけで、黙々と作業します。解説と順序は違いますが、まずは<code>ViewModelKey</code>アノテーションと<code>AppViewModelProviderFactory</code>を作成します。新規にUtility.ktを作成して、以下の内容を入力します。</p>
@@ -2702,7 +2703,7 @@ dependencies {
 <span id="cb71-31"><a href="#cb71-31"></a>    @ViewModelKey(<span class="va">BusApproachesViewModel</span>::<span class="dt">class</span>)</span>
 <span id="cb71-32"><a href="#cb71-32"></a>    <span class="kw">fun</span> provideBusApproachesViewModel(<span class="va">repository</span>: <span class="dt">Repository</span>) = BusApproachesViewModel(<span class="va">repository</span>) <span class="kw">as</span> ViewModel</span>
 <span id="cb71-33"><a href="#cb71-33"></a>}</span></code></pre></div>
-<p><code>AppComponent</code>に<code>BusApproachesFragment</code>に依存性を注入するメソッドの定義します。</p>
+<p><code>AppComponent</code>に<code>BusApproachesFragment</code>に依存性を注入するメソッドを定義します。</p>
 <div class="sourceCode" id="cb72"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb72-1"><a href="#cb72-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus</span></span>
 <span id="cb72-2"><a href="#cb72-2"></a></span>
 <span id="cb72-3"><a href="#cb72-3"></a><span class="kw">import</span> <span class="im">dagger.Component</span></span>
@@ -2714,7 +2715,7 @@ dependencies {
 <span id="cb72-9"><a href="#cb72-9"></a>    <span class="kw">fun</span> <span class="fu">inject</span>(<span class="va">splashFragment</span>: <span class="dt">SplashFragment</span>)</span>
 <span id="cb72-10"><a href="#cb72-10"></a>    <span class="kw">fun</span> <span class="fu">inject</span>(<span class="va">busApproachesFragment</span>: <span class="dt">BusApproachesFragment</span>)</span>
 <span id="cb72-11"><a href="#cb72-11"></a>}</span></code></pre></div>
-<p>この章で<code>App</code>に追加したコードを全部削除して、<code>BusApproachesFragment</code>を修正します。</p>
+<p>この章で<code>App</code>に追加したコードを全部削除して、で、<code>BusApproachesFragment</code>を修正します。</p>
 <div class="sourceCode" id="cb73"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb73-1"><a href="#cb73-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus</span></span>
 <span id="cb73-2"><a href="#cb73-2"></a></span>
 <span id="cb73-3"><a href="#cb73-3"></a><span class="kw">import</span> <span class="im">android.os.Bundle</span></span>
@@ -2754,19 +2755,19 @@ dependencies {
 <span id="cb73-37"><a href="#cb73-37"></a>        }.root</span>
 <span id="cb73-38"><a href="#cb73-38"></a>    }</span>
 <span id="cb73-39"><a href="#cb73-39"></a>}</span></code></pre></div>
-<p>解説とは<code>ViewModel</code>の作成方法が違うじゃんと思われたと思いますが、これ、Android JetpackのKotlin向け便利機能なんです。</p>
-<p>この書き方にしておくと、たとえば認証情報のような<code>Fragment</code>よりも生存期間が長い（別の<code>Fragment</code>に遷移したらまたIDとパスワード入力するなんてやってられないですよね？）ViewModelを使う場合に、<code>private val authorizationViewModel by activityViewModel&lt;AuthorizationViewModel&gt; { viewModelProviderFactory }</code>とするだけで、<code>ViewModel</code>の生存期間が<code>Activity</code>と同じになるのでとても便利ですよ。</p>
+<p>解説とは<code>ViewModel</code>の作成方法が違うじゃんと思われたと思いますが、これ、Android JetpackのKotlin向け便利機能の一つなんです。</p>
+<p>この書き方にしておくと、たとえば認証情報のような<code>Fragment</code>よりも生存期間が長い（別の<code>Fragment</code>に遷移したらまたIDとパスワード入力するなんてやってられないですよね？）ViewModelを使う場合に、<code>private val authorizationViewModel by activityViewModel&lt;AuthorizationViewModel&gt; { viewModelProviderFactory }</code>とするだけで、<code>ViewModel</code>の生存期間が<code>Activity</code>と同じになるのでとても便利なのですよ。</p>
 <p>はい、これで完成！　正しく動くか試してみましょう。</p>
 <p>動画</p>
 <p>うん、動いた……のですけど、確認のために<code>AppModule</code>を開いてソース・コードを眺めていたら、なんかちょっと気持ち悪い。<code>fun provideBusApproachesViewModel(repository: Repository) = BusApproachesViewModel(repository) as ViewModel</code>の<code>repository</code>は、どうやって取得したのでしょうか？　だって、<code>Repository</code>を<code>@Provides</code>するメソッドは定義していないんですよ？</p>
 <p>その答えは「<code>@Inject</code>アノテーションが付いたコンストラクタを持つクラスは、自動で<code>@Provides</code>なメソッドを作成してくれるから」です。先程<code>Repository</code>を作成したときに、<code>@Singleton</code>アノテーションと<code>@Inject</code>アノテーションを追加しましたよね。この<code>@Inject</code>アノテーションが役に立ってくれたんです。</p>
 <p>では<code>@Singleton</code>アノテーションは何なのかというと、<code>@Singleton</code>をDaggerで生成したい型に付加しておくと、<code>@Provides</code>メソッドを生成するときに<code>@Singleton</code>が自動で付くようになるんです。<code>Repository</code>は何個もいらないですもんね。というわけで、<code>AppModule</code>の<code>@Singleton</code>は生成対象の型に移動……させるという手は、<code>provideContext()</code>や<code>provideConsumerKey()</code>では使えません。書き方が統一できないとミスが発生しそうで怖いのですけど、しょうがないので、念の為に両方に書くという方式にしましょう。<code>AppDatabase</code>と<code>WebService</code>にも<code>@Singleton</code>を付加しておきます。</p>
-<p>というわけで、コンストラクタに<code>@Inject</code>を書くだけで依存性を注入しまくれるんです。注入した依存性を活用できるのは<code>ViewModel</code>経由で呼び出す場合だけですけど、MVVMアーキテクチャを採用してアプリを組むのですから問題とはなりません。ほら、前章からの宿題だったDaggerをどうやって使うかが決まったでしょ？　これ以降は、依存性を注入したいならコンストラクタに<code>@Inject</code>を書くだけでよくなったんです。</p>
+<p>というわけで、コンストラクタに<code>@Inject</code>を書くだけで依存性を注入しまくれるんです。注入した依存性を活用できるのは<code>ViewModel</code>経由で呼び出す場合だけですけど、MVVMアーキテクチャを採用してアプリを組むのですから問題とはなりません。ほら、前章からの宿題だったDaggerをどうやって使うかが決まったでしょ？　これ以降は、依存性を注入したいならコンストラクタに<code>@Inject</code>を書くだけでよくなったんですよ。</p>
 <p>まぁ、<code>Activity</code>や<code>Fragment</code>には、依存性を注入する処理を手で書かなければならないんだけどな。</p>
 <h1 id="コルーチン">コルーチン</h1>
 <p>もろもろ片付いたのでよーしパパ残りのViewModelも作っちゃうぞーと考えたのですけど、最初の画面の<code>SplashFragment</code>向けのViewModelでいきなり詰まってしまいました。RoomやRetrofit2はメイン・スレッドからは呼び出せないのですけど、スレッドどうしましょ？</p>
-<p>ViewModelの中で<code>thread</code>で別スレッドを生成する……のは前の章で書いておいてアレなのですけど、ダメ、絶対。だって、生成されたスレッドは終了するまで生き残ってしまうんですから。ViewModelを作成してその中でスレッドを生成して、画面遷移して<code>Fragment</code>が終了するとかでViewModelを終了する。この場合でも、スレッドは処理が終わるまで動き続けます。で、もう一度同じ<code>Fragment</code>が表示されたりしてViewModelが生成されると、またスレッドが生成されちゃう。負荷が大きいことに加えて、処理が2重に動いてしまうんですよ。実は前の章までで作成したアプリにはこの問題に起因するバグがあって、<code>SplashFragment</code>でスレッドを生成してデータベースを更新しているときにスマートフォンを回転させたりすると、<code>Activity</code>が再生成されて<code>Fragment</code>が再生成されてデータベースを更新するスレッドがもう一つ動いて、データの不整合ができてアプリが落ちちゃうんです。</p>
-<p>というわけで、スレッドの生存期間をViewModelと同じになるようにしなければなりません。そんなときに便利なのが、途中で処理を中断したり再開できたり、さらには中断したまま途中でやめちゃったりもできる、コルーチンなんです。</p>
+<p>ViewModelの中で<code>thread</code>で別スレッドを生成する……のは前の章で書いておいてアレなのですけど、ダメ、絶対。だって、生成されたスレッドは終了するまで生き残ってしまうんですから。ViewModelを作成してその中でスレッドを生成して、画面遷移して<code>Fragment</code>が終了するとかでViewModelを終了する。この場合でも、スレッドは処理が終わるまで動き続けます。で、もう一度同じ<code>Fragment</code>が表示されたりしてViewModelが生成されると、またスレッドが生成されちゃう。負荷が大きいことに加えて、処理が2重に動いてしまうんですよ。実は前の章までで作成したアプリにはこの問題に起因するバグがあって、<code>SplashFragment</code>でスレッドを生成してデータベースを更新しているときにスマートフォンを回転させたりすると、<code>Activity</code>が再生成されて<code>Fragment</code>が再生成されてデータベースを更新するスレッドがもう一つ動いて、データの不整合ができてアプリが落ちちゃうんですよ。これじゃあ困る。</p>
+<p>だから、スレッドの生存期間をViewModelと同じになるようにしなければなりません。そんなときに便利なのが、途中で処理を中断したり再開できたり、さらには中断したまま途中でやめちゃったりもできる、コルーチンなんです。</p>
 <h2 id="途中で処理を中断再開">途中で処理を中断、再開？</h2>
 <p>途中で処理を中断したり再開したりするというのがどういうことなのか、具体的なコードでご説明します。</p>
 <div class="sourceCode" id="cb74"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb74-1"><a href="#cb74-1"></a><span class="kw">fun</span> <span class="fu">useCoroutine</span>() {</span>
@@ -2813,7 +2814,7 @@ dependencies {
 <span id="cb76-21"><a href="#cb76-21"></a>        }</span>
 <span id="cb76-22"><a href="#cb76-22"></a>    }</span>
 <span id="cb76-23"><a href="#cb76-23"></a>}</span></code></pre></div>
-<p>このコードを実行すると、<code>useCoroutine()</code>の方ではすべて同じスレッドIDが、<code>useThread()</code>の方ではすべて異なるスレッドIDが出力されます。ほら、<code>useCoroutine()</code>の方は、すべてメイン・スレッドで実行されているでしょ？</p>
+<p>このコードを実行すると、<code>useCoroutine()</code>の方ではすべて同じスレッドIDが、<code>useThread()</code>の方ではすべて異なるスレッドIDが出力されます。ほら、<code>useCoroutine()</code>の方は、すべてメイン・スレッドで実行されていてスゴイでしょ？</p>
 <p>でも、一つのスレッドでは一つのことしかできないはずで、だから、「待つ」のと「出力」の両方は実行できないはず。でもできちゃっているのはなぜかといえば、実は<code>delay()</code>は「待つ」のではなく「中断」だからなんです。中断している間は他のコルーチンを実行できるので、だから並列処理に見えたというわけ。たとえば<code>delay(1000)</code>なら、中断して1,000ミリ秒たったら再開するという意味になるんですよ（とはいえ、メイン・スレッドで動く他の処理がいつまでも終わらなかったりするような場合は、1,000ミリ秒たっても再開されなかったりしますけど）。</p>
 <h2 id="中断して実行するスレッドを変えて再開しちゃえ">中断して、実行するスレッドを変えて、再開しちゃえ！</h2>
 <p>コルーチンのすごいのは、それだけじゃありません。実行するスレッドを変更することができるんです。</p>
@@ -2832,7 +2833,7 @@ dependencies {
 <span id="cb77-13"><a href="#cb77-13"></a>}</span></code></pre></div>
 <p>上のコードを実行すると、<code>withContext()</code>の中だけスレッドIDが変わっていることが分かります。しかも、実行順序は「Hello」「Coroutines」「World」の順序を保っています。まぁ、中断して再開できるのですから、中断してゴニョゴニョして別のスレッドで再開できても不思議ではありませんよね？</p>
 <p>なお、上のコードの<code>Dispatchers.IO</code>はファイル操作やデータベース・アクセス、Webサービス呼び出し等向けで、他には、<code>Dispatchers.Default</code>（バック・グラウンドでの計算処理など向け）、<code>Dispatchers.Main</code>（メイン・スレッド）があります。というわけで、<code>withContext(Dispatchers.IO) {}</code>すれば、データベース・アクセスもWebサービス呼び出しもやりたい放題ですよ。</p>
-<h2 id="中断して途中でやめちゃえ">中断して、途中でやめちゃえ！</h2>
+<h2 id="中断してそのままやめちゃえ">中断して、そのままやめちゃえ！</h2>
 <p><code>ViewModel</code>の中で<code>viewModelScope.launch</code>した場合は、もっと面白いです。</p>
 <div class="sourceCode" id="cb78"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb78-1"><a href="#cb78-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.view_model</span></span>
 <span id="cb78-2"><a href="#cb78-2"></a></span>
@@ -2886,8 +2887,8 @@ dependencies {
 <span id="cb79-27"><a href="#cb79-27"></a>        }.root</span>
 <span id="cb79-28"><a href="#cb79-28"></a>    }</span>
 <span id="cb79-29"><a href="#cb79-29"></a>}</span></code></pre></div>
-<p>こんな感じで、先程の無限ループする処理を呼び出しています。<code>delay(1000)</code>の間にメイン・スレッドは別の処理をできるのでユーザー・インターフェースが止まらず、それでいてもちろん、logcatにログが出力されます。で、それだけではなく、画面が遷移すると無限ループなのに処理が止まるんですよ！</p>
-<p>中断して、再開しなければいい（あと、再開に必要な情報を破棄する）だけですもんね。うん、できるの分かってた。<code>viewModelScope</code>は<code>ViewModel</code>と同じライフ・サイクルを持っているので、画面が遷移して<code>ViewModel</code>が破棄されると処理が止まるというわけ。</p>
+<p>こんな感じで、先程の無限ループする処理を呼び出しています。<code>delay(1000)</code>の間にメイン・スレッドは別の処理をできるのでユーザー・インターフェースが止まらず、それでいてもちろん、logcatにログが出力されます。で、それだけではなくて、画面が遷移すると無限ループなのに処理が止まるんですよ！</p>
+<p>中断して、再開しなければいい（あと、再開に必要な情報を破棄する）だけですもんね。うん、できるの分かってた。<code>viewModelScope</code>は<code>ViewModel</code>と同じライフサイクルを持っているので、画面が遷移して<code>ViewModel</code>が破棄されると処理が止まるというわけ。</p>
 <p>あと、<code>viewModelScope</code>の他に、<code>Activity</code>や<code>Fragment</code>で使用できる<code>lifecycleScope</code>や、アプリと同じライフサイクルを持つ<code>GlobalScope</code>なんてものあります。でも、できるだけ<code>GlobalScope</code>は使わないでくださいね。</p>
 <h2 id="関数に抽出しちゃえ">関数に抽出しちゃえ！</h2>
 <p>さて、ここまでのコードに出てきた<code>launch {}</code>はコルーチンを生成するのですけど、その中に大きな処理を書くと可読性が下がってしまいますから、小さな関数に分割したい。でも、以下のコードはコンパイル・エラーになってしまうんです。</p>
@@ -2918,7 +2919,7 @@ dependencies {
 <span id="cb81-11"><a href="#cb81-11"></a>        }</span>
 <span id="cb81-12"><a href="#cb81-12"></a>    }</span>
 <span id="cb81-13"><a href="#cb81-13"></a>}</span></code></pre></div>
-<p>はい、これでコンパイル通ります。なお、<code>suspend</code>な関数はコルーチン向けの特別な関数なので、コルーチンの外では呼び出せません。<code>launch {}</code>の中や<code>suspend</code>な関数の中から呼び出してください。</p>
+<p>はい、これでコンパイルに通ります。なお、<code>suspend</code>な関数はコルーチン向けの特別な関数ですから、コルーチンの外では呼び出せません。<code>launch {}</code>の中や<code>suspend</code>な関数の中から呼び出してあげてください。</p>
 <h2 id="splashfragmentのデータベースアクセスとwebサービス呼び出しをコルーチンにする">SplashFragmentのデータベース・アクセスとWebサービス呼び出しをコルーチンにする</h2>
 <p>というわけでコルーチンの説明が終了したので（他にもいろいろな便利機能があるので、ぜひ<a href="https://kotlinlang.org/docs/reference/coroutines/coroutines-guide.html">公式ガイド</a>を読んでみてください）、アプリの実装を勧めましょう。</p>
 <h3 id="repository-1"><code>Repository</code></h3>
@@ -3025,7 +3026,7 @@ dependencies {
 <span id="cb82-100"><a href="#cb82-100"></a></span>
 <span id="cb82-101"><a href="#cb82-101"></a>    ...</span>
 <span id="cb82-102"><a href="#cb82-102"></a>}</span></code></pre></div>
-<p>中身は、前に<code>SplashFragment</code>の中に書いたコードのほぼコピー＆ペーストです。変更点は、<code>clearDatabase()</code>と<code>syncDatabase()</code>に分割したのと、<code>withContext(Dispatchers.IO)</code>で囲んだのと、成功（Unit）か失敗（null）を返すようにしたこと（ラムダ式は最後に実行する行の値が返り値になります）と、毎回データを取得するのは時間がかかって嫌なので<code>if (database.getBusStopDao().getCount() &gt; 0)</code>なら処理をしないというチェック・ロジックを付加した（<code>getCount()</code>は<code>@Query(&quot;SELECT COUNT(*) FROM BusStop&quot;)</code>アノテーションで作成しました）のと、そのチェック・ロジックが正常に動作するように<code>database.withTransaction {}</code>で囲んだことくらい。Roomのところで説明し忘れたのですけど、<code>database.withTransaction {}</code>で囲むと処理がアトミックになる（完全にやるか、全くやらないかのどちらかになる）ので便利ですよ。</p>
+<p>中身は、前に<code>SplashFragment</code>の中に書いたコードのほぼコピー＆ペーストです。変更点は、<code>clearDatabase()</code>と<code>syncDatabase()</code>に分割したのと、<code>withContext(Dispatchers.IO)</code>で囲んだのと、成功（Unit）か失敗（null）を返すようにしたこと（前にどこかで書きましたけど、ラムダ式は最後に実行する行の値が返り値になります）と、毎回データを取得するのは時間がかかって嫌なので<code>if (database.getBusStopDao().getCount() &gt; 0)</code>なら処理をしないというチェック・ロジックを付加した（<code>getCount()</code>は<code>@Query(&quot;SELECT COUNT(*) FROM BusStop&quot;)</code>アノテーションで作成しました）のと、そのチェック・ロジックが正常に動作するように<code>database.withTransaction {}</code>で囲んだことくらい。Roomのところで説明し忘れたのですけど、<code>database.withTransaction {}</code>で囲むと処理がアトミックになる（完全にやるか、全くやらないかのどちらかになる）ので便利ですよ。</p>
 <h3 id="splashviewmodel"><code>SplashViewModel</code></h3>
 <p>次は<code>ViewModel</code>です。SplashViewModel.ktを追加して、以下のコードを書きました。</p>
 <div class="sourceCode" id="cb83"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb83-1"><a href="#cb83-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.view_model</span></span>
@@ -3132,7 +3133,7 @@ dependencies {
 <span id="cb85-43"><a href="#cb85-43"></a>&lt;/layout&gt;</span></code></pre></div>
 <p>アイコンと、何をしているのかの説明と、あとは処理に時間がかかるので<code>&lt;ProgressBar&gt;</code>という名前のぐるぐるアイコンですな。これで<code>SpashFragment</code>は完成です。</p>
 <h3 id="mainactivity"><code>MainActivity</code></h3>
-<p>でも、このままだと一回<code>syncDatabase()</code>に成功しちゃうと次からは実行しないので、コードが正しいのかよく分かりません……。なので、<code>menu_navigation.xml</code>に追加したきりすっかり忘れていた<code>&lt;item android:id=&quot;@+id/clearDatabase&quot; android:title=&quot;バス停と路線のデータを再取得&quot; /&gt;</code>のリスナーを作成しましょう。</p>
+<p>でも、このままだと一回<code>syncDatabase()</code>に成功しちゃうと次からは実行しないので、プログラムが正しく動くのかよく分かりません……。なので、<code>menu_navigation.xml</code>に追加したきりすっかり忘れていた<code>&lt;item android:id=&quot;@+id/clearDatabase&quot; android:title=&quot;バス停と路線のデータを再取得&quot; /&gt;</code>のリスナーを作成しましょう。</p>
 <div class="sourceCode" id="cb86"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb86-1"><a href="#cb86-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus</span></span>
 <span id="cb86-2"><a href="#cb86-2"></a></span>
 <span id="cb86-3"><a href="#cb86-3"></a><span class="kw">import</span> <span class="im">android.os.Bundle</span></span>
@@ -3210,11 +3211,10 @@ dependencies {
 <p><code>Repository</code>のメソッドを呼び出し直しているだけ。あとは、前の章で紹介した手順で<code>ViewModel</code>をDaggerで注入可能にすれば、作業終了です。ぜひ実際に動かしてみてください。ほらこのアプリ、端末を回転させても正常に動作するんです！</p>
 <p>……そんなの当たり前だと思うかもしれませんけど、Androidアプリ開発ではこの程度でも大変だったんだよ。</p>
 <h1 id="recyclerview">RecyclerView</h1>
-<p>と、ここまでいろいろ作ってきましたけど、なのにいまだに画面がスカスカで悲しい……。画面を作りましょう。使うのは、これを覚えるだけで閲覧系のアプリなら大体どうにかなっちゃうという噂の<code>RecyclerView</code>です。</p>
+<p>と、ここまでいろいろ作ってきましたけど、なのにいまだに画面がスカスカで悲しい……。画面を作りましょう。使う道具は、これを覚えるだけで閲覧系のアプリなら大体どうにかなっちゃうという噂の<code>RecyclerView</code>です。</p>
 <h2 id="リサイクル">リサイクル？</h2>
 <p><code>RecyclerView</code>は、スクロール可能なリストを作成するGUIウィジェットです。特徴は大規模なデータ・セットに対応可能なこと（大は小を兼ねるので、小さなデータ・セットで使っても特に問題はありませんけど）。</p>
-<p>で、この「大規模」という点が、<code>RecyclerView</code>という名前つながります。Androidの画面は<code>View</code>（本稿でも、文字を表示するための<code>TextView</code>とかを使いましたよね？）で構成されるので、リストの各行も<code>View</code>で構成されます。画面を上にスクロールすると、上の行が画面の外側に消えて下に新しい行が表示されるわけですが、その際に画面の外側に消えた行の<code>View</code>をどうしましょうか？　放っておくとメモリに負荷がかかるし、ガベージ・コレクションの際にはCPUに負荷がかかっちゃう。だから、下から出てくる新しい行の<code>View</code>としてリサイクルしたい。これを自動でやってくれるのが<code>RecyclerView</code>というわけ。</p>
-<p>実装の詳細で名前を決めるのは悪いスタイルだとは思うんだけど、でも、<code>ListView</code>って名前はすでに使われていたし、<code>ListView</code>と<code>RecyclerView</code>の一番大きな違いはリサイクルするところなんだしね……。</p>
+<p>で、この「大規模」という点が、<code>RecyclerView</code>という名前つながります。Androidの画面は<code>View</code>（本稿でも、文字を表示するための<code>TextView</code>とかを使いましたよね？）で構成されるので、リストの各行も<code>View</code>で構成されます。画面を上にスクロールすると、上の行が画面の外側に消えて下に新しい行が表示されるわけですけど、その画面の外側に消えた行の<code>View</code>をどうしましょうか？　放っておくとメモリに負荷がかかるし、ガベージ・コレクションの際にはCPUに負荷がかかっちゃう。だから、下から出てくる新しい行の<code>View</code>としてリサイクルしたい。これを自動でやってくれるのが<code>RecyclerView</code>というわけ。</p>
 <h2 id="viewholderとdiffcallbackとadapterを作る"><code>ViewHolder</code>と<code>DiffCallback</code>とAdapterを作る</h2>
 <p>リストを表示する場合、リストそのものを管理する人とリストの要素を管理する人を分けた方が楽になります。<code>List&lt;MyClass&gt;</code>って分割するのと一緒。<code>RecyclerView</code>の場合、リストの要素は<code>ViewHolder</code>で管理します。で、<code>ViewHolder</code>と<code>RecyclerView</code>を繋げるのが<code>ListAdapter</code>。まずはこの<code>ViewHolder</code>の説明から。</p>
 <p><code>RecyclerView</code>は<code>View</code>をリサイクルするので、これまでは会社の前のバス停を表示していた<code>View</code>に対して、これからは私のアパートの近くのバス停を表示するように指示できなければなりません。これは、前に説明したデータ・バインディングで実現すれば簡単でしょう。レイアウトのXMLの<code>&lt;data&gt;</code>タグの中身を変えちゃえばいいんですからね。</p>
@@ -3246,7 +3246,7 @@ dependencies {
 <span id="cb88-25"><a href="#cb88-25"></a>    <span class="kw">&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;</span></span>
 <span id="cb88-26"><a href="#cb88-26"></a></span>
 <span id="cb88-27"><a href="#cb88-27"></a><span class="kw">&lt;/layout&gt;</span></span></code></pre></div>
-<p><code>&lt;data&gt;</code>タグの中の<code>item</code>の値を変更することで、<code>ViewHolder</code>のリサイクルを実現するわけですな。<code>MaterialButton</code>はAndroidの標準のデザイン・ガイドラインである<a href="https://material.io/">マテリアル・デザイン</a>のボタンを実現するボタンで、見た目がかっこいい上に<code>style</code>を指定するだけで見た目を大きく変えられます。今回は、背景がないTextButtonにしました。</p>
+<p><code>&lt;data&gt;</code>タグの中の<code>item</code>の値を変更することで、<code>ViewHolder</code>のリサイクルを実現するわけですな。<code>&lt;com.google.android.material.button.MaterialButton&gt;</code>はAndroidの標準のデザイン・ガイドラインである<a href="https://material.io/">マテリアル・デザイン</a>のボタンを実現するボタンで、見た目がかっこいい上に<code>style</code>を指定するだけで見た目を大きく変えられます。今回は、背景がなくて文字だけの<code>@style/Widget.MaterialComponents.Button.TextButton</code>にしました。</p>
 <p>このレイアウトを使用する<code>ViewHolder</code>はこんな感じ。</p>
 <div class="sourceCode" id="cb89"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb89-1"><a href="#cb89-1"></a><span class="kw">class</span> ViewHolder(<span class="kw">private</span> <span class="kw">val</span> <span class="va">binding</span>: <span class="dt">ListItemBusStopBinding</span>): <span class="dt">RecyclerView</span>.<span class="dt">ViewHolder</span>(<span class="va">binding</span>.<span class="va">root</span>) {</span>
 <span id="cb89-2"><a href="#cb89-2"></a>    <span class="kw">fun</span> <span class="fu">bind</span>(<span class="va">item</span>: <span class="dt">BusStop</span>) {</span>
@@ -3258,8 +3258,8 @@ dependencies {
 <span id="cb89-8"><a href="#cb89-8"></a>        }</span>
 <span id="cb89-9"><a href="#cb89-9"></a>    }</span>
 <span id="cb89-10"><a href="#cb89-10"></a>}</span></code></pre></div>
-<p><code>bind()</code>メソッドは、<code>ViewHolder</code>にデータを設定するためのメソッドです（このメソッドを呼び出す部分は、<code>ListAdapter</code>で作ります）。<code>&lt;data&gt;</code>タグの<code>item</code>を変更して、<code>executePendingBindings()</code>でデータ・バインディングを強制的に実行させて、あと、リスナーを再設定しています。</p>
-<p>でもちょっと待って。リストが変更された場合のことを考えてみましょう。たとえば最後に1行追加された場合は、残りの行は何もしなくてもよいはず。でも、今回のようにデータベースからデータを取得する場合は、データの変更があったので再取得すると異なるインスタンスになってしまう。以前表示していた<code>BusStop</code>のインスタンスと今回表示する<code>BusStop</code>のインスタンスは、同じバス停を表している場合であっても異るというわけ。異なるインスタンスなのだからもう一度データ・バインディングをやり直しましょうというのは、リソースの無駄遣いなのでやりたくない。あと、<code>RecyclerView.ViewHolder</code>のAPIリファレンスを眺めてみると、リストの中のどの位置なのかを表現する<code>getPosition()</code>というメソッドがありました。他にも、<code>getOldPosition()</code>という位置を移動するアニメーションのためのメソッドも。ということは、<code>ViewHolder</code>はリストの中を上下に移動することが可能なはず。それはそうですよね。最初に一行挿入された場合に、全部を書き直すのは無駄ですもん。</p>
+<p><code>bind()</code>メソッドは、<code>ViewHolder</code>にデータを設定するためのメソッドです（このメソッドを呼び出す部分は<code>ListAdapter</code>で作るのでちょっと待って）。<code>&lt;data&gt;</code>タグの<code>item</code>を変更して、<code>executePendingBindings()</code>でデータ・バインディングを強制的に実行させて、あと、リスナーを再設定しています。</p>
+<p>でもちょっと待って。リストが変更された場合のことを考えてみましょう。たとえば最後に1行追加された場合は、残りの行は何もしなくてもよいはず。でも、今回のようにデータベースからデータを取得する場合は、再取得すると異なるインスタンスになってしまいます。以前表示していた<code>BusStop</code>のインスタンスと今回表示する<code>BusStop</code>のインスタンスは、同じバス停を表している場合であっても異るというわけ。異なるインスタンスなのだからもう一度データ・バインディングをやり直しましょうというのは、リソースの無駄遣いなのでやりたくない。あと、<code>RecyclerView.ViewHolder</code>のAPIリファレンスを眺めてみると、リストの中のどの位置なのかを表現する<code>getPosition()</code>というメソッドがありました。他にも、<code>getOldPosition()</code>という位置を移動するアニメーションのためのメソッドも。ということは、<code>ViewHolder</code>はリストの中を上下に移動することが可能なはず。それはそうですよね。最初に一行挿入された場合に、全部を書き直すのは無駄ですもん。</p>
 <p>というわけで、データの変更が無いから再バインディングは不要と判断したり、異なるインスタンスだけど同じデータを表現しているので上下への移動で対応しようと判断したりするための機能が必要です。これが<code>DiffCallback</code>です。コードは以下に示すとおりで、<code>DiffUtil.ItemCallback</code>を継承して作成します。</p>
 <div class="sourceCode" id="cb90"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb90-1"><a href="#cb90-1"></a><span class="kw">class</span> DiffCallback: <span class="dt">DiffUtil</span>.<span class="dt">ItemCallback</span>&lt;<span class="dt">BusStop</span>&gt;() {</span>
 <span id="cb90-2"><a href="#cb90-2"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">areItemsTheSame</span>(<span class="va">oldItem</span>: <span class="dt">BusStop</span>, <span class="va">newItem</span>: <span class="dt">BusStop</span>) = oldItem.name == newItem.name</span>
@@ -3299,10 +3299,10 @@ dependencies {
 <span id="cb91-30"><a href="#cb91-30"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">onCreateViewHolder</span>(<span class="va">viewGroup</span>: <span class="dt">ViewGroup</span>, <span class="va">viewType</span>: <span class="dt">Int</span>): <span class="dt">ViewHolder</span> = ViewHolder(ListItemBusStopBinding.inflate(LayoutInflater.from(viewGroup.context), viewGroup, <span class="kw">false</span>))</span>
 <span id="cb91-31"><a href="#cb91-31"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">onBindViewHolder</span>(<span class="va">viewHolder</span>: <span class="dt">ViewHolder</span>, <span class="va">position</span>: <span class="dt">Int</span>) = viewHolder.bind(getItem(position))</span>
 <span id="cb91-32"><a href="#cb91-32"></a>}</span></code></pre></div>
-<p>先程作成した<code>ViewHolder</code>と<code>DiffCallback</code>は、管理を簡単にするためにAdapterの中に入れました。Kotlinでは、単純に<code>class</code>の内側に<code>class</code>を作成しただけだと、外側の<code>class</code>の属性やメソッドを参照することはできません。で、<code>ViewHolder</code>では外側のクラスの<code>onBusStopClick</code>を使用したいので、<code>inner class</code>にしました。</p>
-<p>あとは、<code>ViewHolder</code>を作成する<code>onCreateViewHolder()</code>メソッドと、データ・バインディングのときに呼ばれる<code>onBindViewHolder()</code>メソッドを定義するだけです。GitHubのコードを見ていただければ分かるのですけど、Adapterはすべてほぼ同じコードです。コピー＆ペーストして、少しだけ置換すれば完成しちゃうので、一度上のコードを覚えてしまえばとても簡単ですよ。</p>
+<p>先程作成した<code>ViewHolder</code>と<code>DiffCallback</code>は、管理を簡単にするためにAdapterの中に入れました。Kotlinでは、単純に<code>class</code>の内側に<code>class</code>を作成しただけだと、外側の<code>class</code>の属性やメソッドを参照することはできません。で、<code>ViewHolder</code>では外側のクラスの<code>onBusStopClick</code>を使用したかったので、<code>inner class</code>にしました。</p>
+<p>あとは、<code>ViewHolder</code>を作成する<code>onCreateViewHolder()</code>メソッドと、データ・バインディングのときに呼ばれる<code>onBindViewHolder()</code>メソッドを定義するだけです。GitHubのコードを見ていただければ分かるのですけど、Adapterはすべてほぼ同じコードです。コピー＆ペーストして少しだけ置換すれば完成しちゃうので、一度上のコードを覚えてしまえばとても簡単に作れますよ。</p>
 <h2 id="recyclerviewを組み込む">RecyclerViewを組み込む</h2>
-<p>上で作成したバス停をリスト表示するための<code>BusStopAdapter</code>を、<code>DepartureBusStopFragment</code>に組み込みましょう。まずは、レイアウトのXMLです。</p>
+<p>上で作成した<code>BusStopAdapter</code>を使う<code>RecyclerView</code>を、<code>DepartureBusStopFragment</code>に組み込みましょう。まずは、レイアウトのXMLです。</p>
 <div class="sourceCode" id="cb92"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb92-1"><a href="#cb92-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;utf-8&quot;<span class="kw">?&gt;</span></span>
 <span id="cb92-2"><a href="#cb92-2"></a><span class="kw">&lt;layout</span></span>
 <span id="cb92-3"><a href="#cb92-3"></a><span class="ot">    xmlns:android=</span><span class="st">&quot;http://schemas.android.com/apk/res/android&quot;</span></span>
@@ -3325,7 +3325,7 @@ dependencies {
 <span id="cb92-20"><a href="#cb92-20"></a>    <span class="kw">&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;</span></span>
 <span id="cb92-21"><a href="#cb92-21"></a></span>
 <span id="cb92-22"><a href="#cb92-22"></a><span class="kw">&lt;/layout&gt;</span></span></code></pre></div>
-<p><code>android:clipToPadding</code>というのは、パディング範囲を超えた部分を消すかどうかです。なんでこんな指定をしているかというと、これが無いととても不自然なユーザー・インターフェースになってしまうから。マテリアル・デザインではスマートフォンの場合は端から16dpの隙間を空けることになっています。だから、<code>android:padding=&quot;16dp&quot;</code>で隙間を作成しています。でも、上下にスクロールした時にこの16dpの隙間部分を消して真っ白にしてしまうと、表示している内容がどこに消えていったのか分からなくてとても不自然なユーザー・インターフェースになってしまうんですよ。だから<code>android:clipToPadding</code>を敢えて<code>false</code>にして消さないようにして、上方向はApp barの下に、下方向は画面の外に消えていったように見せているわけ。</p>
+<p><code>android:clipToPadding</code>というのは、パディング範囲を超えた部分を消すかどうかです。なんでこんな指定をしているかというと、これが無いととても不自然なユーザー・インターフェースになってしまうから。マテリアル・デザインではスマートフォンの場合は端から16dpの隙間を空けることになっています。だから<code>android:padding=&quot;16dp&quot;</code>で隙間を作成している。でも、上下にスクロールした時にこの16dpの隙間部分を消して真っ白にしてしまうと、表示している内容がどこに消えていったのか分からなくてとても不自然なユーザー・インターフェースになってしまうんですよ。だから<code>android:clipToPadding</code>を敢えて<code>false</code>にして消さないようにして、上方向はApp barの下に、下方向は画面の外に消えていったように見せているわけ。</p>
 <p>あと、<code>app:layoutManager</code>というのは、<code>RecyclerView</code>の要素をどのように表示するかのレイアウトを決めるクラスです。<code>LinearLayoutManager</code>を指定すると、上から下にリスト状に表示されるようになります。</p>
 <p>ここまできたら、BusStopDaoに<code>getObservables()</code>メソッドを、Repositoryに<code>getObservableBusStops()</code>メソッドを追加して、<code>DepartureBusStopViewModel</code>を作成して<code>departureBusStops</code>プロパティを追加してDaggerで挿入できるようにして、で、<code>DepartureBusStopFragment</code>を修正するだけ。コードはこんな感じ。</p>
 <div class="sourceCode" id="cb93"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb93-1"><a href="#cb93-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus</span></span>
@@ -3364,9 +3364,9 @@ dependencies {
 <span id="cb93-34"><a href="#cb93-34"></a>        }.root</span>
 <span id="cb93-35"><a href="#cb93-35"></a>    }</span>
 <span id="cb93-36"><a href="#cb93-36"></a>}</span></code></pre></div>
-<p>レイアウトのXMLに<code>&lt;data&gt;</code>がなかったのは、上のように<code>BusStopAdapter.submitList()</code>をコードでやるため。データが変更になったら<code>submitList()</code>しなおします（今回はデータが変更になることはないけど、変更があり得る場合と無い場合で記述を変えるのと保守性が落ちますから、変更がある場合むけのコードで統一します）。で、バス停がタップされた場合のリスナーに画面遷移をするコードを書いただけ。</p>
+<p>レイアウトのXMLに<code>&lt;data&gt;</code>がなかったのは、上のように<code>BusStopAdapter.submitList()</code>でコード上でやるため。データが変更になったら<code>submitList()</code>し直します（今回はデータが変更になることはないけど、変更があり得る場合と無い場合で記述を変えるのと保守性が落ちるので、変更がある場合向けのコードで統一します）。あとは、バス停がタップされた場合のリスナーに画面遷移をするコードを書いただけ。</p>
 <h2 id="さらに索引用のrecyclerviewを作る">さらに、索引用の<code>RecyclerView</code>を作る</h2>
-<p>うん、これで完成……じゃないんですよ、今回のアプリでは。というのも、バス停の件数があまりに膨大なんです。だから、下の方のバス停を選ぶにはひたすらスクロールしなければならなくて、とても実用にはなりません。というわけで、索引を作りましょう。もう一つ<code>RecyclerView</code>を作って重ねるだけの簡単な作業です。</p>
+<p>うん、これで完成……じゃないんですよ、今回のアプリでは。というのも、バス停の件数があまりに膨大なんです。だから、下の方のバス停を選ぶにはもーひたすらにスクロールしなければならなくて、とても実用にはなりません。実用に耐えられるよう、索引を作りましょう。もう一つ<code>RecyclerView</code>を作って重ねるだけの簡単な作業です。</p>
 <p>list_item_index.xmlを追加します。</p>
 <div class="sourceCode" id="cb94"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb94-1"><a href="#cb94-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;utf-8&quot;<span class="kw">?&gt;</span></span>
 <span id="cb94-2"><a href="#cb94-2"></a><span class="kw">&lt;layout</span></span>
@@ -3407,7 +3407,7 @@ dependencies {
 <span id="cb94-37"><a href="#cb94-37"></a>    <span class="kw">&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;</span></span>
 <span id="cb94-38"><a href="#cb94-38"></a></span>
 <span id="cb94-39"><a href="#cb94-39"></a><span class="kw">&lt;/layout&gt;</span></span></code></pre></div>
-<p>単純に<code>MaterialButton</code>で作ると見た目に変化が無いので混乱しますから、<code>TextView</code>で索引の文字を表示させます。でも<code>TextView</code>だけだとタップしたときの見た目のフィードバックがないので、同じ位置に重なるように<code>MaterialButton</code>も配置します。あと、<code>MaterialButton</code>は<code>android:inset</code>として上下左右に隙間を持っているので、この隙間をなくすために<code>0dp</code>に設定しました。</p>
+<p>単純に<code>MaterialButton</code>で作ると見た目に変化が無くて混乱しますから、<code>TextView</code>で索引の文字を表示させました。でも<code>TextView</code>だけだとタップしたときの見た目のフィードバックがないので、同じ位置に重なるように<code>MaterialButton</code>も配置します。あと、<code>MaterialButton</code>は<code>android:inset</code>として上下左右に隙間を持っているので、この隙間をなくすために<code>0dp</code>に設定しました。</p>
 <p>次に、<code>IndexAdapter</code>を作成します。</p>
 <div class="sourceCode" id="cb95"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb95-1"><a href="#cb95-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.adapter</span></span>
 <span id="cb95-2"><a href="#cb95-2"></a></span>
@@ -3440,8 +3440,8 @@ dependencies {
 <span id="cb95-29"><a href="#cb95-29"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">onCreateViewHolder</span>(<span class="va">viewGroup</span>: <span class="dt">ViewGroup</span>, <span class="va">viewType</span>: <span class="dt">Int</span>): <span class="dt">ViewHolder</span> = ViewHolder(ListItemIndexBinding.inflate(LayoutInflater.from(viewGroup.context), viewGroup, <span class="kw">false</span>))</span>
 <span id="cb95-30"><a href="#cb95-30"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">onBindViewHolder</span>(<span class="va">viewHolder</span>: <span class="dt">IndexAdapter</span>.<span class="va">ViewHolder</span>, <span class="va">position</span>: <span class="dt">Int</span>) = viewHolder.bind(getItem(position))</span>
 <span id="cb95-31"><a href="#cb95-31"></a> }</span></code></pre></div>
-<p>うん、見事なまでに<code>BusStopAdapter</code>とそっくり。コピー＆ペーストで作りました。注意すべきは、索引は<code>Char</code>一文字で属性がないので、<code>areItemsTheSame()</code>が<code>areContentsTheSame()</code>と同じである点くらいです。</p>
-<p>で、索引はどうしましょ？「あ」から「ん」まで全て並べてもよいのですけど、できるだけ短くしたいので、バス停の一覧の頭文字を使うことにしましょう。あと、「か」と「が」が同じになるような考慮もしたい。というわけで、Utility.ktを修正してこんな関数を作成しました。</p>
+<p>うん、見事なまでに<code>BusStopAdapter</code>とそっくり。もちろんコピー＆ペーストで作りました。注意すべきは、索引は<code>Char</code>一文字で属性がないので、<code>areItemsTheSame()</code>と<code>areContentsTheSame()</code>の内容が同じである点くらいです。</p>
+<p>で、索引はどうしましょ？「あ」から「ん」まで全て並べてもよいのですけど、できるだけ短くしたいので、バス停の一覧に含まれる分だけの頭文字を使うことにしましょう。あと、「か」と「が」が同じになるような考慮もしたい。というわけで、Utility.ktを修正してこんな関数を作成しました。</p>
 <div class="sourceCode" id="cb96"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb96-1"><a href="#cb96-1"></a><span class="kw">import</span> <span class="im">com.tail_island.jetbus.model.BusStop</span></span>
 <span id="cb96-2"><a href="#cb96-2"></a></span>
 <span id="cb96-3"><a href="#cb96-3"></a>...</span>
@@ -3464,7 +3464,7 @@ dependencies {
 <span id="cb96-20"><a href="#cb96-20"></a><span class="kw">fun</span> <span class="fu">getBusStopPosition</span>(<span class="va">busStops</span>: <span class="dt">List</span>&lt;<span class="va">BusStop</span>&gt;, <span class="va">index</span>: <span class="dt">Char</span>): <span class="dt">Int</span> {</span>
 <span id="cb96-21"><a href="#cb96-21"></a>    <span class="kw">return</span> busStops.indexOfFirst { busStop -&gt; busStop.phoneticName?.firstOrNull()?.let { convertIndex(it) == index } ?: <span class="kw">false</span> }</span>
 <span id="cb96-22"><a href="#cb96-22"></a>}</span></code></pre></div>
-<p><code>indexConverter</code>という<code>Map</code>を作成して、「ぁ」を「あ」に変換できるようにします。全部の文字をこの<code>Map</code>で変換するのは記述が面倒だったので、<code>convertIndex()</code>関数を作成して、変換が不要な場合はそのまま、そうでなければ<code>indexConverter</code>を使用して変換するようにしました。あとは、<code>List&lt;BusStop&gt;</code>から関数型プログラミングのテクニックでサクッと一覧を作成する<code>getBusStopIndexes()</code>関数と、あとで使用する索引から位置を求める<code>getBusStopPosition()</code>関数です。</p>
+<p><code>indexConverter</code>という<code>Map</code>を作成して、「ぁ」を「あ」に変換できるようにします。全部の文字をこの<code>Map</code>で変換するのは記述が面倒だったので、<code>convertIndex()</code>関数を作成して、変換が不要な場合はそのまま、そうでなければ<code>indexConverter</code>を使用して変換するようにしました。あとは、<code>List&lt;BusStop&gt;</code>から関数型プログラミングのテクニックでサクッと索引一覧を作成する<code>getBusStopIndexes()</code>関数と、あとで使用する索引から位置を求める<code>getBusStopPosition()</code>関数です。</p>
 <p>この<code>getBusStopIndexes()</code>関数を使用して、<code>DepartureBusStopViewModel</code>を完成させます。</p>
 <div class="sourceCode" id="cb97"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb97-1"><a href="#cb97-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.view_model</span></span>
 <span id="cb97-2"><a href="#cb97-2"></a></span>
@@ -3480,7 +3480,7 @@ dependencies {
 <span id="cb97-12"><a href="#cb97-12"></a>        getBusStopIndexes(it)</span>
 <span id="cb97-13"><a href="#cb97-13"></a>    }</span>
 <span id="cb97-14"><a href="#cb97-14"></a>}</span></code></pre></div>
-<p>これで完成、<code>DepartureBusStopFragment</code>に新しい<code>RecyclerView</code>を追加します。レイアウトのXMLはこんな感じ。</p>
+<p><code>DepartureBusStopFragment</code>に新しい<code>RecyclerView</code>を追加します。レイアウトのXMLはこんな感じ。</p>
 <div class="sourceCode" id="cb98"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb98-1"><a href="#cb98-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;utf-8&quot;<span class="kw">?&gt;</span></span>
 <span id="cb98-2"><a href="#cb98-2"></a><span class="kw">&lt;layout</span></span>
 <span id="cb98-3"><a href="#cb98-3"></a><span class="ot">    xmlns:android=</span><span class="st">&quot;http://schemas.android.com/apk/res/android&quot;</span></span>
@@ -3565,7 +3565,7 @@ dependencies {
 <span id="cb99-50"><a href="#cb99-50"></a>        }.root</span>
 <span id="cb99-51"><a href="#cb99-51"></a>    }</span>
 <span id="cb99-52"><a href="#cb99-52"></a>}</span></code></pre></div>
-<p>このコードの中の<code>AcceleratedSmoothScroller</code>というのは、<a href="https://qiita.com/chibatching/items/52d9b73d244eac52d0d4">RecyclerViewの長距離スムーズスクロールをスムーズにする</a>を猿真似して作成した良い感じスクロールさせるためのクラスです。<code>RecylerView</code>のAPIには、指定した場所にスクロールする機能（画面がいきなり切り替わるので使いづらいユーザー・インターフェースになる）と指定した場所までスムーズにスクロールする機能（使いやすいユーザー・インターフェースになるけど、スクロールが終わるまで長時間かかる）しかなくて、これだけだと指定場所までスクロールするという機能がとても作りづらいんです。この問題は、<a href="https://qiita.com/chibatching/items/52d9b73d244eac52d0d4">RecyclerViewの長距離スムーズスクロールをスムーズにする</a>ですべて解決です。ぜひ読んでみてください。なお、今回は少しだけ実装を変えたので、クラス名も少しだけ変更しました。</p>
+<p>このコードの中の<code>AcceleratedSmoothScroller</code>というのは、<a href="https://qiita.com/chibatching/items/52d9b73d244eac52d0d4">RecyclerViewの長距離スムーズスクロールをスムーズにする</a>を猿真似して作成した良い感じスクロールさせるためのクラスです。<code>RecylerView</code>のAPIには、指定した場所にスクロールする機能（画面がいきなり切り替わるので使いづらいユーザー・インターフェースになる）と指定した場所までスムーズにスクロールする機能（使いやすいユーザー・インターフェースになるけど、スクロールが終わるまで長時間かかる）しかなくて、これだけだと指定場所までスクロールするという機能がとても作りづらいんです。この問題は、<a href="https://qiita.com/chibatching/items/52d9b73d244eac52d0d4">RecyclerViewの長距離スムーズスクロールをスムーズにする</a>ですべて解決ですので、ぜひ読んでください。なお、今回は少しだけ実装を変えたので、クラス名も少しだけ変更しました。</p>
 <h2 id="bookmarksfragmentとarrivalbusstopfragmentを同じやり方で作ってbusapproachesfragmentを少しだけ修正する"><code>BookmarksFragment</code>と<code>ArrivalBusStopFragment</code>を同じやり方で作って、<code>BusApproachesFragment</code>を少しだけ修正する</h2>
 <p>あとは、同じやり方で（コピー＆ペーストをやりまくって）<code>BookmarksFragment</code>と<code>ArrivalBusStopFragment</code>を作りましょう。少しだけ工夫したのは、list_item_bookmark.xmlの<code>android:text</code>で<code>String.format()</code>を使用したこと、あと、文字列リソースは<code>@string/id</code>と書けば参照できて、それはデータ・バインディングの中でも変わらないことを証明するために<code>String.format()</code>の中に<code>@string/start_to_end_arrow</code>と書いたことと、ついでだったので文字列をres/values/string.xmlに移動させて、都営バスを思わせる緑色で画面が表示されるようにres/values/colors.xmlを修正したくらい。</p>
 <p>で、このままだとブックマークが一つもないので<code>BookmarksFragment</code>を正しく実装できたか確認できなかったので、<code>BusApproachesFragment</code>にブックマークを追加する機能（<code>BusApproachesViewModel</code>の<code>toggleBookmark()</code>）を追加しました。</p>
@@ -3578,7 +3578,7 @@ dependencies {
 <h2 id="データアクセスオブジェクトを作成する">データ・アクセス・オブジェクトを作成する</h2>
 <p>まずは、バスの接近情報を表示するために必要な情報を取得するデータ・アクセス・オブジェクトを、順を追って作成していきましょう。</p>
 <h3 id="routebusstoppole"><code>RouteBusStopPole</code></h3>
-<p>出発バス停名称と到着バス停名称から<code>Route</code>を取得するところまでは実装済みですので、最初に<code>RouteBusStopPole</code>を考えましょう。<code>RouteBusStopPole</code>は<code>Route</code>と<code>BusStopPole</code>を関連付けるものなのですけど、バスの「接近」情報を表示する本アプリでは、出発バス停以降の<code>RouteBusStopPole</code>の情報は不要でしょう（どれだけ遠ざかったかを表示するプログラムなら、出発バス停以降こそが重要なのでしょうけど）。あと、出発バス停よりも遥かに手前の<code>RouteBusStopPole</code>も不要です。あと3時間でバスが到着する（バスは出発バス停よりも300手前のバス停を出発した）なんて表示されても困りますもんね。私の独断と偏見で、出発バス停の手前10個までを取得の対象としました。</p>
+<p>出発バス停名称と到着バス停名称から<code>Route</code>を取得するところまでは実装済みですので、<code>RouteBusStopPole</code>から考えましょう。<code>RouteBusStopPole</code>は<code>Route</code>と<code>BusStopPole</code>を関連付けるものなのですけど、バスの「接近」情報を表示する本アプリでは、出発バス停以降の<code>RouteBusStopPole</code>の情報は不要です（どれだけ遠ざかったかを表示するプログラムなら、出発バス停以降こそが重要なのでしょうけど）。あと、出発バス停よりも遥かに手前の<code>RouteBusStopPole</code>も不要です。あと3時間でバスが到着する（バスは出発バス停よりも300手前のバス停を出発した）なんて表示されても困りますもんね。私の独断と偏見で、出発バス停の手前10個までを取得の対象としました。</p>
 <div class="sourceCode" id="cb100"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb100-1"><a href="#cb100-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
 <span id="cb100-2"><a href="#cb100-2"></a></span>
 <span id="cb100-3"><a href="#cb100-3"></a><span class="kw">import</span> <span class="im">androidx.lifecycle.LiveData</span></span>
@@ -3664,7 +3664,7 @@ dependencies {
 <span id="cb102-33"><a href="#cb102-33"></a><span class="st">        &quot;&quot;&quot;</span>)</span>
 <span id="cb102-34"><a href="#cb102-34"></a>    <span class="kw">fun</span> <span class="fu">getObservablesByRouteIdsAndDepartureBusStopName</span>(<span class="va">routeIds</span>: <span class="dt">List</span>&lt;<span class="va">String</span>&gt;, <span class="va">departureBusStopName</span>: <span class="dt">String</span>, <span class="va">now</span>: <span class="dt">Int</span>): <span class="dt">LiveData</span>&lt;<span class="dt">List</span>&lt;<span class="dt">TimeTable</span>&gt;&gt;</span>
 <span id="cb102-35"><a href="#cb102-35"></a>}</span></code></pre></div>
-<p>ある特定の条件（これがwindow）下での集約や分析を実現するSQLのwindow関数を使えば簡単に作れそうなのですけど、残念なことにSQLite3がwindow関数をサポートするのはバージョン3.25.0からで、2020年3月現在で最新のAndroid 10であってもSQLite3のバージョンは3.22.0です……。だから、上のSQLでは<code>NOT EXISTS</code>の中の副問合せで代用しました。副問合せの外側の行よりも到着バス停に関連付けられた<code>TimeTableDetail.arrival</code>から現在時刻を引いた結果の絶対値が小さいものが存在しない（<code>NOT EXISTS</code>）なので、結果として到着バス停に関連付けられた<code>TimeTableDetail.arrival</code>が現在時刻に最も近いものがSELECTされます。……ま、現在時刻との差が同じものが複数ある場合に、全部取得されちゃうんだけどな。なので、<code>INNER JOIN</code>でもう一回副問合せして、<code>GROUP BY</code>して最小（順序が付いて一つに絞れるなら何でもいいので、最大とかでも大丈夫）の<code>TimeTable.id</code>と<code>INNER JOIN</code>しています。ちょっと（かなり）複雑なSQL文ですけど、でもたぶん、普通のプログラミング言語でループを回してデータを取得する処理を書くよりは楽だと思いますよ。O/Rマッピング・ツールがなかった頃にプログラムを書いていた私のようなおっさんに頼めば、この程度のSQLは大喜びで書いてくれるはずです。なんとかとハサミは使いようですよ。職場のおっさんを大事にしてくださいね。</p>
+<p>ある特定の条件下での集約や分析を実現するSQLのwindow関数を使えば簡単に作れそうなのですけど、残念なことにSQLite3がwindow関数をサポートしたのはバージョン3.25.0で、2020年3月現在で最新のAndroid 10であってもSQLite3のバージョンは3.22.0です……。だから、上のSQLでは<code>NOT EXISTS</code>の中の副問合せで代用しました。副問合せの外側の行よりも到着バス停に関連付けられた<code>TimeTableDetail.arrival</code>から現在時刻を引いた結果の絶対値が小さいものが存在しない（<code>NOT EXISTS</code>）なので、結果として到着バス停に関連付けられた<code>TimeTableDetail.arrival</code>が現在時刻に最も近いものがSELECTされます。……現在時刻との差が同じものが複数ある場合に、全部取得されちゃうんだけどな。なので、<code>INNER JOIN</code>でもう一回副問合せして、<code>GROUP BY</code>して最小（順序が付いて一つに絞れるなら何でもいいので、最大とかでも大丈夫）の<code>TimeTable.id</code>と<code>INNER JOIN</code>しています。ちょっと（かなり）複雑なSQL文ですけど、でもたぶん、普通のプログラミング言語でループを回してデータを取得する処理を書くよりは楽だと思いますよ。O/Rマッピング・ツールがなかった頃にプログラムを書いていた私のようなおっさんに頼めば、この程度のSQLは大喜びで一瞬で書いてくれるはずです。おっさんとハサミは使いようですよ。職場のおっさんを大事にしましょう。</p>
 <h3 id="timetabledetail"><code>TimeTableDetail</code></h3>
 <p><code>TimeTable</code>を取得できたので、<code>TimeTableDetail</code>も取得します。<code>RouteBusStopPole</code>のときと同じで、出発バス停以降の<code>TimeTableDetail</code>も、出発バス停のはるか手前の<code>TimeTableDetail</code>も不要……なのですけど、同じ条件式を2回書くのは大変なので、取得済みの<code>BusStopPole</code>を活用することにしましょう。</p>
 <div class="sourceCode" id="cb103"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb103-1"><a href="#cb103-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
@@ -3683,7 +3683,7 @@ dependencies {
 <span id="cb103-14"><a href="#cb103-14"></a>}</span></code></pre></div>
 <p>うん、SQL便利。これでデータ・アクセス・オブジェクトの作成は終了です。</p>
 <h2 id="repositoryを作成する"><code>Repository</code>を作成する</h2>
-<p><code>Repository</code>でデータベースとWebサービスの差異を吸収して統一した操作を実現する……なんてのはまず無理。トランザクションがある環境とない環境で、同じ操作なんて無理なんだよ（と私は思います）！　とはいえ、<code>Repository</code>というレイヤーを作っておくとやはり便利です。以前作成した<code>syncDatabase()</code>メソッドのようなデータベースとWebサービスの複雑な呼び出しを隠蔽するメソッドを置けますし、データ・アクセス・オブジェクトのメソッドがへっぽこだったりWebサービスの仕様が物足りなかったりする場合を補う処理を書けますから。</p>
+<p><code>Repository</code>でデータベースとWebサービスの差異を吸収して統一した操作を実現する……のが理想だけど、実際はまず無理！　トランザクションがある環境とない環境で同じ操作なんて無理なんだよ（と私は思います）！　とはいえ、<code>Repository</code>というレイヤーはやはり便利です。以前作成した<code>syncDatabase()</code>メソッドのようなデータベースとWebサービスの複雑な呼び出しを隠蔽するメソッドを置けますし、データ・アクセス・オブジェクトのメソッドがへっぽこだったりWebサービスの仕様が物足りなかったりする場合を補う処理を書けますから。</p>
 <p>というわけで、作成した<code>Repository</code>は以下の通り。</p>
 <div class="sourceCode" id="cb104"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb104-1"><a href="#cb104-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
 <span id="cb104-2"><a href="#cb104-2"></a></span>
@@ -3783,7 +3783,7 @@ dependencies {
 <span id="cb104-96"><a href="#cb104-96"></a>    <span class="kw">fun</span> <span class="fu">getObservableTimeTableDetailsByTimeTablesAndBusStopPoles</span>(<span class="va">timeTables</span>: <span class="dt">Iterable</span>&lt;<span class="va">TimeTable</span>&gt;, <span class="va">busStopPoles</span>: <span class="dt">Iterable</span>&lt;<span class="va">BusStopPole</span>&gt;) = database.getTimeTableDetailDao().getObservablesByTimeTableIdsAndBusStopPoleIds(timeTables.map { it.id }, busStopPoles.map { it.id })</span>
 <span id="cb104-97"><a href="#cb104-97"></a>}</span></code></pre></div>
 <p><code>syncTimeTables()</code>は<code>syncDatabase()</code>の外側にループがもう一つ付いただけ。これで、<code>TimeTable</code>と<code>TimeTableDetail</code>をデータベースにキャッシュできるようになりました。<code>clearBookmarks()</code>はバス停が廃止された場合にブックマークの削除ができなくなっちゃうじゃんと考えてこっそり追加した[ブックマークを全て削除]メニュー向けのメソッド、<code>toggleBookmark()</code>は前の章で作成した（けど説明をし忘れた）ブックマークを設定したり解除したりするためのメソッドです。</p>
-<p>重要なのはここから。<code>getBuses()</code>はWebサービスを呼び出しているのですけど、このWebサービスって<code>Route</code>のバスを全て返すんですよ。で、データ・アクセス・オブジェクトのところで何度も考えたように、出発バス停以降を走っているバスや出発バス停のはるか手前を走っているバスの情報は不要です。なので、不要な情報を削除する処理をこのメソッドの中に入れています。出発バス停を出発したバスを除外するところが格好悪いコードになっていますけど、ご容赦ください。</p>
+<p>重要なのはここから。<code>getBuses()</code>はWebサービスを呼び出しているのですけど、このWebサービスって<code>Route</code>のバスを全て返すんですよ。で、データ・アクセス・オブジェクトのところで何度も考えたように、出発バス停以降を走っているバスや出発バス停のはるか手前を走っているバスの情報は不要。なので、不要な情報を削除する処理をこのメソッドの中に入れています。出発バス停を出発したバスを除外するところが格好悪いコードになっていますけど、ご容赦ください。</p>
 <p>あと、たとえば<code>BusStopPoleDao.getObservablesByIds()</code>ではIDの集合が引数になっていたわけですけど、それだと呼び出しづらいので、<code>BusStopPoleDao.getObservablesByIds()</code>をラップする<code>getObservableBusStopPolesByRouteBusStopPoles()</code>は<code>RouteBusStopPole</code>の集合を引数に呼び出せるようにしたりしています。<code>getObservableRouteBusStopPolesByRoutes()</code>や<code>getObservableTimeTableDetailsByTimeTablesAndBusStopPoles()</code>も同様。<code>getObservableTimeTablesByRoutesAndDepartureBusStop()</code>では、それにくわええて現在時刻の引数を生成しています。</p>
 <p>うん、<code>Repository</code>を作っておいて良かった。これなら<code>ViewModel</code>の作成は簡単でしょう。</p>
 <h2 id="viewmodelを作成する">ViewModelを作成する</h2>
@@ -3985,8 +3985,8 @@ dependencies {
 <span id="cb105-195"><a href="#cb105-195"></a>    }</span>
 <span id="cb105-196"><a href="#cb105-196"></a>}</span></code></pre></div>
 <p>うん、面倒くさかった……。でも、<code>departureBusStopName</code>と<code>arrivalBusStopName</code>、<code>bookmark</code>、<code>routes</code>、<code>routeBusStopPoles</code>、<code>busStopPoles</code>、<code>timeTableDetails</code>については、これまでに説明したやり方をそのまま繰り返しただけなので簡単です。</p>
-<p>問題は<code>timeTables</code>プロパティと<code>buses</code>プロパティ、<code>busApproaches</code>プロパティです。<code>TimeTable</code>は<code>Repository</code>の<code>syncTimeTables()</code>メソッドを実行しないとデータベースは空なので、だからどこかで<code>syncTimeTables()</code>を呼ばなければなりません。<code>buses</code>はWebサービスから取得する値で、自分で値を定期的に更新しなければなりません。バスの接近情報そのものである<code>busApproaches</code>は、全ての情報を手作りしなければなりません……。</p>
-<p>というわけで、まずは<code>timeTables</code>プロパティから。<code>syncTimeTables()</code>を呼ぶのに一番良いタイミングは<code>routes</code>プロパティと<code>departureBusStopName</code>プロパティの両方に値が設定された時なので、<code>MediatorLiveData&lt;List&lt;TimeTable&gt;&gt;().apply { ... }</code>の中に<code>syncTimeTables()</code>を呼び出す処理を入れたい。値を取得する処理の中に更新処理を入れるのは目的違いな気もするけど、他に適当な場所が無いから今回は我慢。で、syncTimeTables()はコルーチンで呼び出さなければならないので<code>viewModelScope.launch { ... }</code>して呼び出します。今回は<code>routes</code>も<code>departureBusStopName</code>も変更がないので実は考慮しなくても動作するのですけど、念の為に、<code>syncTimeTables()</code>している最中にもう一度<code>viewModelScope.launch { ... }</code>が動いてしまっても二重に処理されないための考慮をしておきたい。というわけで、<code>source</code>と同様に<code>job</code>という変数を作成して、<code>cancelAndJoin()</code>するようにしました。<code>cancelAndJoin()</code>も<code>suspend</code>なメソッドなので、<code>update()</code>全体を<code>viewModelScope.launch { ... }</code>で囲んでいます。これで<code>timeTables</code>プロパティは完成。<code>syncTimeTables()</code>が終わればデータベースが更新されたことがLiveDataで通知されて、結果として<code>timeTables</code>プロパティに値が設定されます。</p>
+<p>問題は<code>timeTables</code>プロパティと<code>buses</code>プロパティ、<code>busApproaches</code>プロパティです。<code>Repository</code>の<code>syncTimeTables()</code>メソッドを実行しないとデータベースは空なので、だからどこかで<code>syncTimeTables()</code>を呼ばなければ<code>timeTables</code>はいつまでも空集合を返します。<code>buses</code>はWebサービスから取得する値で、変更通知が来ませんから自分で値を定期的に更新しなければなりません。バスの接近情報そのものである<code>busApproaches</code>は、全ての情報を手作りしなければなりません……。</p>
+<p>というわけで、まずは<code>timeTables</code>プロパティから。<code>syncTimeTables()</code>を呼ぶのに一番良いタイミングは<code>routes</code>プロパティと<code>departureBusStopName</code>プロパティの両方に値が設定された時なので、<code>MediatorLiveData&lt;List&lt;TimeTable&gt;&gt;().apply { ... }</code>の中に<code>syncTimeTables()</code>を呼び出す処理を入れたい。値を取得する処理の中に更新処理を入れるのは目的違いな気もするけど、他に適当な場所が無いから我慢。で、<code>syncTimeTables()</code>はコルーチンで呼び出さなければならないので<code>viewModelScope.launch { ... }</code>して呼び出します。今回は<code>routes</code>も<code>departureBusStopName</code>も変更がないので実は考慮しなくても動作するのですけど、念の為に、<code>syncTimeTables()</code>している最中にもう一度<code>viewModelScope.launch { ... }</code>が動いてしまっても二重に処理されないための考慮をしておきたい。というわけで、<code>source</code>と同様に<code>job</code>という変数を作成して、<code>cancelAndJoin()</code>するようにしました。<code>cancelAndJoin()</code>も<code>suspend</code>なメソッドなので、<code>update()</code>全体を<code>viewModelScope.launch { ... }</code>で囲んでいます。これで<code>timeTables</code>プロパティは完成。<code>syncTimeTables()</code>が終わればデータベースが更新されたことがLiveDataで通知されて、結果として<code>timeTables</code>プロパティに値が設定されます。</p>
 <p><code>buses</code>プロパティも同じやり方で作りました。こちらは15,000ミリ秒の間隔で繰り返される無限ループです。コルーチンがあると気軽に無限ループが使えて便利ですな。</p>
 <p>最後の<code>busApproaches</code>プロパティはゴリゴリにロジックを書いて実現します。で、説明を忘れていたのですけど、このプロパティを作成する前にバスの接近情報を表現する<code>BusApproach</code>を追加しておきます。</p>
 <div class="sourceCode" id="cb106"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb106-1"><a href="#cb106-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
@@ -3999,8 +3999,7 @@ dependencies {
 <span id="cb106-8"><a href="#cb106-8"></a>    <span class="kw">val</span> <span class="va">leftBusStopName</span>: <span class="dt">String</span></span>
 <span id="cb106-9"><a href="#cb106-9"></a>)</span></code></pre></div>
 <p>何秒後に到着するのかを表現する<code>willArriveAfter</code>プロパティに加えて<code>busStopCount</code>プロパティがあるのは、<code>TimeTable</code>を同期する<code>syncTimeTables()</code>はかなり時間がかかるので、それまでの間はあといくつバス停があるのかで到着時刻を判断していただくためです。と、こんな感じに<code>TimeTable</code>がまだない場合も想定しているので、<code>busApproaches</code>プロパティの中の<code>timeTablesValue</code>と<code>timeTableDetailsValue</code>を設定する部分では、<code>null</code>の場合にリターンする処理が省かれているわけですな。</p>
-<p>さて、<code>busApproaches</code>プロパティでは、<code>buses</code>の要素である<code>Bus</code>単位で<code>BusApproach</code>を作成します。関数型プログラミングの<code>map</code>ですね。</p>
-<p><code>willArriveAfter</code>は、TimeTableDetail（出発バス停から手前10バス停分が入っている）を<code>sortedByDescending()</code>で逆順にソートして、<code>takeWhile</code>で<code>bus.fromBusStopPoleId</code>と異なる間だけ取得します。これで、出発バス停からバスが最後に出発したバス停の次のバス停までを入手できるというわけ。あとは、<code>zipWithNext()</code>でペアを作成して、時刻の差を求めて、合計する。これで、何秒後に到着するのかの情報を取得できました！　関数型プログラミングは本当に楽ちんですな。</p>
+<p>さて、<code>busApproaches</code>プロパティでは、<code>buses</code>の要素である<code>Bus</code>単位で<code>BusApproach</code>を作成します。関数型プログラミングの<code>map</code>ですね。<code>willArriveAfter</code>は、TimeTableDetail（出発バス停から手前10バス停分が入っている）を<code>sortedByDescending()</code>で逆順にソートして、<code>takeWhile</code>で<code>bus.fromBusStopPoleId</code>と異なる間だけ取得します。これで、出発バス停からバスが最後に出発したバス停の次のバス停までを入手できるというわけ。あとは、<code>zipWithNext()</code>でペアを作成して、時刻の差を求めて、合計する。これで、何秒後に到着するのかの情報を取得できました！　関数型プログラミングは本当に楽ちんですな。</p>
 <h2 id="fragmentを作成する">Fragmentを作成する</h2>
 <p>もう終わったも同然。機械作業でRecyclerViewを組み込みます。</p>
 <p>まずはlist_item_bus_approaches.xml。</p>
@@ -4066,7 +4065,7 @@ dependencies {
 <span id="cb107-60"><a href="#cb107-60"></a>    <span class="kw">&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;</span></span>
 <span id="cb107-61"><a href="#cb107-61"></a></span>
 <span id="cb107-62"><a href="#cb107-62"></a><span class="kw">&lt;/layout&gt;</span></span></code></pre></div>
-<p>少しだけ見た目にこだわってみました。Google様が用意してくださっているアイコンの中からバスのアイコンを探し出して<code>ic_bus</code>として登録して<code>&lt;ImageView&gt;</code>タグで表示しています。<code>routeNameTextView</code>で路線名を、<code>leftBusStopNameTextView</code>でどのバス停を出たところなのか、<code>willArriveAfterTextView</code>であと何分で到着するのかを表示します。あ、最後に追加してある<code>&lt;View&gt;</code>タグは、強制的に隙間を作るためのものです……。</p>
+<p>少しだけ見た目にこだわってみました。Google様が用意してくださっているアイコンの中からバスのアイコンを探し出して<code>ic_bus</code>を登録して<code>&lt;ImageView&gt;</code>タグで表示しています。<code>routeNameTextView</code>で路線名を、<code>leftBusStopNameTextView</code>でどのバス停を出たところなのか、<code>willArriveAfterTextView</code>であと何分で到着するのかを表示します。あ、最後に追加してある<code>&lt;View&gt;</code>タグは、強制的に隙間を作るためのものです……。</p>
 <p><code>BusApproachAdapter</code>はいつもどおりのコピー＆ペースト。</p>
 <div class="sourceCode" id="cb108"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb108-1"><a href="#cb108-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.adapter</span></span>
 <span id="cb108-2"><a href="#cb108-2"></a></span>
@@ -4208,11 +4207,12 @@ dependencies {
 <span id="cb110-44"><a href="#cb110-44"></a>        }.root</span>
 <span id="cb110-45"><a href="#cb110-45"></a>    }</span>
 <span id="cb110-46"><a href="#cb110-46"></a>}</span></code></pre></div>
+<p>これだけで、はい。動きました！</p>
 <p>動画</p>
-<p>はい。動きました！　これで通勤が楽になるのでもう少しサラリーマンを続けられそうです。素晴らしい！</p>
+<p>これで通勤が楽になるのでもう少しサラリーマンを続けられそうです。素晴らしい！</p>
 <h1 id="asset-studioでアイコンを作れば完成">Asset Studioでアイコンを作れば完成！</h1>
-<p>でも、まだ不十分。アイコンを作らないとね。Android Studioのメニューから[File] - [New] - [Image Asset]を選んで、アプリのアイコンを作成します。</p>
-<p>まぁ、私に絵心はないので、Android Studioのアイコンを流用するだけなんですけどな。[Source Asset]の[Asset Type]の[Clip Art]ラジオ・ボタンをクリックすると、Android Studioが提供するアイコンから選べるようになります。</p>
+<p>でも、まだ不十分。アイコンを作らないとね。Android Studioのメニューから[File] - [New] - [Image Asset]を選んで、アプリのアイコンを作成しましょう。</p>
+<p>私は絵心がないので、Android StudioのClip Artを流用して作るんだけどな。[Source Asset]の[Asset Type]の[Clip Art]ラジオ・ボタンをクリックすると、Android Studioが提供するアイコンから選べるようになります。</p>
 <p>絵</p>
 <p>Clip Artをクリックして、バスのアイコンをクリックします。</p>
 <p>絵</p>
