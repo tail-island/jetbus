@@ -1142,7 +1142,7 @@ getWebServiceResultBody { webService.busroutePattern(consumerKey) }?.let { busro
 
 これで本当に全て完了。実行してみましょう。`Log`で出力した結果は、Android Studioの[Logcat]ビューで見ることができます。
 
-絵
+図
 
 うん、正しくデータを取れていますね。Retrofit2ならWebサービス呼び出しはとても楽チン。
 
@@ -1170,7 +1170,7 @@ getWebServiceResultBody { webService.busroutePattern(consumerKey) }?.let { busro
 
 と、他のO/Rマッピング・ツール経験者への言い訳が終わったところで、作業に入りましょう。まずは、データ構造の設計です。私は設計文書を書かないでいきなりコードを書き出すタイプの人間ですけど、そんな私でもプログラミング前にデータ構造だけは設計します。ER図かUMLのクラス図を描くだけですけどね。こんなの。
 
-絵
+図
 
 今回はER図にしてみました。手書きのなぐり書きですけど、設計はこれで十分。だって、これでアプリが機能を提供できるかを確認できますから。試しにやってみましょう。到着バス停を指定する画面を作れるか、確認してみます。
 
@@ -1465,7 +1465,7 @@ override fun onStart() {
 
 実行してみます。ログを調べてみると……。
 
-絵
+図
 
 はい。成功です。Room簡単ですな。
 
@@ -1475,11 +1475,11 @@ override fun onStart() {
 
 スマートフォン上に生成されたデータベースのファイルは、AndroidStudioを使用してダウンロードする事ができます。Android Studioで[Device File Explorer]を開いて、data/data/com.tail_island.jetbus/databases」を開くと、その下に「jetbus.db」というファイルがあります。これ、SQLite3のファイルなんですよ。このファイルを右クリックして、[Save As...]メニューでローカルに保存します。
 
-絵
+図
 
 ダウンロードしたデータベースのファイルの中を見て、正しく動作したのかを確認してみます。sqlite3コマンドでデータベースを開いて`SELECT * FROM BusStop LIMIT 10;`を実行して、はい、たしかにバス停が保存されています。この章の前で書いた、出発バス停名と到着バス停名から`Route`を取得するSQLも実行してみます。うん、上りか下りなのかの判別まで含めてうまく行っています。やっぱり、Room簡単ですな。
 
-絵
+図
 
 # [Dagger](https://github.com/tail-island/jetbus/tree/dagger)
 
@@ -1796,7 +1796,7 @@ Android Jetpackでは、MVVMアーキテクチャを使うことが推奨され�
 
 で、このAltoってのは当時にしてはものすごく先進的なコンピューターで、マウスがついていてGUI（Graphical User Interface）を持っていました。もちろん世界初です。この世界初のGUIをどうにかしていい感じに開発できないかなぁと考えて作られたのが、MVCアーキテクチャなんです。
 
-絵
+図
 
 Controllerは入力機器（マウスとかキーボードとか）からの入力を監視し、マウス・クリックとかキーボードのAが押されたとかのイベントをもとに、Modelというデータとデータ操作の手続きを管理するオブジェクトにメッセージを送り（メソッドを呼び出し）ます。Modelのデータが変更されたことはViewに通知され（Observerパターン）、通知を受け取ったViewは自分自身を置き換えて出力する。以上がMVCアーキテクチャなんです。
 
@@ -1812,7 +1812,7 @@ WebアプリケーションのMVCアーキテクチャはSmalltalkのMVCとは*�
 
 MVVMアーキテクチャというのは、.NET Framework 3.0のWPF（Windows Presentation Foundation）やSilverlightのために考案されたアーキテクチャです。理屈の上ではModelとViewだけで良さそうなのですけど、WPFやSilverlightではXAMLというViewをXMLで定義する言語を持っていて、この言語はとても高機能で素晴らしいのですけど、XAMLだけでViewを作成した場合は、Model側にViewのためのコードを書く必要がありました。これではModelとViewに分割した意味がありませんから、間にViewModelを挟んで、Model-View-ViewModelとなりました。MVVMアーキテクチャでは、メソッドの呼び出しは片方向（View→ViewModel→Model）だけで、逆の方向は変更の通知で情報を伝えることになっています（ModelとViewModelの間は返り値でもOK）。
 
-絵
+図
 
 さて、ViewをレイアウトのXMLとソース・コードの合わせ技で実装するAndroidアプリ開発ではViewModelは不要に感じられるのですけど、AndroidのViewである`Activity`や`Fragment`には状態を持てないという別の制約がありました。このViewの状態を管理するために、ViewModelを使用するというわけ。必要に迫られて仕方なく、という感じのアーキテクチャなんですな。
 
@@ -1820,7 +1820,7 @@ MVVMアーキテクチャというのは、.NET Framework 3.0のWPF（Windows Pr
 
 Android Jetpackでは、もう一つ層を追加することを提案しています。それがRepositoryです。
 
-絵
+図
 
 Androidが動作するスマートフォンやタブレット、ウェアラブル・デバイスは、インターネットとの親和性が高いデバイスです。だから、我々が作成するアプリもインターネットと頻繁に通信する可能性が高い。しかもローカルのファイルやデータベースだって使用するわけで、だから、モデルはWebサービスに基づく場合とデータベースやファイルに基づく場合がありえます。これらがバラバラのままだと管理が大変になってしまうので、Repositoryという層を追加して一本化してViewModelはRepositoryだけに依存しましょうという感じ。
 
@@ -4443,19 +4443,19 @@ class BusApproachesFragment: Fragment() {
 
 私は絵心がないので、Android StudioのClip Artを流用して作るんだけどな。[Source Asset]の[Asset Type]の[Clip Art]ラジオ・ボタンをクリックすると、Android Studioが提供するアイコンから選べるようになります。
 
-絵
+図
 
 Clip Artをクリックして、バスのアイコンをクリックします。
 
-絵
+図
 
 色を設定します。今回は真っ白にしたいので、「FFFFFF」を入力します。
 
-絵
+図
 
 背景の絵を考えるのも面倒でしたので、単色でやりましょう。[Background Layer]タブを選択して、Colorをクリックします。背景色は、アプリの`colorPrimaryDark`に設定した色の「006428」です。この色は[Color Tool](https://material.io/resources/color/#!/?view.left=0&view.right=1)で作成しました。Primary Colorに適当な色を設定するだけでPrimary Dark Colorが作成されてとても便利ですよ。
 
-絵
+図
 
 あとは、[Next]ボタンをクリックして[Finish]ボタンをクリックして、ビルドしてインストールして、でも何故かアプリのアイコンが変わりませんでした……。
 
@@ -4465,4 +4465,6 @@ Clip Artをクリックして、バスのアイコンをクリックします。
 
 以上！　これで本当の本当に完了です。いろいろあったけど、Androidアプリの開発って別に難しくない、というか簡単でしょ？
 
-絵
+図
+
+図
