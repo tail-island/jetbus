@@ -4178,7 +4178,9 @@ class BusApproachesViewModel(private val repository: Repository): ViewModel() {
 }
 ~~~
 
-うん、本当に面倒くさかった……。でも、`departureBusStopName`と`arrivalBusStopName`、`bookmark`、`routes`、`routeBusStopPoles`、`busStopPoles`、`timeTableDetails`については、これまでに説明したやり方をそのまま繰り返しただけなので簡単です。
+うん、本当に面倒くさかった……。
+
+でも、`departureBusStopName`と`arrivalBusStopName`、`bookmark`、`routes`、`routeBusStopPoles`、`busStopPoles`、`timeTableDetails`については、これまでに説明したやり方をそのまま繰り返しただけなので簡単です。
 
 問題は`timeTables`プロパティと`buses`プロパティ、`busApproaches`プロパティです。`Repository`の`syncTimeTables()`メソッドを実行しないとデータベースは空なので、だからどこかで`syncTimeTables()`を呼ばなければ`timeTables`はいつまでも空集合を返します。`buses`はWebサービスから取得する値で、変更通知が来ませんから自分で値を定期的に更新しなければなりません。バスの接近情報そのものである`busApproaches`は、全ての情報を手作りしなければなりません……。
 
