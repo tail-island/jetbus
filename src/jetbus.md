@@ -4437,7 +4437,7 @@ class BusApproachesFragment: Fragment() {
 
 これで通勤が楽になるのでもう少しサラリーマンを続けられそうです。素晴らしい！
 
-# Asset Studioでアイコンを作れば完成！
+# Asset Studioでアイコンを作れば、完成！
 
 でも、まだ不十分。アイコンを作らないとね。Android Studioのメニューから[File] - [New] - [Image Asset]を選んで、アプリのアイコンを作成しましょう。
 
