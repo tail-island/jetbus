@@ -767,7 +767,7 @@ dependencies {
     androidTestImplementation &#39;androidx.test.espresso:espresso-core:3.2.0&#39;
 }</code></pre>
 <p>これで、デモ・アプリに必要なJetpackのライブラリの組み込みが完了しました。やっとプログラミングです。最初は、作成してやった感が大きそうな、画面まわりをやってみましょう。</p>
-<h1 id="navigation">Navigation</h1>
+<h1 id="navigation"><a href="https://github.com/tail-island/jetbus/tree/navigation">Navigation</a></h1>
 <p>まぁ、画面といっても、かっこいい画面を作るほうではなく、ダミー画面を使用した画面遷移の実装という、見栄えがあまりよくない部分のプログラミングだけどな。画面<em>遷移</em>なので、Navigationが火を吹きますよ。</p>
 <h2 id="activityとfragmentとnavigation"><code>Activity</code>と<code>Fragment</code>とNavigation</h2>
 <p>さて、例によって歴史の話から。<code>Acticity</code>と<code>Fragment</code>の話、あと、Navigationが作られた経緯です。</p>
@@ -1250,7 +1250,7 @@ dependencies {
 <p>ともあれ、これで作業完了のはず。試してみましょう</p>
 <p>動画</p>
 <p>うん、完璧ですな。Navigationよ今夜もありがとう。Navigationくらいに楽チンな、App barとNavigation drawerをどうにかしてくれるライブラリがJetpackに追加されないかなぁ……。</p>
-<h1 id="retrofit2">Retrofit2</h1>
+<h1 id="retrofit2"><a href="https://github.com/tail-island/jetbus/tree/retrofit2">Retrofit2</a></h1>
 <p>さて、本アプリは<a href="https://www.odpt.org/">公共交通オープンデータセンター</a>が提供してくれるデータが無いと動きようがありませんので、個々の画面の機能を作っていく前に、HTTP通信でWebサーバーからデータを取得する処理を作ってみましょう。残念なことにJetpackにはHTTP通信の機能がありませんので、外部のライブラリであるRetrofit2を使用します。</p>
 <h2 id="retrofit2の組み込み">Retrofit2の組み込み</h2>
 <p>Retrofit2を組み込むために、build.gradelを変更します。</p>
@@ -1493,7 +1493,7 @@ dependencies {
 <p>これで本当に全て完了。実行してみましょう。<code>Log</code>で出力した結果は、Android Studioの[Logcat]ビューで見ることができます。</p>
 <p>絵</p>
 <p>うん、正しくデータを取れていますね。Retrofit2ならWebサービス呼び出しはとても楽チン。</p>
-<h1 id="room">Room</h1>
+<h1 id="room"><a href="https://github.com/tail-island/jetbus/tree/room">Room</a></h1>
 <p>前章で取得した公共交通オープンデータセンターのデータは、取得に時間がかかる上に変更が少ないので、RDBMSにキャッシュするとしていました。というわけで、Android OS内蔵のSQLite3への抽象化レイヤを提供するRoomを使用してみます。そこそこ便利ですよ。</p>
 <h2 id="roomが他のorマッピングツールとは異なるところ">Roomが、他のO/Rマッピング・ツールとは異なるところ</h2>
 <p>さて、O/Rマッピングというと、データを表現するクラスを元にテーブルが生成され（もしくは、テーブル定義からクラスが生成され）、黙っていてもINSERTやUPDATE、DELETEをするメソッドが自動生成され、さらに、条件を指定するSELECTがメソッド呼び出しで実施できるようになって、ついにはテーブルとテーブルの間の関連を辿るメソッドが魔法のように現れる重厚長大なツールを想像するかもしれません。</p>
@@ -1743,7 +1743,7 @@ dependencies {
 <p>絵</p>
 <p>ダウンロードしたデータベースのファイルの中を見て、正しく動作したのかを確認してみます。sqlite3コマンドでデータベースを開いて<code>SELECT * FROM BusStop LIMIT 10;</code>を実行して、はい、たしかにバス停が保存されています。この章の前で書いた、出発バス停名と到着バス停名から<code>Route</code>を取得するSQLも実行してみます。うん、上りか下りなのかの判別まで含めてうまく行っています。やっぱり、Room簡単ですな。</p>
 <p>絵</p>
-<h1 id="dagger">Dagger</h1>
+<h1 id="dagger"><a href="https://github.com/tail-island/jetbus/tree/dagger">Dagger</a></h1>
 <p>このあたりで少し冷静になってこれまでに作成したコードを見直してみると、なんだか、<code>SplashFragment</code>があまりに汚い……。ちょっとWebサービス呼び出してみようかなってたびに、前準備として以下のコード書くなんてやってられないですよね？</p>
 <div class="sourceCode" id="cb40"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb40-1"><a href="#cb40-1"></a><span class="kw">val</span> <span class="va">webService</span> = Retrofit.Builder().apply {</span>
 <span id="cb40-2"><a href="#cb40-2"></a>    baseUrl(<span class="st">&quot;https://api.odpt.org&quot;</span>)</span>
@@ -1964,7 +1964,7 @@ dependencies {
 <span id="cb51-13"><a href="#cb51-13"></a>    }</span></code></pre></div>
 <p><code>requireActivity()</code>で取得した<code>Activity</code>を経由して<code>Application</code>を取得して、そこからDaggerの<code>Component</code>を取得して自分自身を引数に<code>inject()</code>します……って、これ、結局<code>Context</code>の代わりに<code>Application</code>が必要になっただけじゃん！　Daggerで楽するために単純作業に耐えてきたのに、ベネフィットは複数の属性を1行で設定できるようになっただけ？</p>
 <p>こんなの絶対おかしいよ……とどこぞの魔法少女のように絶望したかもしれませんけど、安心してください、幸いなことにDaggerには救いがあります。どう救われるのかは、次に説明するLifecycleの中で！</p>
-<h1 id="lifecycle">Lifecycle</h1>
+<h1 id="lifecycle"><a href="https://github.com/tail-island/jetbus/tree/lifecycle">Lifecycle</a></h1>
 <p>と、かなり強引な引きで始めてみたLifecycleなのですけど、ごめんなさい、やたらと書くことが多いので、Daggerの世界が救われるのはこの章の最後です。</p>
 <p>考えてみれば、Androidアプリの開発が大変だった一番大きな理由は、本稿の最初の方で述べたライフサイクルの管理が大変なためなんです。やたらと複雑な<code>Activity</code>のライフサイクルから、もうとにかく逃げたい。そのために状態をViewModelに分離したというわけ。なので、ViewModelとはなんぞやというアーキテクチャーの話をしなければなりません。あと、<code>Activity</code>や<code>Fragment</code>の状態の変化に合わせて正しく動作するには、データの変更を監視する方式が定まっていないとダメ。そうでなければ、状態の変化に対応するための制御を入れられないですもんね。だから、その手段であるLiveDataについての説明も必要です。で、LiveDataは前述したRoomといい感じに協調して動作するように作られているのでデータベースの話まで戻らなくちゃなりません（Roomで不足しているように感じた機能が、LiveDataと組み合わせると不足していたのではなくて無いことこそが正しいとなるのでとても面白いですよ）。</p>
 <p>覚悟してください。この章はとても長いですよ……。</p>
@@ -2764,7 +2764,7 @@ dependencies {
 <p>では<code>@Singleton</code>アノテーションは何なのかというと、<code>@Singleton</code>をDaggerで生成したい型に付加しておくと、<code>@Provides</code>メソッドを生成するときに<code>@Singleton</code>が自動で付くようになるんです。<code>Repository</code>は何個もいらないですもんね。というわけで、<code>AppModule</code>の<code>@Singleton</code>は生成対象の型に移動……させるという手は、<code>provideContext()</code>や<code>provideConsumerKey()</code>では使えません。書き方が統一できないとミスが発生しそうで怖いのですけど、しょうがないので、念の為に両方に書くという方式にしましょう。<code>AppDatabase</code>と<code>WebService</code>にも<code>@Singleton</code>を付加しておきます。</p>
 <p>というわけで、コンストラクタに<code>@Inject</code>を書くだけで依存性を注入しまくれるんです。注入した依存性を活用できるのは<code>ViewModel</code>経由で呼び出す場合だけですけど、MVVMアーキテクチャを採用してアプリを組むのですから問題とはなりません。ほら、前章からの宿題だったDaggerをどうやって使うかが決まったでしょ？　これ以降は、依存性を注入したいならコンストラクタに<code>@Inject</code>を書くだけでよくなったんですよ。</p>
 <p>まぁ、<code>Activity</code>や<code>Fragment</code>には、依存性を注入する処理を手で書かなければならないんだけどな。</p>
-<h1 id="コルーチン">コルーチン</h1>
+<h1 id="コルーチン"><a href="https://github.com/tail-island/jetbus/tree/coroutines">コルーチン</a></h1>
 <p>もろもろ片付いたのでよーしパパ残りのViewModelも作っちゃうぞーと考えたのですけど、最初の画面の<code>SplashFragment</code>向けのViewModelでいきなり詰まってしまいました。RoomやRetrofit2はメイン・スレッドからは呼び出せないのですけど、スレッドどうしましょ？</p>
 <p>ViewModelの中で<code>thread</code>で別スレッドを生成する……のは前の章で書いておいてアレなのですけど、ダメ、絶対。だって、生成されたスレッドは終了するまで生き残ってしまうんですから。ViewModelを作成してその中でスレッドを生成して、画面遷移して<code>Fragment</code>が終了するとかでViewModelを終了する。この場合でも、スレッドは処理が終わるまで動き続けます。で、もう一度同じ<code>Fragment</code>が表示されたりしてViewModelが生成されると、またスレッドが生成されちゃう。負荷が大きいことに加えて、処理が2重に動いてしまうんですよ。実は前の章までで作成したアプリにはこの問題に起因するバグがあって、<code>SplashFragment</code>でスレッドを生成してデータベースを更新しているときにスマートフォンを回転させたりすると、<code>Activity</code>が再生成されて<code>Fragment</code>が再生成されてデータベースを更新するスレッドがもう一つ動いて、データの不整合ができてアプリが落ちちゃうんですよ。これじゃあ困る。</p>
 <p>だから、スレッドの生存期間をViewModelと同じになるようにしなければなりません。そんなときに便利なのが、途中で処理を中断したり再開できたり、さらには中断したまま途中でやめちゃったりもできる、コルーチンなんです。</p>
@@ -3210,7 +3210,7 @@ dependencies {
 <span id="cb87-8"><a href="#cb87-8"></a>}</span></code></pre></div>
 <p><code>Repository</code>のメソッドを呼び出し直しているだけ。あとは、前の章で紹介した手順で<code>ViewModel</code>をDaggerで注入可能にすれば、作業終了です。ぜひ実際に動かしてみてください。ほらこのアプリ、端末を回転させても正常に動作するんです！</p>
 <p>……そんなの当たり前だと思うかもしれませんけど、Androidアプリ開発ではこの程度でも大変だったんだよ。</p>
-<h1 id="recyclerview">RecyclerView</h1>
+<h1 id="recyclerview"><a href="https://github.com/tail-island/jetbus/tree/recycler-view">RecyclerView</a></h1>
 <p>と、ここまでいろいろ作ってきましたけど、なのにいまだに画面がスカスカで悲しい……。画面を作りましょう。使う道具は、これを覚えるだけで閲覧系のアプリなら大体どうにかなっちゃうという噂の<code>RecyclerView</code>です。</p>
 <h2 id="リサイクル">リサイクル？</h2>
 <p><code>RecyclerView</code>は、スクロール可能なリストを作成するGUIウィジェットです。特徴は大規模なデータ・セットに対応可能なこと（大は小を兼ねるので、小さなデータ・セットで使っても特に問題はありませんけど）。</p>
@@ -3573,7 +3573,7 @@ dependencies {
 <p>ともあれ、大分見た目もしっかりしてきました。</p>
 <p>動画</p>
 <p>あとは、バスの接近情報を表示するだけ。表示そのものはRecyclerViewでできそうだけど、表示するデータはどうしましょうか？</p>
-<h1 id="バス接近情報を表示する">バス接近情報を表示する</h1>
+<h1 id="バス接近情報を表示する"><a href="https://github.com/tail-island/jetbus/tree/bus-approaches">バス接近情報を表示する</a></h1>
 <p>バス接近情報を表示する部分は少し複雑なので、データ・アクセス・オブジェクト、<code>Repository</code>、<code>ViewModel</code>、<code>Fragment</code>の順で説明していきます。</p>
 <h2 id="データアクセスオブジェクトを作成する">データ・アクセス・オブジェクトを作成する</h2>
 <p>まずは、バスの接近情報を表示するために必要な情報を取得するデータ・アクセス・オブジェクトを、順を追って作成していきましょう。</p>
@@ -4210,7 +4210,7 @@ dependencies {
 <p>これだけで、はい。動きました！</p>
 <p>動画</p>
 <p>これで通勤が楽になるのでもう少しサラリーマンを続けられそうです。素晴らしい！</p>
-<h1 id="asset-studioでアイコンを作れば完成">Asset Studioでアイコンを作れば、完成！</h1>
+<h1 id="asset-studioでアイコンを作れば完成"><a href="https://github.com/tail-island/jetbus/tree/master">Asset Studioでアイコンを作れば、完成！</a></h1>
 <p>でも、まだ不十分。アイコンを作らないとね。Android Studioのメニューから[File] - [New] - [Image Asset]を選んで、アプリのアイコンを作成しましょう。</p>
 <p>私は絵心がないので、Android StudioのClip Artを流用して作るんだけどな。[Source Asset]の[Asset Type]の[Clip Art]ラジオ・ボタンをクリックすると、Android Studioが提供するアイコンから選べるようになります。</p>
 <p>絵</p>

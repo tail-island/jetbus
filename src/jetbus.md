@@ -186,7 +186,7 @@ dependencies {
 
 これで、デモ・アプリに必要なJetpackのライブラリの組み込みが完了しました。やっとプログラミングです。最初は、作成してやった感が大きそうな、画面まわりをやってみましょう。
 
-# Navigation
+# [Navigation](https://github.com/tail-island/jetbus/tree/navigation)
 
 まぁ、画面といっても、かっこいい画面を作るほうではなく、ダミー画面を使用した画面遷移の実装という、見栄えがあまりよくない部分のプログラミングだけどな。画面*遷移*なので、Navigationが火を吹きますよ。
 
@@ -815,7 +815,7 @@ NavigationとNavigation drwerとApp barはとても良くできていて、上�
 
 うん、完璧ですな。Navigationよ今夜もありがとう。Navigationくらいに楽チンな、App barとNavigation drawerをどうにかしてくれるライブラリがJetpackに追加されないかなぁ……。
 
-# Retrofit2
+# [Retrofit2](https://github.com/tail-island/jetbus/tree/retrofit2)
 
 さて、本アプリは[公共交通オープンデータセンター](https://www.odpt.org/)が提供してくれるデータが無いと動きようがありませんので、個々の画面の機能を作っていく前に、HTTP通信でWebサーバーからデータを取得する処理を作ってみましょう。残念なことにJetpackにはHTTP通信の機能がありませんので、外部のライブラリであるRetrofit2を使用します。
 
@@ -1146,7 +1146,7 @@ getWebServiceResultBody { webService.busroutePattern(consumerKey) }?.let { busro
 
 うん、正しくデータを取れていますね。Retrofit2ならWebサービス呼び出しはとても楽チン。
 
-# Room
+# [Room](https://github.com/tail-island/jetbus/tree/room)
 
 前章で取得した公共交通オープンデータセンターのデータは、取得に時間がかかる上に変更が少ないので、RDBMSにキャッシュするとしていました。というわけで、Android OS内蔵のSQLite3への抽象化レイヤを提供するRoomを使用してみます。そこそこ便利ですよ。
 
@@ -1481,7 +1481,7 @@ override fun onStart() {
 
 絵
 
-# Dagger
+# [Dagger](https://github.com/tail-island/jetbus/tree/dagger)
 
 このあたりで少し冷静になってこれまでに作成したコードを見直してみると、なんだか、`SplashFragment`があまりに汚い……。ちょっとWebサービス呼び出してみようかなってたびに、前準備として以下のコード書くなんてやってられないですよね？
 
@@ -1776,7 +1776,7 @@ class SplashFragment: Fragment() {
 
 こんなの絶対おかしいよ……とどこぞの魔法少女のように絶望したかもしれませんけど、安心してください、幸いなことにDaggerには救いがあります。どう救われるのかは、次に説明するLifecycleの中で！
 
-# Lifecycle
+# [Lifecycle](https://github.com/tail-island/jetbus/tree/lifecycle)
 
 と、かなり強引な引きで始めてみたLifecycleなのですけど、ごめんなさい、やたらと書くことが多いので、Daggerの世界が救われるのはこの章の最後です。
 
@@ -2749,7 +2749,7 @@ class BusApproachesFragment: Fragment() {
 
 まぁ、`Activity`や`Fragment`には、依存性を注入する処理を手で書かなければならないんだけどな。
 
-# コルーチン
+# [コルーチン](https://github.com/tail-island/jetbus/tree/coroutines)
 
 もろもろ片付いたのでよーしパパ残りのViewModelも作っちゃうぞーと考えたのですけど、最初の画面の`SplashFragment`向けのViewModelでいきなり詰まってしまいました。RoomやRetrofit2はメイン・スレッドからは呼び出せないのですけど、スレッドどうしましょ？
 
@@ -3282,7 +3282,7 @@ class MainViewModel(private val repository: Repository): ViewModel() {
 
 ……そんなの当たり前だと思うかもしれませんけど、Androidアプリ開発ではこの程度でも大変だったんだよ。
 
-# RecyclerView
+# [RecyclerView](https://github.com/tail-island/jetbus/tree/recycler-view)
 
 と、ここまでいろいろ作ってきましたけど、なのにいまだに画面がスカスカで悲しい……。画面を作りましょう。使う道具は、これを覚えるだけで閲覧系のアプリなら大体どうにかなっちゃうという噂の`RecyclerView`です。
 
@@ -3724,7 +3724,7 @@ class DepartureBusStopFragment: Fragment() {
 
 あとは、バスの接近情報を表示するだけ。表示そのものはRecyclerViewでできそうだけど、表示するデータはどうしましょうか？
 
-# バス接近情報を表示する
+# [バス接近情報を表示する](https://github.com/tail-island/jetbus/tree/bus-approaches)
 
 バス接近情報を表示する部分は少し複雑なので、データ・アクセス・オブジェクト、`Repository`、`ViewModel`、`Fragment`の順で説明していきます。
 
@@ -4437,7 +4437,7 @@ class BusApproachesFragment: Fragment() {
 
 これで通勤が楽になるのでもう少しサラリーマンを続けられそうです。素晴らしい！
 
-# Asset Studioでアイコンを作れば、完成！
+# [Asset Studioでアイコンを作れば、完成！](https://github.com/tail-island/jetbus/tree/master)
 
 でも、まだ不十分。アイコンを作らないとね。Android Studioのメニューから[File] - [New] - [Image Asset]を選んで、アプリのアイコンを作成しましょう。
 
