@@ -1217,9 +1217,9 @@ import androidx.room.PrimaryKey
 @Entity
 data class BusStop(
     @PrimaryKey
-    var name: String,
+    var name: String,          // 名称（公共交通オープンデータセンターのデータでは、名称はユニークみたい）
 
-    var phoneticName: String?
+    var phoneticName: String?  // ふりがな
 )
 ~~~
 
@@ -1656,7 +1656,7 @@ class AppModule(private val application: Application) {
         baseUrl("https://api.odpt.org")
         client(
             OkHttpClient.Builder().apply {
-                connectTimeout(180, TimeUnit.SECONDS)
+                connectTimeout(180, TimeUnit.SECONDS)  // ついでだったので、タイムアウト時間を長めに設定しておきます
                 readTimeout(180, TimeUnit.SECONDS)
                 writeTimeout(180, TimeUnit.SECONDS)
             }.build()
@@ -1903,11 +1903,13 @@ import kotlin.concurrent.thread
 class BusApproachesFragment: Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return FragmentBusApproachesBinding.inflate(inflater, container, false).apply {
+            // LiveDataを監視します
             (requireActivity().application as App).departureBusStopName.observe(viewLifecycleOwner, Observer { departureBusStopNameValue ->
                 Log.d("BusApproachesFragment", "departureBusStopName.observe()")
                 departureBusStopNameTextView.text = departureBusStopNameValue
             })
 
+            // テスト用に、別スレッドでLiveDataに値を設定します。
             thread {
                 Thread.sleep(5000)
 
@@ -2080,19 +2082,12 @@ class App: Application() {
 
     val departureBusStopName = MutableLiveData<String>()
 
+    // depatureBusStopNameが変更になったら、arrivalBusStopsを設定します
     val arrivalBusStops = Transformations.switchMap(departureBusStopName) { arrivalBusStopNameValue ->
         database.getBusStopDao().getObservablesByDepartureBusStopName(arrivalBusStopNameValue)
     }
 
-    override fun onCreate() {
-        super.onCreate()
-
-        component = DaggerAppComponent.builder().apply {
-            appModule(AppModule(this@App))
-        }.build()
-
-        component.inject(this)
-    }
+    ...
 }
 ~~~
 
@@ -2249,6 +2244,7 @@ class App: Application() {
         arrivalBusStopsValue[0.until(arrivalBusStopsValue.size).random()].name
     }
 
+    // departureBusStopsやarrivalBusStopsが変更になったら、routesを設定します
     val routes = MediatorLiveData<List<Route>>().apply {
         var source: LiveData<List<Route>>? = null
 
@@ -2500,10 +2496,13 @@ import kotlin.concurrent.thread
 class BusApproachesFragment: Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return FragmentBusApproachesBinding.inflate(inflater, container, false).apply {
+            // FragmentBusApproachesBinding.lifecycleOwnerを設定します
             lifecycleOwner = viewLifecycleOwner
 
+            // FragmentBusApproachesBinding.appを設定します
             app = (requireActivity().application as App)
 
+            // 以下はテスト用なので後で削除します
             thread {
                 Thread.sleep(5000)
 
@@ -2707,6 +2706,7 @@ import kotlin.concurrent.thread
 class BusApproachesFragment: Fragment() {
     @Inject lateinit var viewModelProviderFactory: AppViewModelProvideFactory
 
+    // Dagger経由でViewModelを取得します
     private val viewModel by viewModels<BusApproachesViewModel> { viewModelProviderFactory }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -2796,9 +2796,9 @@ fun useCoroutine() {
     Log.d("xxx", "Main thread id: ${Thread.currentThread().id}")
 
     runBlocking {
-        for (i in 3.downTo(1)) {
+        for (i in 3.downTo(1)) {  // 3, 2, 1の順になります
             launch {
-                delay(i.toLong() * 1000)
+                delay(i.toLong() * 1000)  // i * 1000なので、i == 3のときは3秒、2のときは2秒、1のときは1秒待ちます
                 Log.d("xxx", "${i}: ${Thread.currentThread().id}")
             }
         }
@@ -2864,7 +2864,7 @@ class BusApproachesViewModel(private val repository: Repository): ViewModel() {
 
     fun foo() {
         viewModelScope.launch {
-            while (true) {
+            while (true) {  // 無限ループ
                 delay(1000)
 
                 Log.d("xxx", "viewModelScope")
@@ -3095,7 +3095,7 @@ class SplashViewModel(private val repository: Repository): ViewModel() {
 }
 ~~~
 
-`init {}`には、インスタンスが生成されたときに実行する処理を記述します。本章の最初に書いたように、Webサービスを呼び出してデータベースにキャッシュするコルーチンは、`ViewModel`と同じライフサイクルを持っていて欲しい。だから生成と同時に`viewModelScope.launch {}`しているわけですな。`viewModelScope`で`launch`しているのでViewModelが破棄されればこのコルーチンは終了しますから、終了もバッチリ。アプリがバックグラウンドになればコルーチンが止まるので、他のアプリに迷惑をかけないですし。
+`init {}`には、インスタンスが生成されたときに実行する処理を記述します。Webサービスを呼び出してデータベースにキャッシュするコルーチンは`ViewModel`と同じライフサイクルを持っていて欲しいので、だから生成と同時に`viewModelScope.launch {}`しているわけですな。`viewModelScope`で`launch`しているのでViewModelが破棄されればこのコルーチンは終了しますから、終了もバッチリ。アプリがバックグラウンドになればコルーチンは止まるので、他のアプリに迷惑をかけないですし。
 
 `isSyncDatabaseFinished`プロパティは、`syncDatabase()`が成功したか失敗したかを表現する目的で追加しました。ViewModelは`isSyncDatabaseFinished`を`observe()`して、正常に終了したら次の画面に遷移、そうでなければアプリケーションを終了するとかすればよいわけ。
 
@@ -3227,6 +3227,7 @@ class MainActivity: AppCompatActivity() {
         (application as App).component.inject(this)
 
         binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main).apply {
+            // NavigationViewのメニューが選ばれた場合のリスナーを設定します
             navigationView.setNavigationItemSelectedListener {
                 when (it.itemId) {
                     R.id.clearDatabase -> run {
@@ -3288,7 +3289,7 @@ class MainViewModel(private val repository: Repository): ViewModel() {
 
 ## リサイクル？
 
-`RecyclerView`は、スクロール可能なリストを作成するGUIウィジェットです。特徴は大規模なデータ・セットに対応可能なこと（大は小を兼ねるので、小さなデータ・セットで使っても特に問題はありませんけど）。
+`RecyclerView`は、スクロール可能なリストを作成するGUIウィジェットです。特徴は大規模なデータ・セットに対応可能なこと（大は小を兼ねるので、小さなデータ・セットで使っても問題ないけど）。
 
 で、この「大規模」という点が、`RecyclerView`という名前につながります。Androidの画面は`View`（本稿でも、文字を表示するための`TextView`とかを使いましたよね？）で構成されるので、リストの各行も`View`で構成されます。画面を上にスクロールすると、上の行が画面の外側に消えて下に新しい行が表示されるわけですけど、その画面の外側に消えた行の`View`をどうしましょうか？　放っておくとメモリに負荷がかかるし、ガベージ・コレクションの際にはCPUに負荷がかかっちゃう。だから、下から出てくる新しい行の`View`としてリサイクルしたい。これを自動でやってくれるのが`RecyclerView`というわけ。
 
@@ -3338,7 +3339,7 @@ class MainViewModel(private val repository: Repository): ViewModel() {
 class ViewHolder(private val binding: ListItemBusStopBinding): RecyclerView.ViewHolder(binding.root) {
     fun bind(item: BusStop) {
         binding.item = item
-        binding.executePendingBindings()
+        binding.executePendingBindings()  // データ・バインディングを実行します
 
         binding.busStopButton.setOnClickListener {
             // ここに、バス停がタップされたときの処理を入れる
@@ -3463,6 +3464,7 @@ class DepartureBusStopFragment: Fragment() {
         (requireActivity().application as App).component.inject(this)
 
         return FragmentDepartureBusStopBinding.inflate(inflater, container, false).apply {
+            // RecyclerViewにAdapterを設定します。
             recyclerView.adapter = BusStopAdapter().apply {
                 viewModel.busStops.observe(viewLifecycleOwner, Observer {
                     submitList(it)
@@ -3574,8 +3576,10 @@ import com.tail_island.jetbus.model.BusStop
 
 ...
 
+// 小文字や濁音、撥音、旧字を対応する文字に変換するmapです
 private val indexConverter = "ぁぃぅぇぉがぎぐげござじずぜぞだぢっづでどばぱびぴぶぷべぺぼぽゃゅょゎゐゑゔゕゖ".zip("あいうえおかきくけこさしすせそたちつつてとははひひふふへへほほやゆよわいえうかけ").toMap()
 
+// 小文字や濁音、撥音、旧字を対応する文字に変換します
 fun convertIndex(index: Char): Char {
     return when (index) {
         in '\u30a1'..'\u30fa' -> index - 0x0060
@@ -3585,10 +3589,12 @@ fun convertIndex(index: Char): Char {
     }
 }
 
+// バス停名称の索引の文字の集合を作成します
 fun getBusStopIndexes(busStops: List<BusStop>): List<Char> {
     return busStops.asSequence().map { busStop -> busStop.phoneticName?.firstOrNull() }.filterNotNull().map { convertIndex(it) }.distinct().toList()
 }
 
+// 索引の文字からバス停の一を取得します
 fun getBusStopPosition(busStops: List<BusStop>, index: Char): Int {
     return busStops.indexOfFirst { busStop -> busStop.phoneticName?.firstOrNull()?.let { convertIndex(it) == index } ?: false }
 }
@@ -3696,6 +3702,7 @@ class DepartureBusStopFragment: Fragment() {
                 })
 
                 onIndexClick = {
+                    // バス停のRecyclerViewを、適切な位置までスクロールします
                     recyclerView.layoutManager!!.startSmoothScroll(
                         AcceleratedSmoothScroller(requireContext()).apply {
                             targetPosition = getBusStopPosition(viewModel.departureBusStops.value!!, it)
@@ -4149,6 +4156,7 @@ class BusApproachesViewModel(private val repository: Repository): ViewModel() {
             value = busesValue.map { bus ->
                 BusApproach(
                     bus.id,
+                    // 時刻表から、あと何秒で到着するのかを計算します
                     timeTablesValue?.find { timeTable -> timeTable.routeId == bus.routeId }?.let { timeTable ->
                         timeTableDetailsValue?.filter { it.timeTableId == timeTable.id }?.sortedByDescending { it.order }?.takeWhile { it.busStopPoleId != bus.fromBusStopPoleId }?.zipWithNext()?.map { (next, prev) -> next.arrival - prev.arrival }?.sum()
                     },
@@ -4195,10 +4203,10 @@ package com.tail_island.jetbus.model
 
 data class BusApproach(
     val id: String,
-    val willArriveAfter: Int?,
-    val busStopCount: Int,
-    val routeName: String,
-    val leftBusStopName: String
+    val willArriveAfter: Int?,   // あと何秒で到着するか
+    val busStopCount: Int,       // 出発バス停までのバス停の数
+    val routeName: String,       // 路線の名称
+    val leftBusStopName: String  // バスが最後に出発したバス停の名称
 )
 ~~~
 
@@ -4423,6 +4431,7 @@ class BusApproachesFragment: Fragment() {
 
             recyclerView.adapter = BusApproachAdapter().apply {
                 this@BusApproachesFragment.viewModel.busApproaches.observe(viewLifecycleOwner, Observer {
+                    // データ件数が0件だった場合のViewの可視性を適切に設定します
                     noBusApproachesTextView.visibility = if (it.isEmpty()) { View.VISIBLE } else { View.GONE }
 
                     submitList(it)

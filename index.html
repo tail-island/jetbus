@@ -1537,9 +1537,9 @@ dependencies {
 <span id="cb32-6"><a href="#cb32-6"></a><span class="at">@Entity</span></span>
 <span id="cb32-7"><a href="#cb32-7"></a><span class="kw">data</span> <span class="kw">class</span> BusStop(</span>
 <span id="cb32-8"><a href="#cb32-8"></a>    @<span class="va">PrimaryKey</span></span>
-<span id="cb32-9"><a href="#cb32-9"></a>    <span class="kw">var</span> <span class="va">name</span>: <span class="dt">String</span>,</span>
+<span id="cb32-9"><a href="#cb32-9"></a>    <span class="kw">var</span> <span class="va">name</span>: <span class="dt">String</span>,          // 名称（公共交通オープンデータセンターのデータでは、名称はユニークみたい）</span>
 <span id="cb32-10"><a href="#cb32-10"></a></span>
-<span id="cb32-11"><a href="#cb32-11"></a>    <span class="kw">var</span> <span class="va">phoneticName</span>: <span class="dt">String?</span></span>
+<span id="cb32-11"><a href="#cb32-11"></a>    <span class="kw">var</span> <span class="va">phoneticName</span>: <span class="dt">String?</span>  // ふりがな</span>
 <span id="cb32-12"><a href="#cb32-12"></a>)</span></code></pre></div>
 <p>RoomのエンティティであることをRoomに伝えるために、<code>@Entity</code>アノテーションを追加しておきます。あと、リレーショナル・データベースではレコードを識別するための主キーが必要なので、<code>@PrimaryKey</code>アノテーションで主キーを指定しています。</p>
 <p><code>BusStop</code>に関連付けられる<code>BusStopPole</code>も作りましょう。</p>
@@ -1873,7 +1873,7 @@ dependencies {
 <span id="cb47-35"><a href="#cb47-35"></a>        baseUrl(<span class="st">&quot;https://api.odpt.org&quot;</span>)</span>
 <span id="cb47-36"><a href="#cb47-36"></a>        client(</span>
 <span id="cb47-37"><a href="#cb47-37"></a>            OkHttpClient.Builder().apply {</span>
-<span id="cb47-38"><a href="#cb47-38"></a>                connectTimeout(<span class="dv">180</span>, TimeUnit.SECONDS)</span>
+<span id="cb47-38"><a href="#cb47-38"></a>                connectTimeout(<span class="dv">180</span>, TimeUnit.SECONDS)  <span class="co">// ついでだったので、タイムアウト時間を長めに設定しておきます</span></span>
 <span id="cb47-39"><a href="#cb47-39"></a>                readTimeout(<span class="dv">180</span>, TimeUnit.SECONDS)</span>
 <span id="cb47-40"><a href="#cb47-40"></a>                writeTimeout(<span class="dv">180</span>, TimeUnit.SECONDS)</span>
 <span id="cb47-41"><a href="#cb47-41"></a>            }.build()</span>
@@ -2050,20 +2050,22 @@ dependencies {
 <span id="cb54-13"><a href="#cb54-13"></a><span class="kw">class</span> BusApproachesFragment: <span class="dt">Fragment</span>() {</span>
 <span id="cb54-14"><a href="#cb54-14"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">onCreateView</span>(<span class="va">inflater</span>: <span class="dt">LayoutInflater</span>, <span class="va">container</span>: <span class="dt">ViewGroup?</span>, <span class="va">savedInstanceState</span>: <span class="dt">Bundle?</span>): <span class="dt">View?</span> {</span>
 <span id="cb54-15"><a href="#cb54-15"></a>        <span class="kw">return</span> FragmentBusApproachesBinding.inflate(inflater, container, <span class="kw">false</span>).apply {</span>
-<span id="cb54-16"><a href="#cb54-16"></a>            (requireActivity().application <span class="kw">as</span> App).departureBusStopName.observe(viewLifecycleOwner, Observer { departureBusStopNameValue -&gt;</span>
-<span id="cb54-17"><a href="#cb54-17"></a>                Log.d(<span class="st">&quot;BusApproachesFragment&quot;</span>, <span class="st">&quot;departureBusStopName.observe()&quot;</span>)</span>
-<span id="cb54-18"><a href="#cb54-18"></a>                departureBusStopNameTextView.text = departureBusStopNameValue</span>
-<span id="cb54-19"><a href="#cb54-19"></a>            })</span>
-<span id="cb54-20"><a href="#cb54-20"></a></span>
-<span id="cb54-21"><a href="#cb54-21"></a>            thread {</span>
-<span id="cb54-22"><a href="#cb54-22"></a>                Thread.sleep(<span class="dv">5000</span>)</span>
-<span id="cb54-23"><a href="#cb54-23"></a></span>
-<span id="cb54-24"><a href="#cb54-24"></a>                (requireActivity().application <span class="kw">as</span> App).departureBusStopName.postValue(<span class="st">&quot;日本ユニシス本社前&quot;</span>)</span>
-<span id="cb54-25"><a href="#cb54-25"></a>                Log.d(<span class="st">&quot;BusApproachesFragment&quot;</span>, <span class="st">&quot;MutableLiveData.postValue()&quot;</span>)</span>
-<span id="cb54-26"><a href="#cb54-26"></a>            }</span>
-<span id="cb54-27"><a href="#cb54-27"></a>        }.root</span>
-<span id="cb54-28"><a href="#cb54-28"></a>    }</span>
-<span id="cb54-29"><a href="#cb54-29"></a>}</span></code></pre></div>
+<span id="cb54-16"><a href="#cb54-16"></a>            <span class="co">// LiveDataを監視します</span></span>
+<span id="cb54-17"><a href="#cb54-17"></a>            (requireActivity().application <span class="kw">as</span> App).departureBusStopName.observe(viewLifecycleOwner, Observer { departureBusStopNameValue -&gt;</span>
+<span id="cb54-18"><a href="#cb54-18"></a>                Log.d(<span class="st">&quot;BusApproachesFragment&quot;</span>, <span class="st">&quot;departureBusStopName.observe()&quot;</span>)</span>
+<span id="cb54-19"><a href="#cb54-19"></a>                departureBusStopNameTextView.text = departureBusStopNameValue</span>
+<span id="cb54-20"><a href="#cb54-20"></a>            })</span>
+<span id="cb54-21"><a href="#cb54-21"></a></span>
+<span id="cb54-22"><a href="#cb54-22"></a>            <span class="co">// テスト用に、別スレッドでLiveDataに値を設定します。</span></span>
+<span id="cb54-23"><a href="#cb54-23"></a>            thread {</span>
+<span id="cb54-24"><a href="#cb54-24"></a>                Thread.sleep(<span class="dv">5000</span>)</span>
+<span id="cb54-25"><a href="#cb54-25"></a></span>
+<span id="cb54-26"><a href="#cb54-26"></a>                (requireActivity().application <span class="kw">as</span> App).departureBusStopName.postValue(<span class="st">&quot;日本ユニシス本社前&quot;</span>)</span>
+<span id="cb54-27"><a href="#cb54-27"></a>                Log.d(<span class="st">&quot;BusApproachesFragment&quot;</span>, <span class="st">&quot;MutableLiveData.postValue()&quot;</span>)</span>
+<span id="cb54-28"><a href="#cb54-28"></a>            }</span>
+<span id="cb54-29"><a href="#cb54-29"></a>        }.root</span>
+<span id="cb54-30"><a href="#cb54-30"></a>    }</span>
+<span id="cb54-31"><a href="#cb54-31"></a>}</span></code></pre></div>
 <p><code>observe()</code>の引数の<code>Observer { ... }</code>は、抽象メソッド一つだったらラムダ式から変換してやる（SAM変換）というKotlinの機能を使用しています。ラムダ式でいいんだったら前に付いている<code>Observer</code>は何なんだとか、どうして<code>(...)</code>の内側に入っているんだこれまでの書き方と違うじゃないかという疑問は、<code>observe()</code>にはいくつもバージョンがあるのでそのどれなのかを指定しなければならないから。普段と書き方が違うので面倒ですけど、普通の書き方をするとコンパイル・エラーになるので発見も書き換えも容易ですのでまぁいいかな。</p>
 <p>で、これで作業は終了です。<code>MutableLiveData</code>に値を設定するには、メイン・スレッドからの場合は<code>value</code>プロパティ、他のスレッドからの場合は<code>postValue()</code>メソッドを使用します。スレッドを作成して5秒経ったら、私の両親が「お前をまだクビにしてないんだから度量が大きい会社だな」と評価した会社の前にあるバス停が設定されて、通知が飛んで、画面に表示されます。</p>
 <p>で、ここで試していただきたいのですけど、バス接近情報を表示する画面に遷移したら、5秒経つ前にホーム画面を表示してアプリをバックグラウンドに移動させてみてください。バックグラウンドに移ったので画面を更新する必要はなくて、だから<code>Observer</code>の呼び出しは無駄です。LiveDataはこのことを知っていて、しかも、<code>Fragment</code>がどのような状態にあるのかを<code>viewLifecycleOwner</code>を経由して知ることができるので、変更を通知しなくなるんです。その証拠に、ほら、logcatを見てください「departureBusStopName.observe()」が表示されていないでしょ？　で、アプリをフォアグランドに戻すと、すぐにlogcatに「departureBusStopName.observe()」が表示されて、私の会社の前にあるバス停の名前が画面に表示される。 というわけで、ほら、LiveDataのおかげで<code>Activity</code>や<code>Fragment</code>のライフサイクルがどうなっているのかを考えながらプログラミングする手間はほぼなくなりました！</p>
@@ -2194,20 +2196,13 @@ dependencies {
 <span id="cb58-16"><a href="#cb58-16"></a></span>
 <span id="cb58-17"><a href="#cb58-17"></a>    <span class="kw">val</span> <span class="va">departureBusStopName</span> = MutableLiveData&lt;<span class="kw">String</span>&gt;()</span>
 <span id="cb58-18"><a href="#cb58-18"></a></span>
-<span id="cb58-19"><a href="#cb58-19"></a>    <span class="kw">val</span> <span class="va">arrivalBusStops</span> = Transformations.switchMap(departureBusStopName) { arrivalBusStopNameValue -&gt;</span>
-<span id="cb58-20"><a href="#cb58-20"></a>        database.getBusStopDao().getObservablesByDepartureBusStopName(arrivalBusStopNameValue)</span>
-<span id="cb58-21"><a href="#cb58-21"></a>    }</span>
-<span id="cb58-22"><a href="#cb58-22"></a></span>
-<span id="cb58-23"><a href="#cb58-23"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">onCreate</span>() {</span>
-<span id="cb58-24"><a href="#cb58-24"></a>        <span class="kw">super</span>.onCreate()</span>
-<span id="cb58-25"><a href="#cb58-25"></a></span>
-<span id="cb58-26"><a href="#cb58-26"></a>        component = DaggerAppComponent.builder().apply {</span>
-<span id="cb58-27"><a href="#cb58-27"></a>            appModule(AppModule(this<span class="at">@App</span>))</span>
-<span id="cb58-28"><a href="#cb58-28"></a>        }.build()</span>
-<span id="cb58-29"><a href="#cb58-29"></a></span>
-<span id="cb58-30"><a href="#cb58-30"></a>        component.inject(<span class="kw">this</span>)</span>
-<span id="cb58-31"><a href="#cb58-31"></a>    }</span>
-<span id="cb58-32"><a href="#cb58-32"></a>}</span></code></pre></div>
+<span id="cb58-19"><a href="#cb58-19"></a>    <span class="co">// depatureBusStopNameが変更になったら、arrivalBusStopsを設定します</span></span>
+<span id="cb58-20"><a href="#cb58-20"></a>    <span class="kw">val</span> <span class="va">arrivalBusStops</span> = Transformations.switchMap(departureBusStopName) { arrivalBusStopNameValue -&gt;</span>
+<span id="cb58-21"><a href="#cb58-21"></a>        database.getBusStopDao().getObservablesByDepartureBusStopName(arrivalBusStopNameValue)</span>
+<span id="cb58-22"><a href="#cb58-22"></a>    }</span>
+<span id="cb58-23"><a href="#cb58-23"></a></span>
+<span id="cb58-24"><a href="#cb58-24"></a>    ...</span>
+<span id="cb58-25"><a href="#cb58-25"></a>}</span></code></pre></div>
 <p><code>Transformations</code>の<code>switchMap()</code>メソッドは、１つ目の引数で指定した<code>LiveData</code>が変更になったら、2つ目の引数のラムダ式の結果がセットされる<code>LiveData</code>を返します。なお、今回はラムダ式が<code>LiveData</code>を返すので<code>switchMap()</code>を使用しましたが、<code>Transformations</code>には、<code>LiveData</code>ではない返り値を使う場合向けの<code>map()</code>というメソッドもありますのでいい感じに使い分けてください。</p>
 <p>で、この<code>Transformations</code>を使うと、Roomにテーブルとテーブルの間を辿る機能がないことが気にならなくなります。たとえば注文と注文明細を表示するような場合は、注文と注文明細を<code>Transformations</code>でつないで、注文と関係づけられた注文明細を取得するデータ・アクセス・オブジェクトのメソッドを書けばいいんですから。というわけで、Roomは前に書いたような「こういうのでいいんだよ。こういうので」と表現されるような機能が貧弱なO/Rマッピング・ツールではなくて、不要な機能がついていないとても洗練された最高に出来が良いO/Rマッピング・ツールなのですよ。もし「Roomは機能が貧弱で」とのたまうRoomの説明を書いていたときの私みたいな人がいたら、分かってないなぁと鼻で笑ってやってください。</p>
 <p>最後。せっかく<code>departureBusStopName</code>が変更になったら<code>arrivalBusStops</code>が変更されるようになったのですから、<code>BusApproachesFragment</code>を修正して画面も変更されるようにしましょう。</p>
@@ -2342,29 +2337,30 @@ dependencies {
 <span id="cb62-25"><a href="#cb62-25"></a>        arrivalBusStopsValue[<span class="fl">0.</span>until(arrivalBusStopsValue.size).random()].name</span>
 <span id="cb62-26"><a href="#cb62-26"></a>    }</span>
 <span id="cb62-27"><a href="#cb62-27"></a></span>
-<span id="cb62-28"><a href="#cb62-28"></a>    <span class="kw">val</span> <span class="va">routes</span> = MediatorLiveData&lt;List&lt;Route&gt;&gt;().apply {</span>
-<span id="cb62-29"><a href="#cb62-29"></a>        <span class="kw">var</span> <span class="va">source</span>: LiveData&lt;List&lt;Route&gt;&gt;? = <span class="kw">null</span></span>
-<span id="cb62-30"><a href="#cb62-30"></a></span>
-<span id="cb62-31"><a href="#cb62-31"></a>        <span class="kw">fun</span> <span class="fu">update</span>() {</span>
-<span id="cb62-32"><a href="#cb62-32"></a>            <span class="kw">val</span> <span class="va">departureBusStopNameValue</span> = departureBusStopName.value ?: <span class="kw">return</span></span>
-<span id="cb62-33"><a href="#cb62-33"></a>            <span class="kw">val</span> <span class="va">arrivalBusStopNameValue</span>   = arrivalBusStopName.value   ?: <span class="kw">return</span></span>
-<span id="cb62-34"><a href="#cb62-34"></a></span>
-<span id="cb62-35"><a href="#cb62-35"></a>            source?.let {</span>
-<span id="cb62-36"><a href="#cb62-36"></a>                removeSource(it)</span>
-<span id="cb62-37"><a href="#cb62-37"></a>            }</span>
-<span id="cb62-38"><a href="#cb62-38"></a></span>
-<span id="cb62-39"><a href="#cb62-39"></a>            source = database.getRouteDao().getObservablesByDepartureBusStopNameAndArrivalBusStopName(departureBusStopNameValue, arrivalBusStopNameValue).also {</span>
-<span id="cb62-40"><a href="#cb62-40"></a>                addSource(it) { sourceValue -&gt;</span>
-<span id="cb62-41"><a href="#cb62-41"></a>                    value = sourceValue</span>
-<span id="cb62-42"><a href="#cb62-42"></a>                }</span>
-<span id="cb62-43"><a href="#cb62-43"></a>            }</span>
-<span id="cb62-44"><a href="#cb62-44"></a>        }</span>
-<span id="cb62-45"><a href="#cb62-45"></a></span>
-<span id="cb62-46"><a href="#cb62-46"></a>        addSource(departureBusStopName) { update() }</span>
-<span id="cb62-47"><a href="#cb62-47"></a>        addSource(arrivalBusStopName)   { update() }</span>
-<span id="cb62-48"><a href="#cb62-48"></a>    }</span>
-<span id="cb62-49"><a href="#cb62-49"></a></span>
-<span id="cb62-50"><a href="#cb62-50"></a>    ...</span></code></pre></div>
+<span id="cb62-28"><a href="#cb62-28"></a>    <span class="co">// departureBusStopsやarrivalBusStopsが変更になったら、routesを設定します</span></span>
+<span id="cb62-29"><a href="#cb62-29"></a>    <span class="kw">val</span> <span class="va">routes</span> = MediatorLiveData&lt;List&lt;Route&gt;&gt;().apply {</span>
+<span id="cb62-30"><a href="#cb62-30"></a>        <span class="kw">var</span> <span class="va">source</span>: LiveData&lt;List&lt;Route&gt;&gt;? = <span class="kw">null</span></span>
+<span id="cb62-31"><a href="#cb62-31"></a></span>
+<span id="cb62-32"><a href="#cb62-32"></a>        <span class="kw">fun</span> <span class="fu">update</span>() {</span>
+<span id="cb62-33"><a href="#cb62-33"></a>            <span class="kw">val</span> <span class="va">departureBusStopNameValue</span> = departureBusStopName.value ?: <span class="kw">return</span></span>
+<span id="cb62-34"><a href="#cb62-34"></a>            <span class="kw">val</span> <span class="va">arrivalBusStopNameValue</span>   = arrivalBusStopName.value   ?: <span class="kw">return</span></span>
+<span id="cb62-35"><a href="#cb62-35"></a></span>
+<span id="cb62-36"><a href="#cb62-36"></a>            source?.let {</span>
+<span id="cb62-37"><a href="#cb62-37"></a>                removeSource(it)</span>
+<span id="cb62-38"><a href="#cb62-38"></a>            }</span>
+<span id="cb62-39"><a href="#cb62-39"></a></span>
+<span id="cb62-40"><a href="#cb62-40"></a>            source = database.getRouteDao().getObservablesByDepartureBusStopNameAndArrivalBusStopName(departureBusStopNameValue, arrivalBusStopNameValue).also {</span>
+<span id="cb62-41"><a href="#cb62-41"></a>                addSource(it) { sourceValue -&gt;</span>
+<span id="cb62-42"><a href="#cb62-42"></a>                    value = sourceValue</span>
+<span id="cb62-43"><a href="#cb62-43"></a>                }</span>
+<span id="cb62-44"><a href="#cb62-44"></a>            }</span>
+<span id="cb62-45"><a href="#cb62-45"></a>        }</span>
+<span id="cb62-46"><a href="#cb62-46"></a></span>
+<span id="cb62-47"><a href="#cb62-47"></a>        addSource(departureBusStopName) { update() }</span>
+<span id="cb62-48"><a href="#cb62-48"></a>        addSource(arrivalBusStopName)   { update() }</span>
+<span id="cb62-49"><a href="#cb62-49"></a>    }</span>
+<span id="cb62-50"><a href="#cb62-50"></a></span>
+<span id="cb62-51"><a href="#cb62-51"></a>    ...</span></code></pre></div>
 <p>うぉ、面倒臭そう……なので、少し解説を。</p>
 <p><code>departureBusStopName</code>（出発バス停名称）が変更になったら、<code>arrivalBusStops</code>（到着バス停のリスト）を設定するところまでは前にやりました。今回は<code>arrivalBusStopName</code>（到着バス停名称）も必要なので、<code>Transformations</code>の<code>map()</code>メソッドを使用して<code>arrivalBusStops</code>が変更になったらその中の一つをランダムに選ぶようにしました。</p>
 <p>で、<code>routes</code>（路線のリスト）が問題の<code>MediatorLiveData</code>です。<code>MediatorLiveData</code>では、監視対象の<code>LiveData</code>を<code>addSource()</code>メソッドで追加できます。<code>addSource()</code>メソッドの2つ目の引数はラムダ式で、監視対象が変更になった場合に実行する処理です。今回は、その直前に定義している<code>update()</code>関数を呼び出しています。で、<code>MediatorLiveData</code>の値を変更したい場合は、<code>value</code>プロパティに値を設定すればよくて、監視対象の<code>LiveData</code>の値は<code>LiveData</code>の<code>value</code>プロパティで取得できるのですけど、残念なことに<code>RouteDao</code>に定義したのは<code>LiveData&lt;List&lt;Route&gt;&gt;</code>を返すメソッドですから、そのままでは<code>value</code>に設定できません。</p>
@@ -2560,23 +2556,26 @@ dependencies {
 <span id="cb67-12"><a href="#cb67-12"></a><span class="kw">class</span> BusApproachesFragment: <span class="dt">Fragment</span>() {</span>
 <span id="cb67-13"><a href="#cb67-13"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">onCreateView</span>(<span class="va">inflater</span>: <span class="dt">LayoutInflater</span>, <span class="va">container</span>: <span class="dt">ViewGroup?</span>, <span class="va">savedInstanceState</span>: <span class="dt">Bundle?</span>): <span class="dt">View?</span> {</span>
 <span id="cb67-14"><a href="#cb67-14"></a>        <span class="kw">return</span> FragmentBusApproachesBinding.inflate(inflater, container, <span class="kw">false</span>).apply {</span>
-<span id="cb67-15"><a href="#cb67-15"></a>            lifecycleOwner = viewLifecycleOwner</span>
-<span id="cb67-16"><a href="#cb67-16"></a></span>
-<span id="cb67-17"><a href="#cb67-17"></a>            app = (requireActivity().application <span class="kw">as</span> App)</span>
-<span id="cb67-18"><a href="#cb67-18"></a></span>
-<span id="cb67-19"><a href="#cb67-19"></a>            thread {</span>
-<span id="cb67-20"><a href="#cb67-20"></a>                Thread.sleep(<span class="dv">5000</span>)</span>
-<span id="cb67-21"><a href="#cb67-21"></a></span>
-<span id="cb67-22"><a href="#cb67-22"></a>                (requireActivity().application <span class="kw">as</span> App).departureBusStopName.postValue(<span class="st">&quot;日本ユニシス本社前&quot;</span>)</span>
-<span id="cb67-23"><a href="#cb67-23"></a>                Log.d(<span class="st">&quot;BusApproachesFragment&quot;</span>, <span class="st">&quot;MutableLiveData.postValue()&quot;</span>)</span>
+<span id="cb67-15"><a href="#cb67-15"></a>            <span class="co">// FragmentBusApproachesBinding.lifecycleOwnerを設定します</span></span>
+<span id="cb67-16"><a href="#cb67-16"></a>            lifecycleOwner = viewLifecycleOwner</span>
+<span id="cb67-17"><a href="#cb67-17"></a></span>
+<span id="cb67-18"><a href="#cb67-18"></a>            <span class="co">// FragmentBusApproachesBinding.appを設定します</span></span>
+<span id="cb67-19"><a href="#cb67-19"></a>            app = (requireActivity().application <span class="kw">as</span> App)</span>
+<span id="cb67-20"><a href="#cb67-20"></a></span>
+<span id="cb67-21"><a href="#cb67-21"></a>            <span class="co">// 以下はテスト用なので後で削除します</span></span>
+<span id="cb67-22"><a href="#cb67-22"></a>            thread {</span>
+<span id="cb67-23"><a href="#cb67-23"></a>                Thread.sleep(<span class="dv">5000</span>)</span>
 <span id="cb67-24"><a href="#cb67-24"></a></span>
-<span id="cb67-25"><a href="#cb67-25"></a>                Thread.sleep(<span class="dv">5000</span>)</span>
-<span id="cb67-26"><a href="#cb67-26"></a></span>
-<span id="cb67-27"><a href="#cb67-27"></a>                (requireActivity().application <span class="kw">as</span> App).departureBusStopName.postValue(<span class="st">&quot;深川第八中学校前&quot;</span>)</span>
-<span id="cb67-28"><a href="#cb67-28"></a>            }</span>
-<span id="cb67-29"><a href="#cb67-29"></a>        }.root</span>
-<span id="cb67-30"><a href="#cb67-30"></a>    }</span>
-<span id="cb67-31"><a href="#cb67-31"></a>}</span></code></pre></div>
+<span id="cb67-25"><a href="#cb67-25"></a>                (requireActivity().application <span class="kw">as</span> App).departureBusStopName.postValue(<span class="st">&quot;日本ユニシス本社前&quot;</span>)</span>
+<span id="cb67-26"><a href="#cb67-26"></a>                Log.d(<span class="st">&quot;BusApproachesFragment&quot;</span>, <span class="st">&quot;MutableLiveData.postValue()&quot;</span>)</span>
+<span id="cb67-27"><a href="#cb67-27"></a></span>
+<span id="cb67-28"><a href="#cb67-28"></a>                Thread.sleep(<span class="dv">5000</span>)</span>
+<span id="cb67-29"><a href="#cb67-29"></a></span>
+<span id="cb67-30"><a href="#cb67-30"></a>                (requireActivity().application <span class="kw">as</span> App).departureBusStopName.postValue(<span class="st">&quot;深川第八中学校前&quot;</span>)</span>
+<span id="cb67-31"><a href="#cb67-31"></a>            }</span>
+<span id="cb67-32"><a href="#cb67-32"></a>        }.root</span>
+<span id="cb67-33"><a href="#cb67-33"></a>    }</span>
+<span id="cb67-34"><a href="#cb67-34"></a>}</span></code></pre></div>
 <p>不要になった<code>observe()</code>メソッドの呼び出しをまるっと削除して、データ・バインディングが<code>LiveData</code>を監視できるように<code>lifeCycleOwner</code>プロパティを設定して、あと、<code>&lt;data&gt;</code>タグで設定した<code>app</code>プロパティを設定しているだけ。<code>thread { ... }</code>の部分はテスト用のコードなので最後にはなくなりますから、かなりシンプルなコードですよね？　こんな単純になっても、今までと同じ動作をしてくれるんですよ。</p>
 <p>うん、LiveDataとデータ・バインディングは、コード量を激減させてくれて素晴らしいですな。</p>
 <h2 id="repository">Repository</h2>
@@ -2733,28 +2732,29 @@ dependencies {
 <span id="cb73-15"><a href="#cb73-15"></a><span class="kw">class</span> BusApproachesFragment: <span class="dt">Fragment</span>() {</span>
 <span id="cb73-16"><a href="#cb73-16"></a>    <span class="at">@Inject</span> lateinit <span class="kw">var</span> <span class="va">viewModelProviderFactory</span>: AppViewModelProvideFactory</span>
 <span id="cb73-17"><a href="#cb73-17"></a></span>
-<span id="cb73-18"><a href="#cb73-18"></a>    <span class="kw">private</span> <span class="kw">val</span> <span class="va">viewModel</span> <span class="kw">by</span> viewModels&lt;BusApproachesViewModel&gt; { viewModelProviderFactory }</span>
-<span id="cb73-19"><a href="#cb73-19"></a></span>
-<span id="cb73-20"><a href="#cb73-20"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">onCreateView</span>(<span class="va">inflater</span>: <span class="dt">LayoutInflater</span>, <span class="va">container</span>: <span class="dt">ViewGroup?</span>, <span class="va">savedInstanceState</span>: <span class="dt">Bundle?</span>): <span class="dt">View?</span> {</span>
-<span id="cb73-21"><a href="#cb73-21"></a>        (requireActivity().application <span class="kw">as</span> App).component.inject(<span class="kw">this</span>)</span>
-<span id="cb73-22"><a href="#cb73-22"></a></span>
-<span id="cb73-23"><a href="#cb73-23"></a>        <span class="kw">return</span> FragmentBusApproachesBinding.inflate(inflater, container, <span class="kw">false</span>).apply {</span>
-<span id="cb73-24"><a href="#cb73-24"></a>            lifecycleOwner = viewLifecycleOwner</span>
-<span id="cb73-25"><a href="#cb73-25"></a>            viewModel      = this<span class="at">@BusApproachesFragment</span>.viewModel</span>
-<span id="cb73-26"><a href="#cb73-26"></a></span>
-<span id="cb73-27"><a href="#cb73-27"></a>            thread {</span>
-<span id="cb73-28"><a href="#cb73-28"></a>                Thread.sleep(<span class="dv">5000</span>)</span>
-<span id="cb73-29"><a href="#cb73-29"></a></span>
-<span id="cb73-30"><a href="#cb73-30"></a>                viewModel.departureBusStopName.postValue(<span class="st">&quot;日本ユニシス本社前&quot;</span>)</span>
-<span id="cb73-31"><a href="#cb73-31"></a>                Log.d(<span class="st">&quot;BusApproachesFragment&quot;</span>, <span class="st">&quot;MutableLiveData.postValue()&quot;</span>)</span>
-<span id="cb73-32"><a href="#cb73-32"></a></span>
-<span id="cb73-33"><a href="#cb73-33"></a>                Thread.sleep(<span class="dv">5000</span>)</span>
-<span id="cb73-34"><a href="#cb73-34"></a></span>
-<span id="cb73-35"><a href="#cb73-35"></a>                viewModel.departureBusStopName.postValue(<span class="st">&quot;深川第八中学校前&quot;</span>)</span>
-<span id="cb73-36"><a href="#cb73-36"></a>            }</span>
-<span id="cb73-37"><a href="#cb73-37"></a>        }.root</span>
-<span id="cb73-38"><a href="#cb73-38"></a>    }</span>
-<span id="cb73-39"><a href="#cb73-39"></a>}</span></code></pre></div>
+<span id="cb73-18"><a href="#cb73-18"></a>    <span class="co">// Dagger経由でViewModelを取得します</span></span>
+<span id="cb73-19"><a href="#cb73-19"></a>    <span class="kw">private</span> <span class="kw">val</span> <span class="va">viewModel</span> <span class="kw">by</span> viewModels&lt;BusApproachesViewModel&gt; { viewModelProviderFactory }</span>
+<span id="cb73-20"><a href="#cb73-20"></a></span>
+<span id="cb73-21"><a href="#cb73-21"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">onCreateView</span>(<span class="va">inflater</span>: <span class="dt">LayoutInflater</span>, <span class="va">container</span>: <span class="dt">ViewGroup?</span>, <span class="va">savedInstanceState</span>: <span class="dt">Bundle?</span>): <span class="dt">View?</span> {</span>
+<span id="cb73-22"><a href="#cb73-22"></a>        (requireActivity().application <span class="kw">as</span> App).component.inject(<span class="kw">this</span>)</span>
+<span id="cb73-23"><a href="#cb73-23"></a></span>
+<span id="cb73-24"><a href="#cb73-24"></a>        <span class="kw">return</span> FragmentBusApproachesBinding.inflate(inflater, container, <span class="kw">false</span>).apply {</span>
+<span id="cb73-25"><a href="#cb73-25"></a>            lifecycleOwner = viewLifecycleOwner</span>
+<span id="cb73-26"><a href="#cb73-26"></a>            viewModel      = this<span class="at">@BusApproachesFragment</span>.viewModel</span>
+<span id="cb73-27"><a href="#cb73-27"></a></span>
+<span id="cb73-28"><a href="#cb73-28"></a>            thread {</span>
+<span id="cb73-29"><a href="#cb73-29"></a>                Thread.sleep(<span class="dv">5000</span>)</span>
+<span id="cb73-30"><a href="#cb73-30"></a></span>
+<span id="cb73-31"><a href="#cb73-31"></a>                viewModel.departureBusStopName.postValue(<span class="st">&quot;日本ユニシス本社前&quot;</span>)</span>
+<span id="cb73-32"><a href="#cb73-32"></a>                Log.d(<span class="st">&quot;BusApproachesFragment&quot;</span>, <span class="st">&quot;MutableLiveData.postValue()&quot;</span>)</span>
+<span id="cb73-33"><a href="#cb73-33"></a></span>
+<span id="cb73-34"><a href="#cb73-34"></a>                Thread.sleep(<span class="dv">5000</span>)</span>
+<span id="cb73-35"><a href="#cb73-35"></a></span>
+<span id="cb73-36"><a href="#cb73-36"></a>                viewModel.departureBusStopName.postValue(<span class="st">&quot;深川第八中学校前&quot;</span>)</span>
+<span id="cb73-37"><a href="#cb73-37"></a>            }</span>
+<span id="cb73-38"><a href="#cb73-38"></a>        }.root</span>
+<span id="cb73-39"><a href="#cb73-39"></a>    }</span>
+<span id="cb73-40"><a href="#cb73-40"></a>}</span></code></pre></div>
 <p>解説とは<code>ViewModel</code>の作成方法が違うじゃんと思われたと思いますが、これ、Android JetpackのKotlin向け便利機能の一つなんです。</p>
 <p>この書き方にしておくと、<code>Fragment</code>とViewModelの生存期間が同じになります。あと、たとえば認証情報のような<code>Fragment</code>よりも生存期間が長い（別の<code>Fragment</code>に遷移したらまたIDとパスワード入力するなんてやってられないですよね？）ViewModelを使う場合には、<code>private val authorizationViewModel by activityViewModel&lt;AuthorizationViewModel&gt; { viewModelProviderFactory }</code>とするだけで<code>ViewModel</code>の生存期間が<code>Activity</code>と同じになるのでとても便利ですよ。</p>
 <p>はい、これで完成！　正しく動くか試してみましょう。</p>
@@ -2795,9 +2795,9 @@ dependencies {
 <span id="cb76-2"><a href="#cb76-2"></a>    Log.d(<span class="st">&quot;xxx&quot;</span>, <span class="st">&quot;Main thread id: ${Thread.currentThread().id}&quot;</span>)</span>
 <span id="cb76-3"><a href="#cb76-3"></a></span>
 <span id="cb76-4"><a href="#cb76-4"></a>    runBlocking {</span>
-<span id="cb76-5"><a href="#cb76-5"></a>        <span class="cf">for</span> (i <span class="kw">in</span> <span class="fl">3.</span>downTo(<span class="dv">1</span>)) {</span>
+<span id="cb76-5"><a href="#cb76-5"></a>        <span class="cf">for</span> (i <span class="kw">in</span> <span class="fl">3.</span>downTo(<span class="dv">1</span>)) {  <span class="co">// 3, 2, 1の順になります</span></span>
 <span id="cb76-6"><a href="#cb76-6"></a>            launch {</span>
-<span id="cb76-7"><a href="#cb76-7"></a>                delay(i.toLong() * <span class="dv">1000</span>)</span>
+<span id="cb76-7"><a href="#cb76-7"></a>                delay(i.toLong() * <span class="dv">1000</span>)  <span class="co">// i * 1000なので、i == 3のときは3秒、2のときは2秒、1のときは1秒待ちます</span></span>
 <span id="cb76-8"><a href="#cb76-8"></a>                Log.d(<span class="st">&quot;xxx&quot;</span>, <span class="st">&quot;${i}: ${Thread.currentThread().id}&quot;</span>)</span>
 <span id="cb76-9"><a href="#cb76-9"></a>            }</span>
 <span id="cb76-10"><a href="#cb76-10"></a>        }</span>
@@ -2849,7 +2849,7 @@ dependencies {
 <span id="cb78-12"><a href="#cb78-12"></a></span>
 <span id="cb78-13"><a href="#cb78-13"></a>    <span class="kw">fun</span> <span class="fu">foo</span>() {</span>
 <span id="cb78-14"><a href="#cb78-14"></a>        viewModelScope.launch {</span>
-<span id="cb78-15"><a href="#cb78-15"></a>            <span class="cf">while</span> (<span class="kw">true</span>) {</span>
+<span id="cb78-15"><a href="#cb78-15"></a>            <span class="cf">while</span> (<span class="kw">true</span>) {  <span class="co">// 無限ループ</span></span>
 <span id="cb78-16"><a href="#cb78-16"></a>                delay(<span class="dv">1000</span>)</span>
 <span id="cb78-17"><a href="#cb78-17"></a></span>
 <span id="cb78-18"><a href="#cb78-18"></a>                Log.d(<span class="st">&quot;xxx&quot;</span>, <span class="st">&quot;viewModelScope&quot;</span>)</span>
@@ -3048,7 +3048,7 @@ dependencies {
 <span id="cb83-17"><a href="#cb83-17"></a>        }</span>
 <span id="cb83-18"><a href="#cb83-18"></a>    }</span>
 <span id="cb83-19"><a href="#cb83-19"></a>}</span></code></pre></div>
-<p><code>init {}</code>には、インスタンスが生成されたときに実行する処理を記述します。本章の最初に書いたように、Webサービスを呼び出してデータベースにキャッシュするコルーチンは、<code>ViewModel</code>と同じライフサイクルを持っていて欲しい。だから生成と同時に<code>viewModelScope.launch {}</code>しているわけですな。<code>viewModelScope</code>で<code>launch</code>しているのでViewModelが破棄されればこのコルーチンは終了しますから、終了もバッチリ。アプリがバックグラウンドになればコルーチンが止まるので、他のアプリに迷惑をかけないですし。</p>
+<p><code>init {}</code>には、インスタンスが生成されたときに実行する処理を記述します。Webサービスを呼び出してデータベースにキャッシュするコルーチンは<code>ViewModel</code>と同じライフサイクルを持っていて欲しいので、だから生成と同時に<code>viewModelScope.launch {}</code>しているわけですな。<code>viewModelScope</code>で<code>launch</code>しているのでViewModelが破棄されればこのコルーチンは終了しますから、終了もバッチリ。アプリがバックグラウンドになればコルーチンは止まるので、他のアプリに迷惑をかけないですし。</p>
 <p><code>isSyncDatabaseFinished</code>プロパティは、<code>syncDatabase()</code>が成功したか失敗したかを表現する目的で追加しました。ViewModelは<code>isSyncDatabaseFinished</code>を<code>observe()</code>して、正常に終了したら次の画面に遷移、そうでなければアプリケーションを終了するとかすればよいわけ。</p>
 <h3 id="splashfragment"><code>SplashFragment</code></h3>
 <p>というわけで、<code>SplashFragment</code>には<code>isSyncDatabaseFinished</code>を<code>observe()</code>する処理を追加して、その代わりにWebサービスを呼び出したりデータベースにアクセスしたりしていた処理をまるごと削除しました。こんな感じ。</p>
@@ -3164,40 +3164,41 @@ dependencies {
 <span id="cb86-28"><a href="#cb86-28"></a>        (application <span class="kw">as</span> App).component.inject(<span class="kw">this</span>)</span>
 <span id="cb86-29"><a href="#cb86-29"></a></span>
 <span id="cb86-30"><a href="#cb86-30"></a>        binding = DataBindingUtil.setContentView&lt;ActivityMainBinding&gt;(<span class="kw">this</span>, R.layout.activity_main).apply {</span>
-<span id="cb86-31"><a href="#cb86-31"></a>            navigationView.setNavigationItemSelectedListener {</span>
-<span id="cb86-32"><a href="#cb86-32"></a>                <span class="cf">when</span> (it.itemId) {</span>
-<span id="cb86-33"><a href="#cb86-33"></a>                    R.id.clearDatabase -&gt; run {</span>
-<span id="cb86-34"><a href="#cb86-34"></a>                        lifecycleScope.launch {</span>
-<span id="cb86-35"><a href="#cb86-35"></a>                            viewModel.clearDatabase()</span>
-<span id="cb86-36"><a href="#cb86-36"></a>                            findNavController(R.id.navHostFragment).navigate(R.id.splashFragment)</span>
-<span id="cb86-37"><a href="#cb86-37"></a>                        }</span>
-<span id="cb86-38"><a href="#cb86-38"></a></span>
-<span id="cb86-39"><a href="#cb86-39"></a>                        <span class="kw">true</span></span>
-<span id="cb86-40"><a href="#cb86-40"></a>                    }</span>
-<span id="cb86-41"><a href="#cb86-41"></a>                    <span class="cf">else</span> -&gt; <span class="kw">false</span></span>
-<span id="cb86-42"><a href="#cb86-42"></a></span>
-<span id="cb86-43"><a href="#cb86-43"></a>                }.also {</span>
-<span id="cb86-44"><a href="#cb86-44"></a>                    <span class="cf">if</span> (!it) {</span>
-<span id="cb86-45"><a href="#cb86-45"></a>                        return<span class="at">@also</span></span>
-<span id="cb86-46"><a href="#cb86-46"></a>                    }</span>
-<span id="cb86-47"><a href="#cb86-47"></a></span>
-<span id="cb86-48"><a href="#cb86-48"></a>                    drawerLayout.closeDrawer(GravityCompat.START)</span>
-<span id="cb86-49"><a href="#cb86-49"></a>                }</span>
-<span id="cb86-50"><a href="#cb86-50"></a>            }</span>
-<span id="cb86-51"><a href="#cb86-51"></a></span>
-<span id="cb86-52"><a href="#cb86-52"></a>        }.also {</span>
-<span id="cb86-53"><a href="#cb86-53"></a>            findNavController(R.id.navHostFragment).apply {</span>
-<span id="cb86-54"><a href="#cb86-54"></a>                NavigationUI.setupWithNavController(it.toolbar, <span class="kw">this</span>, AppBarConfiguration(setOf(R.id.bookmarksFragment), it.drawerLayout))</span>
-<span id="cb86-55"><a href="#cb86-55"></a></span>
-<span id="cb86-56"><a href="#cb86-56"></a>                addOnDestinationChangedListener { _, destination, _ -&gt;</span>
-<span id="cb86-57"><a href="#cb86-57"></a>                    it.appBarLayout.visibility = <span class="cf">if</span> (destination.id == R.id.splashFragment) View.GONE <span class="cf">else</span> View.VISIBLE</span>
-<span id="cb86-58"><a href="#cb86-58"></a>                }</span>
-<span id="cb86-59"><a href="#cb86-59"></a>            }</span>
-<span id="cb86-60"><a href="#cb86-60"></a>        }</span>
-<span id="cb86-61"><a href="#cb86-61"></a>    }</span>
-<span id="cb86-62"><a href="#cb86-62"></a></span>
-<span id="cb86-63"><a href="#cb86-63"></a>    ...</span>
-<span id="cb86-64"><a href="#cb86-64"></a>}</span></code></pre></div>
+<span id="cb86-31"><a href="#cb86-31"></a>            <span class="co">// NavigationViewのメニューが選ばれた場合のリスナーを設定します</span></span>
+<span id="cb86-32"><a href="#cb86-32"></a>            navigationView.setNavigationItemSelectedListener {</span>
+<span id="cb86-33"><a href="#cb86-33"></a>                <span class="cf">when</span> (it.itemId) {</span>
+<span id="cb86-34"><a href="#cb86-34"></a>                    R.id.clearDatabase -&gt; run {</span>
+<span id="cb86-35"><a href="#cb86-35"></a>                        lifecycleScope.launch {</span>
+<span id="cb86-36"><a href="#cb86-36"></a>                            viewModel.clearDatabase()</span>
+<span id="cb86-37"><a href="#cb86-37"></a>                            findNavController(R.id.navHostFragment).navigate(R.id.splashFragment)</span>
+<span id="cb86-38"><a href="#cb86-38"></a>                        }</span>
+<span id="cb86-39"><a href="#cb86-39"></a></span>
+<span id="cb86-40"><a href="#cb86-40"></a>                        <span class="kw">true</span></span>
+<span id="cb86-41"><a href="#cb86-41"></a>                    }</span>
+<span id="cb86-42"><a href="#cb86-42"></a>                    <span class="cf">else</span> -&gt; <span class="kw">false</span></span>
+<span id="cb86-43"><a href="#cb86-43"></a></span>
+<span id="cb86-44"><a href="#cb86-44"></a>                }.also {</span>
+<span id="cb86-45"><a href="#cb86-45"></a>                    <span class="cf">if</span> (!it) {</span>
+<span id="cb86-46"><a href="#cb86-46"></a>                        return<span class="at">@also</span></span>
+<span id="cb86-47"><a href="#cb86-47"></a>                    }</span>
+<span id="cb86-48"><a href="#cb86-48"></a></span>
+<span id="cb86-49"><a href="#cb86-49"></a>                    drawerLayout.closeDrawer(GravityCompat.START)</span>
+<span id="cb86-50"><a href="#cb86-50"></a>                }</span>
+<span id="cb86-51"><a href="#cb86-51"></a>            }</span>
+<span id="cb86-52"><a href="#cb86-52"></a></span>
+<span id="cb86-53"><a href="#cb86-53"></a>        }.also {</span>
+<span id="cb86-54"><a href="#cb86-54"></a>            findNavController(R.id.navHostFragment).apply {</span>
+<span id="cb86-55"><a href="#cb86-55"></a>                NavigationUI.setupWithNavController(it.toolbar, <span class="kw">this</span>, AppBarConfiguration(setOf(R.id.bookmarksFragment), it.drawerLayout))</span>
+<span id="cb86-56"><a href="#cb86-56"></a></span>
+<span id="cb86-57"><a href="#cb86-57"></a>                addOnDestinationChangedListener { _, destination, _ -&gt;</span>
+<span id="cb86-58"><a href="#cb86-58"></a>                    it.appBarLayout.visibility = <span class="cf">if</span> (destination.id == R.id.splashFragment) View.GONE <span class="cf">else</span> View.VISIBLE</span>
+<span id="cb86-59"><a href="#cb86-59"></a>                }</span>
+<span id="cb86-60"><a href="#cb86-60"></a>            }</span>
+<span id="cb86-61"><a href="#cb86-61"></a>        }</span>
+<span id="cb86-62"><a href="#cb86-62"></a>    }</span>
+<span id="cb86-63"><a href="#cb86-63"></a></span>
+<span id="cb86-64"><a href="#cb86-64"></a>    ...</span>
+<span id="cb86-65"><a href="#cb86-65"></a>}</span></code></pre></div>
 <p><code>SplashViewModel</code>のときのように<code>clearDatabase()</code>が完了したかどうかを表現するプロパティを追加する方式だとコード量が増えてしまうので、今回は<code>lifecycleScope.launch {}</code>することにしました。</p>
 <p><code>MainViewModel</code>の中身は、以下のようにとても単純です。</p>
 <div class="sourceCode" id="cb87"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb87-1"><a href="#cb87-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.view_model</span></span>
@@ -3213,7 +3214,7 @@ dependencies {
 <h1 id="recyclerview"><a href="https://github.com/tail-island/jetbus/tree/recycler-view">RecyclerView</a></h1>
 <p>と、ここまでいろいろ作ってきましたけど、なのにいまだに画面がスカスカで悲しい……。画面を作りましょう。使う道具は、これを覚えるだけで閲覧系のアプリなら大体どうにかなっちゃうという噂の<code>RecyclerView</code>です。</p>
 <h2 id="リサイクル">リサイクル？</h2>
-<p><code>RecyclerView</code>は、スクロール可能なリストを作成するGUIウィジェットです。特徴は大規模なデータ・セットに対応可能なこと（大は小を兼ねるので、小さなデータ・セットで使っても特に問題はありませんけど）。</p>
+<p><code>RecyclerView</code>は、スクロール可能なリストを作成するGUIウィジェットです。特徴は大規模なデータ・セットに対応可能なこと（大は小を兼ねるので、小さなデータ・セットで使っても問題ないけど）。</p>
 <p>で、この「大規模」という点が、<code>RecyclerView</code>という名前につながります。Androidの画面は<code>View</code>（本稿でも、文字を表示するための<code>TextView</code>とかを使いましたよね？）で構成されるので、リストの各行も<code>View</code>で構成されます。画面を上にスクロールすると、上の行が画面の外側に消えて下に新しい行が表示されるわけですけど、その画面の外側に消えた行の<code>View</code>をどうしましょうか？　放っておくとメモリに負荷がかかるし、ガベージ・コレクションの際にはCPUに負荷がかかっちゃう。だから、下から出てくる新しい行の<code>View</code>としてリサイクルしたい。これを自動でやってくれるのが<code>RecyclerView</code>というわけ。</p>
 <h2 id="viewholderとdiffcallbackとadapterを作る"><code>ViewHolder</code>と<code>DiffCallback</code>とAdapterを作る</h2>
 <p>リストを表示する場合は、リストそのものを管理する人とリストの要素を管理する人を分けた方が楽になります。<code>List&lt;MyClass&gt;</code>って分割するのと一緒。<code>RecyclerView</code>の場合、リストの要素は<code>ViewHolder</code>で管理します。で、<code>ViewHolder</code>と<code>RecyclerView</code>を繋げるのが<code>ListAdapter</code>。まずはこの<code>ViewHolder</code>の説明から。</p>
@@ -3251,7 +3252,7 @@ dependencies {
 <div class="sourceCode" id="cb89"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb89-1"><a href="#cb89-1"></a><span class="kw">class</span> ViewHolder(<span class="kw">private</span> <span class="kw">val</span> <span class="va">binding</span>: <span class="dt">ListItemBusStopBinding</span>): <span class="dt">RecyclerView</span>.<span class="dt">ViewHolder</span>(<span class="va">binding</span>.<span class="va">root</span>) {</span>
 <span id="cb89-2"><a href="#cb89-2"></a>    <span class="kw">fun</span> <span class="fu">bind</span>(<span class="va">item</span>: <span class="dt">BusStop</span>) {</span>
 <span id="cb89-3"><a href="#cb89-3"></a>        binding.item = item</span>
-<span id="cb89-4"><a href="#cb89-4"></a>        binding.executePendingBindings()</span>
+<span id="cb89-4"><a href="#cb89-4"></a>        binding.executePendingBindings()  <span class="co">// データ・バインディングを実行します</span></span>
 <span id="cb89-5"><a href="#cb89-5"></a></span>
 <span id="cb89-6"><a href="#cb89-6"></a>        binding.busStopButton.setOnClickListener {</span>
 <span id="cb89-7"><a href="#cb89-7"></a>            <span class="co">// ここに、バス停がタップされたときの処理を入れる</span></span>
@@ -3352,18 +3353,19 @@ dependencies {
 <span id="cb93-22"><a href="#cb93-22"></a>        (requireActivity().application <span class="kw">as</span> App).component.inject(<span class="kw">this</span>)</span>
 <span id="cb93-23"><a href="#cb93-23"></a></span>
 <span id="cb93-24"><a href="#cb93-24"></a>        <span class="kw">return</span> FragmentDepartureBusStopBinding.inflate(inflater, container, <span class="kw">false</span>).apply {</span>
-<span id="cb93-25"><a href="#cb93-25"></a>            recyclerView.adapter = BusStopAdapter().apply {</span>
-<span id="cb93-26"><a href="#cb93-26"></a>                viewModel.busStops.observe(viewLifecycleOwner, Observer {</span>
-<span id="cb93-27"><a href="#cb93-27"></a>                    submitList(it)</span>
-<span id="cb93-28"><a href="#cb93-28"></a>                })</span>
-<span id="cb93-29"><a href="#cb93-29"></a></span>
-<span id="cb93-30"><a href="#cb93-30"></a>                onBusStopClick = {</span>
-<span id="cb93-31"><a href="#cb93-31"></a>                    findNavController().navigate(DepartureBusStopFragmentDirections.departureBusStopFragmentToArrivalBusStopFragment(it.name))</span>
-<span id="cb93-32"><a href="#cb93-32"></a>                }</span>
-<span id="cb93-33"><a href="#cb93-33"></a>            }</span>
-<span id="cb93-34"><a href="#cb93-34"></a>        }.root</span>
-<span id="cb93-35"><a href="#cb93-35"></a>    }</span>
-<span id="cb93-36"><a href="#cb93-36"></a>}</span></code></pre></div>
+<span id="cb93-25"><a href="#cb93-25"></a>            <span class="co">// RecyclerViewにAdapterを設定します。</span></span>
+<span id="cb93-26"><a href="#cb93-26"></a>            recyclerView.adapter = BusStopAdapter().apply {</span>
+<span id="cb93-27"><a href="#cb93-27"></a>                viewModel.busStops.observe(viewLifecycleOwner, Observer {</span>
+<span id="cb93-28"><a href="#cb93-28"></a>                    submitList(it)</span>
+<span id="cb93-29"><a href="#cb93-29"></a>                })</span>
+<span id="cb93-30"><a href="#cb93-30"></a></span>
+<span id="cb93-31"><a href="#cb93-31"></a>                onBusStopClick = {</span>
+<span id="cb93-32"><a href="#cb93-32"></a>                    findNavController().navigate(DepartureBusStopFragmentDirections.departureBusStopFragmentToArrivalBusStopFragment(it.name))</span>
+<span id="cb93-33"><a href="#cb93-33"></a>                }</span>
+<span id="cb93-34"><a href="#cb93-34"></a>            }</span>
+<span id="cb93-35"><a href="#cb93-35"></a>        }.root</span>
+<span id="cb93-36"><a href="#cb93-36"></a>    }</span>
+<span id="cb93-37"><a href="#cb93-37"></a>}</span></code></pre></div>
 <p>レイアウトのXMLに<code>&lt;data&gt;</code>がなかったのは、上のように<code>BusStopAdapter.submitList()</code>でコード上でやるため。データが変更になったら<code>submitList()</code>し直します（今回はデータが変更になることはないけど、変更があり得る場合と無い場合で記述を変えるのと保守性が落ちるので、変更がある場合向けのコードで統一します）。あとは、バス停がタップされた場合のリスナーに画面遷移をするコードを書いただけ。</p>
 <h2 id="さらに索引用のrecyclerviewを作る">さらに、索引用の<code>RecyclerView</code>を作る</h2>
 <p>うん、これで完成……じゃないんですよ、今回のアプリでは。というのも、バス停の件数があまりに膨大なんです。だから、下の方のバス停を選ぶにはもーひたすらにスクロールしなければならなくて、とても実用にはなりません。実用に耐えられるようにするために、索引を作りましょう。もう一つ<code>RecyclerView</code>を作って重ねるだけの簡単な作業です。</p>
@@ -3446,24 +3448,28 @@ dependencies {
 <span id="cb96-2"><a href="#cb96-2"></a></span>
 <span id="cb96-3"><a href="#cb96-3"></a>...</span>
 <span id="cb96-4"><a href="#cb96-4"></a></span>
-<span id="cb96-5"><a href="#cb96-5"></a><span class="kw">private</span> <span class="kw">val</span> <span class="va">indexConverter</span> = <span class="st">&quot;ぁぃぅぇぉがぎぐげござじずぜぞだぢっづでどばぱびぴぶぷべぺぼぽゃゅょゎゐゑゔゕゖ&quot;</span>.zip(<span class="st">&quot;あいうえおかきくけこさしすせそたちつつてとははひひふふへへほほやゆよわいえうかけ&quot;</span>).toMap()</span>
-<span id="cb96-6"><a href="#cb96-6"></a></span>
-<span id="cb96-7"><a href="#cb96-7"></a><span class="kw">fun</span> <span class="fu">convertIndex</span>(<span class="va">index</span>: <span class="dt">Char</span>): <span class="dt">Char</span> {</span>
-<span id="cb96-8"><a href="#cb96-8"></a>    <span class="kw">return</span> <span class="cf">when</span> (index) {</span>
-<span id="cb96-9"><a href="#cb96-9"></a>        <span class="kw">in</span> <span class="ch">&#39;</span><span class="sc">\u30a1</span><span class="ch">&#39;</span>..<span class="ch">&#39;</span><span class="sc">\u30fa</span><span class="ch">&#39;</span> -&gt; index - <span class="dv">0x0060</span></span>
-<span id="cb96-10"><a href="#cb96-10"></a>        <span class="cf">else</span>                  -&gt; index</span>
-<span id="cb96-11"><a href="#cb96-11"></a>    }.let {</span>
-<span id="cb96-12"><a href="#cb96-12"></a>        indexConverter[it] ?: it</span>
-<span id="cb96-13"><a href="#cb96-13"></a>    }</span>
-<span id="cb96-14"><a href="#cb96-14"></a>}</span>
-<span id="cb96-15"><a href="#cb96-15"></a></span>
-<span id="cb96-16"><a href="#cb96-16"></a><span class="kw">fun</span> <span class="fu">getBusStopIndexes</span>(<span class="va">busStops</span>: <span class="dt">List</span>&lt;<span class="va">BusStop</span>&gt;): <span class="dt">List</span>&lt;<span class="dt">Char</span>&gt; {</span>
-<span id="cb96-17"><a href="#cb96-17"></a>    <span class="kw">return</span> busStops.asSequence().map { busStop -&gt; busStop.phoneticName?.firstOrNull() }.filterNotNull().map { convertIndex(it) }.distinct().toList()</span>
-<span id="cb96-18"><a href="#cb96-18"></a>}</span>
-<span id="cb96-19"><a href="#cb96-19"></a></span>
-<span id="cb96-20"><a href="#cb96-20"></a><span class="kw">fun</span> <span class="fu">getBusStopPosition</span>(<span class="va">busStops</span>: <span class="dt">List</span>&lt;<span class="va">BusStop</span>&gt;, <span class="va">index</span>: <span class="dt">Char</span>): <span class="dt">Int</span> {</span>
-<span id="cb96-21"><a href="#cb96-21"></a>    <span class="kw">return</span> busStops.indexOfFirst { busStop -&gt; busStop.phoneticName?.firstOrNull()?.let { convertIndex(it) == index } ?: <span class="kw">false</span> }</span>
-<span id="cb96-22"><a href="#cb96-22"></a>}</span></code></pre></div>
+<span id="cb96-5"><a href="#cb96-5"></a><span class="co">// 小文字や濁音、撥音、旧字を対応する文字に変換するmapです</span></span>
+<span id="cb96-6"><a href="#cb96-6"></a><span class="kw">private</span> <span class="kw">val</span> <span class="va">indexConverter</span> = <span class="st">&quot;ぁぃぅぇぉがぎぐげござじずぜぞだぢっづでどばぱびぴぶぷべぺぼぽゃゅょゎゐゑゔゕゖ&quot;</span>.zip(<span class="st">&quot;あいうえおかきくけこさしすせそたちつつてとははひひふふへへほほやゆよわいえうかけ&quot;</span>).toMap()</span>
+<span id="cb96-7"><a href="#cb96-7"></a></span>
+<span id="cb96-8"><a href="#cb96-8"></a><span class="co">// 小文字や濁音、撥音、旧字を対応する文字に変換します</span></span>
+<span id="cb96-9"><a href="#cb96-9"></a><span class="kw">fun</span> <span class="fu">convertIndex</span>(<span class="va">index</span>: <span class="dt">Char</span>): <span class="dt">Char</span> {</span>
+<span id="cb96-10"><a href="#cb96-10"></a>    <span class="kw">return</span> <span class="cf">when</span> (index) {</span>
+<span id="cb96-11"><a href="#cb96-11"></a>        <span class="kw">in</span> <span class="ch">&#39;</span><span class="sc">\u30a1</span><span class="ch">&#39;</span>..<span class="ch">&#39;</span><span class="sc">\u30fa</span><span class="ch">&#39;</span> -&gt; index - <span class="dv">0x0060</span></span>
+<span id="cb96-12"><a href="#cb96-12"></a>        <span class="cf">else</span>                  -&gt; index</span>
+<span id="cb96-13"><a href="#cb96-13"></a>    }.let {</span>
+<span id="cb96-14"><a href="#cb96-14"></a>        indexConverter[it] ?: it</span>
+<span id="cb96-15"><a href="#cb96-15"></a>    }</span>
+<span id="cb96-16"><a href="#cb96-16"></a>}</span>
+<span id="cb96-17"><a href="#cb96-17"></a></span>
+<span id="cb96-18"><a href="#cb96-18"></a><span class="co">// バス停名称の索引の文字の集合を作成します</span></span>
+<span id="cb96-19"><a href="#cb96-19"></a><span class="kw">fun</span> <span class="fu">getBusStopIndexes</span>(<span class="va">busStops</span>: <span class="dt">List</span>&lt;<span class="va">BusStop</span>&gt;): <span class="dt">List</span>&lt;<span class="dt">Char</span>&gt; {</span>
+<span id="cb96-20"><a href="#cb96-20"></a>    <span class="kw">return</span> busStops.asSequence().map { busStop -&gt; busStop.phoneticName?.firstOrNull() }.filterNotNull().map { convertIndex(it) }.distinct().toList()</span>
+<span id="cb96-21"><a href="#cb96-21"></a>}</span>
+<span id="cb96-22"><a href="#cb96-22"></a></span>
+<span id="cb96-23"><a href="#cb96-23"></a><span class="co">// 索引の文字からバス停の一を取得します</span></span>
+<span id="cb96-24"><a href="#cb96-24"></a><span class="kw">fun</span> <span class="fu">getBusStopPosition</span>(<span class="va">busStops</span>: <span class="dt">List</span>&lt;<span class="va">BusStop</span>&gt;, <span class="va">index</span>: <span class="dt">Char</span>): <span class="dt">Int</span> {</span>
+<span id="cb96-25"><a href="#cb96-25"></a>    <span class="kw">return</span> busStops.indexOfFirst { busStop -&gt; busStop.phoneticName?.firstOrNull()?.let { convertIndex(it) == index } ?: <span class="kw">false</span> }</span>
+<span id="cb96-26"><a href="#cb96-26"></a>}</span></code></pre></div>
 <p><code>indexConverter</code>という<code>Map</code>を作成して、「ぁ」を「あ」に変換できるようにします。全部の文字をこの<code>Map</code>で変換するのは記述が面倒だったので、<code>convertIndex()</code>関数を作成して、変換が不要な場合はそのまま、そうでなければ<code>indexConverter</code>を使用して変換するようにしました。あとは、<code>List&lt;BusStop&gt;</code>から関数型プログラミングのテクニックでサクッと索引一覧を作成する<code>getBusStopIndexes()</code>関数と、あとで使用する索引から位置を求める<code>getBusStopPosition()</code>関数です。</p>
 <p>この<code>getBusStopIndexes()</code>関数を使用して、<code>DepartureBusStopViewModel</code>を完成させます。</p>
 <div class="sourceCode" id="cb97"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb97-1"><a href="#cb97-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.view_model</span></span>
@@ -3555,16 +3561,17 @@ dependencies {
 <span id="cb99-40"><a href="#cb99-40"></a>                })</span>
 <span id="cb99-41"><a href="#cb99-41"></a></span>
 <span id="cb99-42"><a href="#cb99-42"></a>                onIndexClick = {</span>
-<span id="cb99-43"><a href="#cb99-43"></a>                    recyclerView.layoutManager!!.startSmoothScroll(</span>
-<span id="cb99-44"><a href="#cb99-44"></a>                        AcceleratedSmoothScroller(requireContext()).apply {</span>
-<span id="cb99-45"><a href="#cb99-45"></a>                            targetPosition = getBusStopPosition(viewModel.departureBusStops.value!!, it)</span>
-<span id="cb99-46"><a href="#cb99-46"></a>                        }</span>
-<span id="cb99-47"><a href="#cb99-47"></a>                    )</span>
-<span id="cb99-48"><a href="#cb99-48"></a>                }</span>
-<span id="cb99-49"><a href="#cb99-49"></a>            }</span>
-<span id="cb99-50"><a href="#cb99-50"></a>        }.root</span>
-<span id="cb99-51"><a href="#cb99-51"></a>    }</span>
-<span id="cb99-52"><a href="#cb99-52"></a>}</span></code></pre></div>
+<span id="cb99-43"><a href="#cb99-43"></a>                    <span class="co">// バス停のRecyclerViewを、適切な位置までスクロールします</span></span>
+<span id="cb99-44"><a href="#cb99-44"></a>                    recyclerView.layoutManager!!.startSmoothScroll(</span>
+<span id="cb99-45"><a href="#cb99-45"></a>                        AcceleratedSmoothScroller(requireContext()).apply {</span>
+<span id="cb99-46"><a href="#cb99-46"></a>                            targetPosition = getBusStopPosition(viewModel.departureBusStops.value!!, it)</span>
+<span id="cb99-47"><a href="#cb99-47"></a>                        }</span>
+<span id="cb99-48"><a href="#cb99-48"></a>                    )</span>
+<span id="cb99-49"><a href="#cb99-49"></a>                }</span>
+<span id="cb99-50"><a href="#cb99-50"></a>            }</span>
+<span id="cb99-51"><a href="#cb99-51"></a>        }.root</span>
+<span id="cb99-52"><a href="#cb99-52"></a>    }</span>
+<span id="cb99-53"><a href="#cb99-53"></a>}</span></code></pre></div>
 <p>このコードの中の<code>AcceleratedSmoothScroller</code>というのは、<a href="https://qiita.com/chibatching/items/52d9b73d244eac52d0d4">RecyclerViewの長距離スムーズスクロールをスムーズにする</a>を猿真似して作成した良い感じスクロールさせるためのクラスです。<code>RecylerView</code>のAPIには、指定した場所にスクロールする機能（画面がいきなり切り替わるので使いづらいユーザー・インターフェースになる）と指定した場所までスムーズにスクロールする機能（使いやすいユーザー・インターフェースになるけど、スクロールが終わるまで長時間かかる）しかなくて、これだけだと指定場所までスクロールするという機能がとても作りづらいんです。この問題は、<a href="https://qiita.com/chibatching/items/52d9b73d244eac52d0d4">RecyclerViewの長距離スムーズスクロールをスムーズにする</a>ですべて解決ですので、ぜひ読んでみてください。なお、今回は少しだけ実装を変えたので、クラス名も少しだけ変更しています。</p>
 <h2 id="bookmarksfragmentとarrivalbusstopfragmentを同じやり方で作ってbusapproachesfragmentを少しだけ修正する"><code>BookmarksFragment</code>と<code>ArrivalBusStopFragment</code>を同じやり方で作って、<code>BusApproachesFragment</code>を少しだけ修正する</h2>
 <p>あとは、同じやり方で（コピー＆ペーストをやりまくって）<code>BookmarksFragment</code>と<code>ArrivalBusStopFragment</code>を作りましょう。少しだけ工夫したのは、list_item_bookmark.xmlの<code>android:text</code>で<code>String.format()</code>を使用したこと、あと、文字列リソースは<code>@string/id</code>と書けば参照できて、それはデータ・バインディングの中でも変わらないことを証明するために<code>String.format()</code>の中に<code>@string/start_to_end_arrow</code>と書いたことと、ついでだったのでリソース中のすべての文字列をres/values/string.xmlに移動させて、都営バスを思わせる緑色で画面が表示されるようにres/values/colors.xmlを修正したくらい。</p>
@@ -3957,33 +3964,34 @@ dependencies {
 <span id="cb105-167"><a href="#cb105-167"></a>            value = busesValue.map { bus -&gt;</span>
 <span id="cb105-168"><a href="#cb105-168"></a>                BusApproach(</span>
 <span id="cb105-169"><a href="#cb105-169"></a>                    bus.id,</span>
-<span id="cb105-170"><a href="#cb105-170"></a>                    timeTablesValue?.find { timeTable -&gt; timeTable.routeId == bus.routeId }?.let { timeTable -&gt;</span>
-<span id="cb105-171"><a href="#cb105-171"></a>                        timeTableDetailsValue?.filter { it.timeTableId == timeTable.id }?.sortedByDescending { it.order }?.takeWhile { it.busStopPoleId != bus.fromBusStopPoleId }?.zipWithNext()?.map { (next, prev) -&gt; next.arrival - prev.arrival }?.sum()</span>
-<span id="cb105-172"><a href="#cb105-172"></a>                    },</span>
-<span id="cb105-173"><a href="#cb105-173"></a>                    routeBusStopPolesValue.sortedByDescending { it.order }.let { it.first().order - it.find { routeBusStopPole -&gt; routeBusStopPole.busStopPoleId == bus.fromBusStopPoleId }!!.order },</span>
-<span id="cb105-174"><a href="#cb105-174"></a>                    routesValue.find { it.id == bus.routeId }!!.name,</span>
-<span id="cb105-175"><a href="#cb105-175"></a>                    busStopPolesValue.find { it.id == bus.fromBusStopPoleId }!!.busStopName</span>
-<span id="cb105-176"><a href="#cb105-176"></a>                )</span>
-<span id="cb105-177"><a href="#cb105-177"></a>            }.sortedWith(compareBy({ it.willArriveAfter ?: <span class="kw">Int</span>.MAX_VALUE }, { it.busStopCount }))</span>
-<span id="cb105-178"><a href="#cb105-178"></a>        }</span>
-<span id="cb105-179"><a href="#cb105-179"></a></span>
-<span id="cb105-180"><a href="#cb105-180"></a>        addSource(routes)            { update() }</span>
-<span id="cb105-181"><a href="#cb105-181"></a>        addSource(routeBusStopPoles) { update() }</span>
-<span id="cb105-182"><a href="#cb105-182"></a>        addSource(busStopPoles)      { update() }</span>
-<span id="cb105-183"><a href="#cb105-183"></a>        addSource(timeTables)        { update() }</span>
-<span id="cb105-184"><a href="#cb105-184"></a>        addSource(timeTableDetails)  { update() }</span>
-<span id="cb105-185"><a href="#cb105-185"></a>        addSource(buses)             { update() }</span>
-<span id="cb105-186"><a href="#cb105-186"></a>    }</span>
-<span id="cb105-187"><a href="#cb105-187"></a></span>
-<span id="cb105-188"><a href="#cb105-188"></a>    <span class="kw">fun</span> <span class="fu">toggleBookmark</span>() {</span>
-<span id="cb105-189"><a href="#cb105-189"></a>        viewModelScope.launch {</span>
-<span id="cb105-190"><a href="#cb105-190"></a>            <span class="kw">val</span> <span class="va">departureBusStopNameValue</span> = departureBusStopName.value ?: return<span class="at">@launch</span></span>
-<span id="cb105-191"><a href="#cb105-191"></a>            <span class="kw">val</span> <span class="va">arrivalBusStopNameValue</span>   = arrivalBusStopName.value   ?: return<span class="at">@launch</span></span>
-<span id="cb105-192"><a href="#cb105-192"></a></span>
-<span id="cb105-193"><a href="#cb105-193"></a>            repository.toggleBookmark(departureBusStopNameValue, arrivalBusStopNameValue)</span>
-<span id="cb105-194"><a href="#cb105-194"></a>        }</span>
-<span id="cb105-195"><a href="#cb105-195"></a>    }</span>
-<span id="cb105-196"><a href="#cb105-196"></a>}</span></code></pre></div>
+<span id="cb105-170"><a href="#cb105-170"></a>                    <span class="co">// 時刻表から、あと何秒で到着するのかを計算します</span></span>
+<span id="cb105-171"><a href="#cb105-171"></a>                    timeTablesValue?.find { timeTable -&gt; timeTable.routeId == bus.routeId }?.let { timeTable -&gt;</span>
+<span id="cb105-172"><a href="#cb105-172"></a>                        timeTableDetailsValue?.filter { it.timeTableId == timeTable.id }?.sortedByDescending { it.order }?.takeWhile { it.busStopPoleId != bus.fromBusStopPoleId }?.zipWithNext()?.map { (next, prev) -&gt; next.arrival - prev.arrival }?.sum()</span>
+<span id="cb105-173"><a href="#cb105-173"></a>                    },</span>
+<span id="cb105-174"><a href="#cb105-174"></a>                    routeBusStopPolesValue.sortedByDescending { it.order }.let { it.first().order - it.find { routeBusStopPole -&gt; routeBusStopPole.busStopPoleId == bus.fromBusStopPoleId }!!.order },</span>
+<span id="cb105-175"><a href="#cb105-175"></a>                    routesValue.find { it.id == bus.routeId }!!.name,</span>
+<span id="cb105-176"><a href="#cb105-176"></a>                    busStopPolesValue.find { it.id == bus.fromBusStopPoleId }!!.busStopName</span>
+<span id="cb105-177"><a href="#cb105-177"></a>                )</span>
+<span id="cb105-178"><a href="#cb105-178"></a>            }.sortedWith(compareBy({ it.willArriveAfter ?: <span class="kw">Int</span>.MAX_VALUE }, { it.busStopCount }))</span>
+<span id="cb105-179"><a href="#cb105-179"></a>        }</span>
+<span id="cb105-180"><a href="#cb105-180"></a></span>
+<span id="cb105-181"><a href="#cb105-181"></a>        addSource(routes)            { update() }</span>
+<span id="cb105-182"><a href="#cb105-182"></a>        addSource(routeBusStopPoles) { update() }</span>
+<span id="cb105-183"><a href="#cb105-183"></a>        addSource(busStopPoles)      { update() }</span>
+<span id="cb105-184"><a href="#cb105-184"></a>        addSource(timeTables)        { update() }</span>
+<span id="cb105-185"><a href="#cb105-185"></a>        addSource(timeTableDetails)  { update() }</span>
+<span id="cb105-186"><a href="#cb105-186"></a>        addSource(buses)             { update() }</span>
+<span id="cb105-187"><a href="#cb105-187"></a>    }</span>
+<span id="cb105-188"><a href="#cb105-188"></a></span>
+<span id="cb105-189"><a href="#cb105-189"></a>    <span class="kw">fun</span> <span class="fu">toggleBookmark</span>() {</span>
+<span id="cb105-190"><a href="#cb105-190"></a>        viewModelScope.launch {</span>
+<span id="cb105-191"><a href="#cb105-191"></a>            <span class="kw">val</span> <span class="va">departureBusStopNameValue</span> = departureBusStopName.value ?: return<span class="at">@launch</span></span>
+<span id="cb105-192"><a href="#cb105-192"></a>            <span class="kw">val</span> <span class="va">arrivalBusStopNameValue</span>   = arrivalBusStopName.value   ?: return<span class="at">@launch</span></span>
+<span id="cb105-193"><a href="#cb105-193"></a></span>
+<span id="cb105-194"><a href="#cb105-194"></a>            repository.toggleBookmark(departureBusStopNameValue, arrivalBusStopNameValue)</span>
+<span id="cb105-195"><a href="#cb105-195"></a>        }</span>
+<span id="cb105-196"><a href="#cb105-196"></a>    }</span>
+<span id="cb105-197"><a href="#cb105-197"></a>}</span></code></pre></div>
 <p>うん、本当に面倒くさかった……。</p>
 <p>でも、<code>departureBusStopName</code>と<code>arrivalBusStopName</code>、<code>bookmark</code>、<code>routes</code>、<code>routeBusStopPoles</code>、<code>busStopPoles</code>、<code>timeTableDetails</code>については、これまでに説明したやり方をそのまま繰り返しただけなので簡単です。</p>
 <p>問題は<code>timeTables</code>プロパティと<code>buses</code>プロパティ、<code>busApproaches</code>プロパティです。<code>Repository</code>の<code>syncTimeTables()</code>メソッドを実行しないとデータベースは空なので、だからどこかで<code>syncTimeTables()</code>を呼ばなければ<code>timeTables</code>はいつまでも空集合のまま。あと、<code>buses</code>はWebサービスから取得する値で、変更通知が来ませんから自分で値を定期的に更新しなければなりません。バスの接近情報そのものである<code>busApproaches</code>は、全ての情報を手作りしなければなりませんし……。</p>
@@ -3994,10 +4002,10 @@ dependencies {
 <span id="cb106-2"><a href="#cb106-2"></a></span>
 <span id="cb106-3"><a href="#cb106-3"></a><span class="kw">data</span> <span class="kw">class</span> BusApproach(</span>
 <span id="cb106-4"><a href="#cb106-4"></a>    <span class="kw">val</span> <span class="va">id</span>: <span class="dt">String</span>,</span>
-<span id="cb106-5"><a href="#cb106-5"></a>    <span class="kw">val</span> <span class="va">willArriveAfter</span>: <span class="dt">Int?</span>,</span>
-<span id="cb106-6"><a href="#cb106-6"></a>    <span class="kw">val</span> <span class="va">busStopCount</span>: <span class="dt">Int</span>,</span>
-<span id="cb106-7"><a href="#cb106-7"></a>    <span class="kw">val</span> <span class="va">routeName</span>: <span class="dt">String</span>,</span>
-<span id="cb106-8"><a href="#cb106-8"></a>    <span class="kw">val</span> <span class="va">leftBusStopName</span>: <span class="dt">String</span></span>
+<span id="cb106-5"><a href="#cb106-5"></a>    <span class="kw">val</span> <span class="va">willArriveAfter</span>: <span class="dt">Int?</span>,   // あと何秒で到着するか</span>
+<span id="cb106-6"><a href="#cb106-6"></a>    <span class="kw">val</span> <span class="va">busStopCount</span>: <span class="dt">Int</span>,       // 出発バス停までのバス停の数</span>
+<span id="cb106-7"><a href="#cb106-7"></a>    <span class="kw">val</span> <span class="va">routeName</span>: <span class="dt">String</span>,       // 路線の名称</span>
+<span id="cb106-8"><a href="#cb106-8"></a>    <span class="kw">val</span> <span class="va">leftBusStopName</span>: <span class="dt">String</span>  // バスが最後に出発したバス停の名称</span>
 <span id="cb106-9"><a href="#cb106-9"></a>)</span></code></pre></div>
 <p>何秒後に到着するのかを表現する<code>willArriveAfter</code>プロパティに加えて<code>busStopCount</code>プロパティがあるのは、<code>TimeTable</code>を同期する<code>syncTimeTables()</code>はかなり時間がかかるので、それまでの間はあといくつバス停があるのかでなんとなく到着時刻を判断していただくためです。と、こんな感じに<code>TimeTable</code>がまだない場合も想定しているので、<code>busApproaches</code>プロパティの中の<code>timeTablesValue</code>と<code>timeTableDetailsValue</code>を設定する部分では、<code>null</code>の場合にリターンする処理が省かれているわけですな。</p>
 <p>さて、<code>busApproaches</code>プロパティでは、<code>buses</code>の要素である<code>Bus</code>単位で<code>BusApproach</code>を作成します。関数型プログラミングの<code>map</code>ですね。<code>willArriveAfter</code>は、TimeTableDetail（出発バス停から手前10バス停分が入っている）を<code>sortedByDescending()</code>で逆順にソートして、<code>takeWhile</code>で<code>bus.fromBusStopPoleId</code>と異なる間だけ取得します。これで、出発バス停からバスが最後に出発したバス停の<em>次</em>のバス停までを入手できるというわけ。あとは、<code>zipWithNext()</code>でペアを作成して、時刻の差を求めて、合計する。これで、何秒後に到着するのかの情報を取得できました！　関数型プログラミングは本当に楽ちんですな。</p>
@@ -4200,14 +4208,15 @@ dependencies {
 <span id="cb110-36"><a href="#cb110-36"></a></span>
 <span id="cb110-37"><a href="#cb110-37"></a>            recyclerView.adapter = BusApproachAdapter().apply {</span>
 <span id="cb110-38"><a href="#cb110-38"></a>                this<span class="at">@BusApproachesFragment</span>.viewModel.busApproaches.observe(viewLifecycleOwner, Observer {</span>
-<span id="cb110-39"><a href="#cb110-39"></a>                    noBusApproachesTextView.visibility = <span class="cf">if</span> (it.isEmpty()) { View.VISIBLE } <span class="cf">else</span> { View.GONE }</span>
-<span id="cb110-40"><a href="#cb110-40"></a></span>
-<span id="cb110-41"><a href="#cb110-41"></a>                    submitList(it)</span>
-<span id="cb110-42"><a href="#cb110-42"></a>                })</span>
-<span id="cb110-43"><a href="#cb110-43"></a>            }</span>
-<span id="cb110-44"><a href="#cb110-44"></a>        }.root</span>
-<span id="cb110-45"><a href="#cb110-45"></a>    }</span>
-<span id="cb110-46"><a href="#cb110-46"></a>}</span></code></pre></div>
+<span id="cb110-39"><a href="#cb110-39"></a>                    <span class="co">// データ件数が0件だった場合のViewの可視性を適切に設定します</span></span>
+<span id="cb110-40"><a href="#cb110-40"></a>                    noBusApproachesTextView.visibility = <span class="cf">if</span> (it.isEmpty()) { View.VISIBLE } <span class="cf">else</span> { View.GONE }</span>
+<span id="cb110-41"><a href="#cb110-41"></a></span>
+<span id="cb110-42"><a href="#cb110-42"></a>                    submitList(it)</span>
+<span id="cb110-43"><a href="#cb110-43"></a>                })</span>
+<span id="cb110-44"><a href="#cb110-44"></a>            }</span>
+<span id="cb110-45"><a href="#cb110-45"></a>        }.root</span>
+<span id="cb110-46"><a href="#cb110-46"></a>    }</span>
+<span id="cb110-47"><a href="#cb110-47"></a>}</span></code></pre></div>
 <p>これだけで、はい。動きました！</p>
 <p>動画</p>
 <p>これで通勤が楽になるので、ダメ人間な私でももう少しサラリーマンを続けられそうです。Android Jetpackありがとー！</p>
