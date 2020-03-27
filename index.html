@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Androidアプリ開発ガイド</title>
+  <title>私的Androidアプリ開発ガイド</title>
   <style>
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
@@ -1741,7 +1741,7 @@ dependencies {
 <p>……ごめんなさい。ログに「Finish.」という文字が出たからRoomを正しく使えたと思えってのは、あまりに乱暴でしたね。もう少しきちんと確認しましょう。</p>
 <p>スマートフォン上に生成されたデータベースのファイルは、AndroidStudioを使用してダウンロードする事ができます。Android Studioで[Device File Explorer]を開いて、data/data/com.tail_island.jetbus/databases」を開くと、その下に「jetbus.db」というファイルがあります。これ、SQLite3のファイルなんですよ。このファイルを右クリックして、[Save As...]メニューでローカルに保存します。</p>
 <p>図</p>
-<p>ダウンロードしたデータベースのファイルの中を見て、正しく動作したのかを確認してみます。sqlite3コマンドでデータベースを開いて<code>SELECT * FROM BusStop LIMIT 10;</code>を実行して、はい、たしかにバス停が保存されています。この章の前で書いた、出発バス停名と到着バス停名から<code>Route</code>を取得するSQLも実行してみます。うん、上りか下りなのかの判別まで含めてうまく行っています。やっぱり、Room簡単ですな。</p>
+<p>ダウンロードしたデータベースのファイルの中を見て、正しく動作したのかを確認してみましょう。sqlite3コマンドでデータベースを開いて<code>SELECT * FROM BusStop LIMIT 10;</code>を実行して、はい、たしかにバス停が保存されています。この章の前で書いた、出発バス停名と到着バス停名から<code>Route</code>を取得するSQLも実行してみます。うん、上りか下りなのかの判別まで含めてうまく行っています。やっぱり、Room簡単ですな。</p>
 <p>図</p>
 <h1 id="dagger"><a href="https://github.com/tail-island/jetbus/tree/dagger">Dagger</a></h1>
 <p>このあたりで少し冷静になってこれまでに作成したコードを見直してみると、なんだか、<code>SplashFragment</code>があまりに汚い……。ちょっとWebサービス呼び出してみようかなってたびに、前準備として以下のコード書くなんてやってられないですよね？</p>
