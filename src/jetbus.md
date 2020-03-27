@@ -2605,7 +2605,7 @@ class BusApproachesViewModel(private val repository: Repository): ViewModel() {
 
 同じ問題は`Activity`や`Fragment`で経験済みで、あのときはDaggerによるDependency Injectionで解決できました。でも、`ViewModel`からは`App`にアクセスできないので、同じ解決策は使えません……。
 
-幸いなことに、Daggerは有名なプロダクトですから、いろいろな人が使い方を調べて解説を書いてくださっています。その一つの[ViewModelをDagger2でDIする](https://qiita.com/superman9387/items/bea94e4316c2ccf8fb68)がこの問題を解決してくれます。ありがてぇ。というわけで、ここに書いてある通りにすればオッケー。
+幸いなことに、Daggerは有名なプロダクトですから、いろいろな人が使い方を調べて解説を書いてくださっています。その一つの[ViewModelをDagger2でDIする](https://qiita.com/superman9387/items/bea94e4316c2ccf8fb68)がこの問題を解決してくれます。ありがてぇ。というわけで、ここに書いてある通りにすればすべてオッケー。
 
 解説と順序は違いますが、まずは`ViewModelKey`アノテーションと`AppViewModelProviderFactory`を作成します。新規にUtility.ktを作成して、以下の内容を入力します。
 

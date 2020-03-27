@@ -2646,7 +2646,7 @@ dependencies {
 <h2 id="viewmodelをdaggerから取得する"><code>ViewModel</code>をDaggerから取得する</h2>
 <p>では、ViewModelを使ってみましょう。ドキュメントの<a href="https://developer.android.com/topic/libraries/architecture/viewmodel?hl=ja">ViewModelの概要</a>を見てみると、なるほど、<code>ViewModelProviders.of(this)[BusApproachesViewModel::class.java]</code>でインスタンスを取得できるのね……って、これではインスタンス生成が自動化されていて手が出せないので、<code>Repository</code>を引数にしてコンストラクタを呼び出すことできないじゃん！</p>
 <p>同じ問題は<code>Activity</code>や<code>Fragment</code>で経験済みで、あのときはDaggerによるDependency Injectionで解決できました。でも、<code>ViewModel</code>からは<code>App</code>にアクセスできないので、同じ解決策は使えません……。</p>
-<p>幸いなことに、Daggerは有名なプロダクトですから、いろいろな人が使い方を調べて解説を書いてくださっています。その一つの<a href="https://qiita.com/superman9387/items/bea94e4316c2ccf8fb68">ViewModelをDagger2でDIする</a>がこの問題を解決してくれます。ありがてぇ。というわけで、ここに書いてある通りにすればオッケー。</p>
+<p>幸いなことに、Daggerは有名なプロダクトですから、いろいろな人が使い方を調べて解説を書いてくださっています。その一つの<a href="https://qiita.com/superman9387/items/bea94e4316c2ccf8fb68">ViewModelをDagger2でDIする</a>がこの問題を解決してくれます。ありがてぇ。というわけで、ここに書いてある通りにすればすべてオッケー。</p>
 <p>解説と順序は違いますが、まずは<code>ViewModelKey</code>アノテーションと<code>AppViewModelProviderFactory</code>を作成します。新規にUtility.ktを作成して、以下の内容を入力します。</p>
 <div class="sourceCode" id="cb70"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb70-1"><a href="#cb70-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus</span></span>
 <span id="cb70-2"><a href="#cb70-2"></a></span>
