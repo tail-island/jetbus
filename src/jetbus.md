@@ -3399,9 +3399,9 @@ class BusStopAdapter: ListAdapter<BusStop, BusStopAdapter.ViewHolder>(DiffCallba
 }
 ~~~
 
-先程作成した`ViewHolder`と`DiffCallback`は、管理を簡単にするためにAdapterの中に入れました。Kotlinでは、単純に`class`の内側に`class`を作成しただけだと、外側の`class`の属性やメソッドを参照することはできません。で、`ViewHolder`では外側のクラスの`onBusStopClick`を使用したかったので、`inner class`にしました。
+先程作成した`ViewHolder`と`DiffCallback`は、管理を簡単にするためにAdapterの中に入れました。Kotlinでは、単純に`class`の内側に`class`を作成しただけだと、外側の`class`の属性やメソッドを参照することはできません。だから、`ViewHolder`は外側のクラスの`onBusStopClick`を使用できるよう、`inner class`にしました。
 
-あとは、`ViewHolder`を作成する`onCreateViewHolder()`メソッドと、データ・バインディングのときに呼ばれる`onBindViewHolder()`メソッドを定義するだけです。GitHubのコードを見ていただければ分かるのですけど、Adapterはすべてほぼ同じコードです。コピー＆ペーストして少しだけ置換すれば完成しちゃうので、一度上のコードを覚えてしまえばとても簡単に作れますよ。
+あとは、`ViewHolder`を作成する`onCreateViewHolder()`メソッドと、データ・バインディングのときに呼ばれる`onBindViewHolder()`メソッドを定義するだけです。[GitHubのコード](https://github.com/tail-island/jetbus/tree/recycler-view)を見ていただければ分かるのですけど、Adapterはすべてほぼ同じコードです。コピー＆ペーストして少しだけ置換すれば完成しちゃうので、一度上のコードを覚えてしまえばとても簡単に作れますよ。
 
 ## RecyclerViewを組み込む
 
