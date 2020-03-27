@@ -3664,7 +3664,7 @@ dependencies {
 <span id="cb102-33"><a href="#cb102-33"></a><span class="st">        &quot;&quot;&quot;</span>)</span>
 <span id="cb102-34"><a href="#cb102-34"></a>    <span class="kw">fun</span> <span class="fu">getObservablesByRouteIdsAndDepartureBusStopName</span>(<span class="va">routeIds</span>: <span class="dt">List</span>&lt;<span class="va">String</span>&gt;, <span class="va">departureBusStopName</span>: <span class="dt">String</span>, <span class="va">now</span>: <span class="dt">Int</span>): <span class="dt">LiveData</span>&lt;<span class="dt">List</span>&lt;<span class="dt">TimeTable</span>&gt;&gt;</span>
 <span id="cb102-35"><a href="#cb102-35"></a>}</span></code></pre></div>
-<p>ある特定の条件下での集約や分析を実現するSQLのwindow関数を使えば簡単に作れそうなのですけど、残念なことにSQLite3がwindow関数をサポートしたのはバージョン3.25.0で、2020年3月現在で最新のAndroid 10であってもSQLite3のバージョンは3.22.0です……。だから、上のSQLでは<code>NOT EXISTS</code>の中の副問合せで代用しました。副問合せの外側の行よりも到着バス停に関連付けられた<code>TimeTableDetail.arrival</code>から現在時刻を引いた結果の絶対値が小さいものが存在しない（<code>NOT EXISTS</code>）なので、結果として到着バス停に関連付けられた<code>TimeTableDetail.arrival</code>が現在時刻に最も近いものがSELECTされます。……現在時刻との差が同じものが複数ある場合に、全部取得されちゃうんだけどな。なので、<code>INNER JOIN</code>でもう一回副問合せして、<code>GROUP BY</code>して最小（順序が付いて一つに絞れるなら何でもいいので、最大とかでも大丈夫）の<code>TimeTable.id</code>と<code>INNER JOIN</code>しています。ちょっと（かなり）複雑なSQL文ですけど、でもたぶん、普通のプログラミング言語でループを回してデータを取得する処理を書くよりは楽だと思いますよ。O/Rマッピング・ツールがなかった頃にプログラムを書いていた私のようなおっさんに頼めば、この程度のSQLは大喜びで一瞬で書いてくれるはずです。おっさんとハサミは使いようですよ。職場のおっさんを大事にしましょう。</p>
+<p>ある特定の条件下での集約や分析を実現するSQLのwindow関数を使えば簡単に作れそうなのですけど、残念なことにSQLite3がwindow関数をサポートしたのはバージョン3.25.0で、2020年3月現在で最新のAndroid 10であってもSQLite3のバージョンは3.22.0です……。だから、上のSQLでは<code>NOT EXISTS</code>の中の副問合せで代用しました。副問合せの外側の行よりも到着バス停に関連付けられた<code>TimeTableDetail.arrival</code>から現在時刻を引いた結果の絶対値が小さいものが存在しない（<code>NOT EXISTS</code>）なので、結果として到着バス停に関連付けられた<code>TimeTableDetail.arrival</code>が現在時刻に最も近いものが<code>SELECT</code>されます。……現在時刻との差が同じものが複数ある場合に、全部取得されちゃうんだけどな。なので、<code>INNER JOIN</code>でもう一回副問合せして、<code>GROUP BY</code>して最小（順序が付いて一つに絞れるなら何でもいいので、最大とかでも大丈夫）の<code>TimeTable.id</code>と<code>INNER JOIN</code>しています。ちょっと（かなり）複雑なSQL文ですけど、でもたぶん、普通のプログラミング言語でループを回してデータを取得する処理を書くよりは楽だと思いますよ。O/Rマッピング・ツールがなかった頃にプログラムを書いていた私のようなおっさんに頼めば、この程度のSQLは大喜びで一瞬で書いてくれるはずです。おっさんとハサミは使いようですよ。職場のおっさんを大事にしましょう。</p>
 <h3 id="timetabledetail"><code>TimeTableDetail</code></h3>
 <p><code>TimeTable</code>を取得できたので、<code>TimeTableDetail</code>も取得します。<code>RouteBusStopPole</code>のときと同じで、出発バス停以降の<code>TimeTableDetail</code>も、出発バス停のはるか手前の<code>TimeTableDetail</code>も不要……なのですけど、同じ条件式を2回書くのは大変なので、取得済みの<code>BusStopPole</code>を活用することにしましょう。</p>
 <div class="sourceCode" id="cb103"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb103-1"><a href="#cb103-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
@@ -3683,7 +3683,7 @@ dependencies {
 <span id="cb103-14"><a href="#cb103-14"></a>}</span></code></pre></div>
 <p>うん、SQL便利。これでデータ・アクセス・オブジェクトの作成は終了です。</p>
 <h2 id="repositoryを作成する"><code>Repository</code>を作成する</h2>
-<p><code>Repository</code>でデータベースとWebサービスの差異を吸収して統一した操作を実現する……のが理想だけど、実際はまず無理！　トランザクションがある環境とない環境で同じ操作なんて無理なんだよ（と私は思います）！　とはいえ、<code>Repository</code>というレイヤーはやはり便利です。以前作成した<code>syncDatabase()</code>メソッドのようなデータベースとWebサービスの複雑な呼び出しを隠蔽するメソッドを置けますし、データ・アクセス・オブジェクトのメソッドがへっぽこだったりWebサービスの仕様が物足りなかったりする場合を補う処理を書けますから。</p>
+<p><code>Repository</code>でデータベースとWebサービスの差異を吸収して統一した操作を実現する……のが理想なんだけど、実際はまず無理！　トランザクションがある環境とない環境で同じ操作なんて無理なんだよ（と私は思います）。とはいえ、<code>Repository</code>というレイヤーはやはり便利です。以前作成した<code>syncDatabase()</code>メソッドのようなデータベースとWebサービスの複雑な呼び出しを隠蔽するメソッドを置けますし、データ・アクセス・オブジェクトのメソッドがへっぽこだったりWebサービスの仕様が物足りなかったりする場合を補う処理を書けますから。</p>
 <p>というわけで、作成した<code>Repository</code>は以下の通り。</p>
 <div class="sourceCode" id="cb104"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb104-1"><a href="#cb104-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
 <span id="cb104-2"><a href="#cb104-2"></a></span>
@@ -3782,7 +3782,7 @@ dependencies {
 <span id="cb104-95"><a href="#cb104-95"></a>    <span class="kw">fun</span> <span class="fu">getObservableTimeTablesByRoutesAndDepartureBusStop</span>(<span class="va">routes</span>: <span class="dt">Iterable</span>&lt;<span class="va">Route</span>&gt;, <span class="va">departureBusStopName</span>: <span class="dt">String</span>) = database.getTimeTableDao().getObservablesByRouteIdsAndDepartureBusStopName(routes.map { it.id }, departureBusStopName, Calendar.getInstance().let { it.<span class="kw">get</span>(Calendar.HOUR_OF_DAY) * <span class="dv">60</span> * <span class="dv">60</span> + it.<span class="kw">get</span>(Calendar.MINUTE) * <span class="dv">60</span> })</span>
 <span id="cb104-96"><a href="#cb104-96"></a>    <span class="kw">fun</span> <span class="fu">getObservableTimeTableDetailsByTimeTablesAndBusStopPoles</span>(<span class="va">timeTables</span>: <span class="dt">Iterable</span>&lt;<span class="va">TimeTable</span>&gt;, <span class="va">busStopPoles</span>: <span class="dt">Iterable</span>&lt;<span class="va">BusStopPole</span>&gt;) = database.getTimeTableDetailDao().getObservablesByTimeTableIdsAndBusStopPoleIds(timeTables.map { it.id }, busStopPoles.map { it.id })</span>
 <span id="cb104-97"><a href="#cb104-97"></a>}</span></code></pre></div>
-<p><code>syncTimeTables()</code>は<code>syncDatabase()</code>の外側にループがもう一つ付いただけ。これで、<code>TimeTable</code>と<code>TimeTableDetail</code>をデータベースにキャッシュできるようになりました。<code>clearBookmarks()</code>はバス停が廃止された場合にブックマークの削除ができなくなっちゃうじゃんと考えてこっそり追加した[ブックマークを全て削除]メニュー向けのメソッド、<code>toggleBookmark()</code>は前の章で作成した（けど説明をし忘れた）ブックマークを設定したり解除したりするためのメソッドです。</p>
+<p><code>syncTimeTables()</code>は、構造的には<code>syncDatabase()</code>の外側にループがもう一つ付いただけ。これで、<code>TimeTable</code>と<code>TimeTableDetail</code>をデータベースにキャッシュできるようになりました。<code>clearBookmarks()</code>はバス停が廃止された場合にブックマークの削除ができなくなっちゃうかもと考えてこっそり追加した[ブックマークを全て削除]メニュー向けのメソッド、<code>toggleBookmark()</code>は前の章で作成した（けど説明をし忘れた）ブックマークを設定したり解除したりするためのメソッドです。</p>
 <p>重要なのはここから。<code>getBuses()</code>はWebサービスを呼び出しているのですけど、このWebサービスって<code>Route</code>のバスを全て返すんですよ。で、データ・アクセス・オブジェクトのところで何度も考えたように、出発バス停以降を走っているバスや出発バス停のはるか手前を走っているバスの情報は不要。なので、不要な情報を削除する処理をこのメソッドの中に入れています。出発バス停を出発したバスを除外するところが格好悪いコードになっていますけど、ご容赦ください。</p>
 <p>あと、たとえば<code>BusStopPoleDao.getObservablesByIds()</code>ではIDの集合が引数になっていたわけですけど、それだと呼び出しづらいので、<code>BusStopPoleDao.getObservablesByIds()</code>をラップする<code>getObservableBusStopPolesByRouteBusStopPoles()</code>は<code>RouteBusStopPole</code>の集合を引数に呼び出せるようにしたりしています。<code>getObservableRouteBusStopPolesByRoutes()</code>や<code>getObservableTimeTableDetailsByTimeTablesAndBusStopPoles()</code>も同様。<code>getObservableTimeTablesByRoutesAndDepartureBusStop()</code>では、それにくわええて現在時刻の引数を生成しています。</p>
 <p>うん、<code>Repository</code>を作っておいて良かった。これなら<code>ViewModel</code>の作成は簡単でしょう。</p>
@@ -3986,10 +3986,10 @@ dependencies {
 <span id="cb105-196"><a href="#cb105-196"></a>}</span></code></pre></div>
 <p>うん、本当に面倒くさかった……。</p>
 <p>でも、<code>departureBusStopName</code>と<code>arrivalBusStopName</code>、<code>bookmark</code>、<code>routes</code>、<code>routeBusStopPoles</code>、<code>busStopPoles</code>、<code>timeTableDetails</code>については、これまでに説明したやり方をそのまま繰り返しただけなので簡単です。</p>
-<p>問題は<code>timeTables</code>プロパティと<code>buses</code>プロパティ、<code>busApproaches</code>プロパティです。<code>Repository</code>の<code>syncTimeTables()</code>メソッドを実行しないとデータベースは空なので、だからどこかで<code>syncTimeTables()</code>を呼ばなければ<code>timeTables</code>はいつまでも空集合を返します。<code>buses</code>はWebサービスから取得する値で、変更通知が来ませんから自分で値を定期的に更新しなければなりません。バスの接近情報そのものである<code>busApproaches</code>は、全ての情報を手作りしなければなりません……。</p>
-<p>というわけで、まずは<code>timeTables</code>プロパティから。<code>syncTimeTables()</code>を呼ぶのに一番良いタイミングは<code>routes</code>プロパティと<code>departureBusStopName</code>プロパティの両方に値が設定された時なので、<code>MediatorLiveData&lt;List&lt;TimeTable&gt;&gt;().apply { ... }</code>の中に<code>syncTimeTables()</code>を呼び出す処理を入れたい。値を取得する処理の中に更新処理を入れるのは目的違いな気もするけど、他に適当な場所が無いから我慢。で、<code>syncTimeTables()</code>はコルーチンで呼び出さなければならないので<code>viewModelScope.launch { ... }</code>して呼び出します。今回は<code>routes</code>も<code>departureBusStopName</code>も変更がないので実は考慮しなくても動作するのですけど、念の為に、<code>syncTimeTables()</code>している最中にもう一度<code>viewModelScope.launch { ... }</code>が動いてしまっても二重に処理されないための考慮をしておきたい。というわけで、<code>source</code>と同様に<code>job</code>という変数を作成して、<code>cancelAndJoin()</code>するようにしました。<code>cancelAndJoin()</code>も<code>suspend</code>なメソッドなので、<code>update()</code>全体を<code>viewModelScope.launch { ... }</code>で囲んでいます。これで<code>timeTables</code>プロパティは完成。<code>syncTimeTables()</code>が終わればデータベースが更新されたことがLiveDataで通知されて、結果として<code>timeTables</code>プロパティに値が設定されます。</p>
+<p>問題は<code>timeTables</code>プロパティと<code>buses</code>プロパティ、<code>busApproaches</code>プロパティです。<code>Repository</code>の<code>syncTimeTables()</code>メソッドを実行しないとデータベースは空なので、だからどこかで<code>syncTimeTables()</code>を呼ばなければ<code>timeTables</code>はいつまでも空集合のまま。あと、<code>buses</code>はWebサービスから取得する値で、変更通知が来ませんから自分で値を定期的に更新しなければなりません。バスの接近情報そのものである<code>busApproaches</code>は、全ての情報を手作りしなければなりませんし……。</p>
+<p>というわけで、まずは<code>timeTables</code>プロパティから。<code>syncTimeTables()</code>を呼ぶのに一番良いタイミングは<code>routes</code>プロパティと<code>departureBusStopName</code>プロパティの両方に値が設定された時なので、<code>MediatorLiveData&lt;List&lt;TimeTable&gt;&gt;().apply { ... }</code>の中に<code>syncTimeTables()</code>を呼び出す処理を入れたい。値を取得する処理の中に更新処理を入れるのは目的違いな気もするけど、他に適当な場所が無いから我慢。で、<code>syncTimeTables()</code>はコルーチンで呼び出さなければならないので<code>viewModelScope.launch { ... }</code>して呼び出します。今回は<code>routes</code>も<code>departureBusStopName</code>も変更がないので実は考慮しなくても動作するのですけど、念の為に、<code>syncTimeTables()</code>している最中にもう一度<code>viewModelScope.launch { ... }</code>が動いてしまっても二重に処理されないための考慮をしておきたい。というわけで、<code>source</code>と同様に<code>job</code>という変数を作成して、<code>cancelAndJoin()</code>でキャンセルされるまで待つようにしました。<code>cancelAndJoin()</code>も<code>suspend</code>なメソッドなので、<code>update()</code>全体を<code>viewModelScope.launch { ... }</code>で囲んでいます。これで<code>timeTables</code>プロパティは完成。<code>syncTimeTables()</code>が終わればデータベースが更新されたことがLiveDataで通知されて、その結果として<code>timeTables</code>プロパティに値が設定されます。</p>
 <p><code>buses</code>プロパティも同じやり方で作りました。こちらは15,000ミリ秒の間隔で繰り返される無限ループです。コルーチンがあると気軽に無限ループが使えて便利ですな。</p>
-<p>最後の<code>busApproaches</code>プロパティはゴリゴリにロジックを書いて実現します。で、説明を忘れていたのですけど、このプロパティを作成する前にバスの接近情報を表現する<code>BusApproach</code>を追加しておきます。</p>
+<p>最後の<code>busApproaches</code>プロパティはゴリゴリにロジックを書いて実現しました。で、説明を忘れていたのですけど、このプロパティを作成する前にバスの接近情報を表現する<code>BusApproach</code>を追加しておきます。</p>
 <div class="sourceCode" id="cb106"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb106-1"><a href="#cb106-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
 <span id="cb106-2"><a href="#cb106-2"></a></span>
 <span id="cb106-3"><a href="#cb106-3"></a><span class="kw">data</span> <span class="kw">class</span> BusApproach(</span>
@@ -3999,8 +3999,8 @@ dependencies {
 <span id="cb106-7"><a href="#cb106-7"></a>    <span class="kw">val</span> <span class="va">routeName</span>: <span class="dt">String</span>,</span>
 <span id="cb106-8"><a href="#cb106-8"></a>    <span class="kw">val</span> <span class="va">leftBusStopName</span>: <span class="dt">String</span></span>
 <span id="cb106-9"><a href="#cb106-9"></a>)</span></code></pre></div>
-<p>何秒後に到着するのかを表現する<code>willArriveAfter</code>プロパティに加えて<code>busStopCount</code>プロパティがあるのは、<code>TimeTable</code>を同期する<code>syncTimeTables()</code>はかなり時間がかかるので、それまでの間はあといくつバス停があるのかで到着時刻を判断していただくためです。と、こんな感じに<code>TimeTable</code>がまだない場合も想定しているので、<code>busApproaches</code>プロパティの中の<code>timeTablesValue</code>と<code>timeTableDetailsValue</code>を設定する部分では、<code>null</code>の場合にリターンする処理が省かれているわけですな。</p>
-<p>さて、<code>busApproaches</code>プロパティでは、<code>buses</code>の要素である<code>Bus</code>単位で<code>BusApproach</code>を作成します。関数型プログラミングの<code>map</code>ですね。<code>willArriveAfter</code>は、TimeTableDetail（出発バス停から手前10バス停分が入っている）を<code>sortedByDescending()</code>で逆順にソートして、<code>takeWhile</code>で<code>bus.fromBusStopPoleId</code>と異なる間だけ取得します。これで、出発バス停からバスが最後に出発したバス停の次のバス停までを入手できるというわけ。あとは、<code>zipWithNext()</code>でペアを作成して、時刻の差を求めて、合計する。これで、何秒後に到着するのかの情報を取得できました！　関数型プログラミングは本当に楽ちんですな。</p>
+<p>何秒後に到着するのかを表現する<code>willArriveAfter</code>プロパティに加えて<code>busStopCount</code>プロパティがあるのは、<code>TimeTable</code>を同期する<code>syncTimeTables()</code>はかなり時間がかかるので、それまでの間はあといくつバス停があるのかでなんとなく到着時刻を判断していただくためです。と、こんな感じに<code>TimeTable</code>がまだない場合も想定しているので、<code>busApproaches</code>プロパティの中の<code>timeTablesValue</code>と<code>timeTableDetailsValue</code>を設定する部分では、<code>null</code>の場合にリターンする処理が省かれているわけですな。</p>
+<p>さて、<code>busApproaches</code>プロパティでは、<code>buses</code>の要素である<code>Bus</code>単位で<code>BusApproach</code>を作成します。関数型プログラミングの<code>map</code>ですね。<code>willArriveAfter</code>は、TimeTableDetail（出発バス停から手前10バス停分が入っている）を<code>sortedByDescending()</code>で逆順にソートして、<code>takeWhile</code>で<code>bus.fromBusStopPoleId</code>と異なる間だけ取得します。これで、出発バス停からバスが最後に出発したバス停の<em>次</em>のバス停までを入手できるというわけ。あとは、<code>zipWithNext()</code>でペアを作成して、時刻の差を求めて、合計する。これで、何秒後に到着するのかの情報を取得できました！　関数型プログラミングは本当に楽ちんですな。</p>
 <h2 id="fragmentを作成する">Fragmentを作成する</h2>
 <p>もう終わったも同然。機械作業でRecyclerViewを組み込みます。</p>
 <p>まずはlist_item_bus_approaches.xml。</p>
@@ -4210,21 +4210,21 @@ dependencies {
 <span id="cb110-46"><a href="#cb110-46"></a>}</span></code></pre></div>
 <p>これだけで、はい。動きました！</p>
 <p>動画</p>
-<p>これで通勤が楽になるのでもう少しサラリーマンを続けられそうです。素晴らしい！</p>
+<p>これで通勤が楽になるので、ダメ人間な私でももう少しサラリーマンを続けられそうです。Android Jetpackありがとー！</p>
 <h1 id="image-asset-studioでアイコンを作れば完成"><a href="https://github.com/tail-island/jetbus/tree/master">Image Asset Studioでアイコンを作れば、完成！</a></h1>
-<p>でも、まだ不十分。アイコンを作らないとね。Android Studioのメニューから[File] - [New] - [Image Asset]メニューを選んで、アプリのアイコンを作成しましょう。</p>
-<p>私は絵心がないので、Android StudioのClip Artを流用して作るんだけどな。[Source Asset]の[Asset Type]の[Clip Art]ラジオ・ボタンをクリックすると、Android Studioが提供するアイコンから選べるようになります。</p>
+<p>でも、まだ不十分。アプリのアイコンを作らないとね。Android Studioのメニューから[File] - [New] - [Image Asset]メニューを選んで、アプリのアイコンを作成しましょう。</p>
+<p>私は絵心がないのから、Android StudioのClip Artの流用で作るんだけどな。[Source Asset]の[Asset Type]の[Clip Art]ラジオ・ボタンをクリックすると、Android Studioが提供するアイコンから選べるようになります。</p>
 <p>図</p>
 <p>Clip Artをクリックして、バスのアイコンをクリックします。</p>
 <p>図</p>
 <p>色を設定します。今回は真っ白にしたいので、「FFFFFF」を入力します。</p>
 <p>図</p>
-<p>背景の絵を考えるのも面倒でしたので、単色でやりましょう。[Background Layer]タブを選択して、Colorをクリックします。背景色は、アプリの<code>colorPrimaryDark</code>に設定した色の「006428」です。この色は<a href="https://material.io/resources/color/#!/?view.left=0&amp;view.right=1">Color Tool</a>で作成しました。Primary Colorに適当な色を設定するだけでPrimary Dark Colorが作成されてとても便利ですよ。</p>
+<p>背景の絵を作るデザインス・センスもありませんので、背景は単色にしました。[Background Layer]タブを選択して、Colorをクリックします。背景色は、アプリの<code>colorPrimaryDark</code>に設定した色の「006428」です。この色は<a href="https://material.io/resources/color/#!/?view.left=0&amp;view.right=1">Color Tool</a>で作成しています。Primary Colorに適当な色を設定するだけでPrimary Dark Colorが作成されてとても便利ですよ。</p>
 <p>図</p>
-<p>あとは、[Next]ボタンをクリックして[Finish]ボタンをクリックして、ビルドしてインストールして、でも何故かアプリのアイコンが変わりませんでした……。</p>
-<p>その理由は、drawableのリソースのXMLにはAndroidのバージョンで記述できる事柄に差異があって、Android Studioがデフォルトで作成したアプリのアイコンは新しいバージョン向け、Image Assetで先程作成したアプリのアイコンは古いバージョン向けのファイルを作成していたため。というわけで、不要になった以前のdrawableを消しちゃいましょう。app/src/main/res/drawable-v24フォルダをまるっと削除しました。</p>
+<p>あとは、[Next]ボタンをクリックして[Finish]ボタンをクリックして、ビルドしてインストールして、でも何故かアプリのアイコンが変わりません……。</p>
+<p>その理由は、drawableのリソースのXMLにはAndroidのバージョンによって記述できる事柄に差異があって、Android Studioがデフォルトで作成したアプリのアイコンは新しいバージョン向け、Image Assetで先程作成したアプリのアイコンは古いバージョン向けのファイルを作成していたため。というわけで、不要になった以前のdrawableを消しちゃいましょう。app/src/main/res/drawable-v24フォルダをまるっと削除しました。</p>
 <p>まだ終わりません。今回は単色の背景にしたので、app/src/main/res/valuesフォルダの中にic_launcher_background.xmlが生成されています。でも、以前のアイコンはいろいろ描いてあるベクトル・グラフィックスだったので、app/src/main/res/drawablesにあったんですよ。以前のアイコン向けの背景が悪さをするのを防ぐために、app/src/main/res/drawable/ic_launcher_background.xmlも削除しました。</p>
-<p>以上！　これで本当の本当に完了です。いろいろあったけど、Androidアプリの開発って別に難しくない、というか楽チンで美味しいでしょ？</p>
+<p>以上！　これで本当の本当に完了です。いろいろあったけど、Androidアプリの開発ってべつに難しくない、むしろ楽チンで美味しいでしょ？</p>
 <p>図</p>
 <p>図</p>
 </article>

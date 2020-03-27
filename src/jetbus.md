@@ -3836,7 +3836,7 @@ interface TimeTableDao {
 }
 ~~~
 
-ある特定の条件下での集約や分析を実現するSQLのwindow関数を使えば簡単に作れそうなのですけど、残念なことにSQLite3がwindow関数をサポートしたのはバージョン3.25.0で、2020年3月現在で最新のAndroid 10であってもSQLite3のバージョンは3.22.0です……。だから、上のSQLでは`NOT EXISTS`の中の副問合せで代用しました。副問合せの外側の行よりも到着バス停に関連付けられた`TimeTableDetail.arrival`から現在時刻を引いた結果の絶対値が小さいものが存在しない（`NOT EXISTS`）なので、結果として到着バス停に関連付けられた`TimeTableDetail.arrival`が現在時刻に最も近いものがSELECTされます。……現在時刻との差が同じものが複数ある場合に、全部取得されちゃうんだけどな。なので、`INNER JOIN`でもう一回副問合せして、`GROUP BY`して最小（順序が付いて一つに絞れるなら何でもいいので、最大とかでも大丈夫）の`TimeTable.id`と`INNER JOIN`しています。ちょっと（かなり）複雑なSQL文ですけど、でもたぶん、普通のプログラミング言語でループを回してデータを取得する処理を書くよりは楽だと思いますよ。O/Rマッピング・ツールがなかった頃にプログラムを書いていた私のようなおっさんに頼めば、この程度のSQLは大喜びで一瞬で書いてくれるはずです。おっさんとハサミは使いようですよ。職場のおっさんを大事にしましょう。
+ある特定の条件下での集約や分析を実現するSQLのwindow関数を使えば簡単に作れそうなのですけど、残念なことにSQLite3がwindow関数をサポートしたのはバージョン3.25.0で、2020年3月現在で最新のAndroid 10であってもSQLite3のバージョンは3.22.0です……。だから、上のSQLでは`NOT EXISTS`の中の副問合せで代用しました。副問合せの外側の行よりも到着バス停に関連付けられた`TimeTableDetail.arrival`から現在時刻を引いた結果の絶対値が小さいものが存在しない（`NOT EXISTS`）なので、結果として到着バス停に関連付けられた`TimeTableDetail.arrival`が現在時刻に最も近いものが`SELECT`されます。……現在時刻との差が同じものが複数ある場合に、全部取得されちゃうんだけどな。なので、`INNER JOIN`でもう一回副問合せして、`GROUP BY`して最小（順序が付いて一つに絞れるなら何でもいいので、最大とかでも大丈夫）の`TimeTable.id`と`INNER JOIN`しています。ちょっと（かなり）複雑なSQL文ですけど、でもたぶん、普通のプログラミング言語でループを回してデータを取得する処理を書くよりは楽だと思いますよ。O/Rマッピング・ツールがなかった頃にプログラムを書いていた私のようなおっさんに頼めば、この程度のSQLは大喜びで一瞬で書いてくれるはずです。おっさんとハサミは使いようですよ。職場のおっさんを大事にしましょう。
 
 ### `TimeTableDetail`
 
@@ -3863,7 +3863,7 @@ interface TimeTableDetailDao {
 
 ## `Repository`を作成する
 
-`Repository`でデータベースとWebサービスの差異を吸収して統一した操作を実現する……のが理想だけど、実際はまず無理！　トランザクションがある環境とない環境で同じ操作なんて無理なんだよ（と私は思います）！　とはいえ、`Repository`というレイヤーはやはり便利です。以前作成した`syncDatabase()`メソッドのようなデータベースとWebサービスの複雑な呼び出しを隠蔽するメソッドを置けますし、データ・アクセス・オブジェクトのメソッドがへっぽこだったりWebサービスの仕様が物足りなかったりする場合を補う処理を書けますから。
+`Repository`でデータベースとWebサービスの差異を吸収して統一した操作を実現する……のが理想なんだけど、実際はまず無理！　トランザクションがある環境とない環境で同じ操作なんて無理なんだよ（と私は思います）。とはいえ、`Repository`というレイヤーはやはり便利です。以前作成した`syncDatabase()`メソッドのようなデータベースとWebサービスの複雑な呼び出しを隠蔽するメソッドを置けますし、データ・アクセス・オブジェクトのメソッドがへっぽこだったりWebサービスの仕様が物足りなかったりする場合を補う処理を書けますから。
 
 というわけで、作成した`Repository`は以下の通り。
 
@@ -3967,7 +3967,7 @@ class Repository @Inject constructor(private val database: AppDatabase, private 
 }
 ~~~
 
-`syncTimeTables()`は`syncDatabase()`の外側にループがもう一つ付いただけ。これで、`TimeTable`と`TimeTableDetail`をデータベースにキャッシュできるようになりました。`clearBookmarks()`はバス停が廃止された場合にブックマークの削除ができなくなっちゃうじゃんと考えてこっそり追加した[ブックマークを全て削除]メニュー向けのメソッド、`toggleBookmark()`は前の章で作成した（けど説明をし忘れた）ブックマークを設定したり解除したりするためのメソッドです。
+`syncTimeTables()`は、構造的には`syncDatabase()`の外側にループがもう一つ付いただけ。これで、`TimeTable`と`TimeTableDetail`をデータベースにキャッシュできるようになりました。`clearBookmarks()`はバス停が廃止された場合にブックマークの削除ができなくなっちゃうかもと考えてこっそり追加した[ブックマークを全て削除]メニュー向けのメソッド、`toggleBookmark()`は前の章で作成した（けど説明をし忘れた）ブックマークを設定したり解除したりするためのメソッドです。
 
 重要なのはここから。`getBuses()`はWebサービスを呼び出しているのですけど、このWebサービスって`Route`のバスを全て返すんですよ。で、データ・アクセス・オブジェクトのところで何度も考えたように、出発バス停以降を走っているバスや出発バス停のはるか手前を走っているバスの情報は不要。なので、不要な情報を削除する処理をこのメソッドの中に入れています。出発バス停を出発したバスを除外するところが格好悪いコードになっていますけど、ご容赦ください。
 
@@ -4182,13 +4182,13 @@ class BusApproachesViewModel(private val repository: Repository): ViewModel() {
 
 でも、`departureBusStopName`と`arrivalBusStopName`、`bookmark`、`routes`、`routeBusStopPoles`、`busStopPoles`、`timeTableDetails`については、これまでに説明したやり方をそのまま繰り返しただけなので簡単です。
 
-問題は`timeTables`プロパティと`buses`プロパティ、`busApproaches`プロパティです。`Repository`の`syncTimeTables()`メソッドを実行しないとデータベースは空なので、だからどこかで`syncTimeTables()`を呼ばなければ`timeTables`はいつまでも空集合を返します。`buses`はWebサービスから取得する値で、変更通知が来ませんから自分で値を定期的に更新しなければなりません。バスの接近情報そのものである`busApproaches`は、全ての情報を手作りしなければなりません……。
+問題は`timeTables`プロパティと`buses`プロパティ、`busApproaches`プロパティです。`Repository`の`syncTimeTables()`メソッドを実行しないとデータベースは空なので、だからどこかで`syncTimeTables()`を呼ばなければ`timeTables`はいつまでも空集合のまま。あと、`buses`はWebサービスから取得する値で、変更通知が来ませんから自分で値を定期的に更新しなければなりません。バスの接近情報そのものである`busApproaches`は、全ての情報を手作りしなければなりませんし……。
 
-というわけで、まずは`timeTables`プロパティから。`syncTimeTables()`を呼ぶのに一番良いタイミングは`routes`プロパティと`departureBusStopName`プロパティの両方に値が設定された時なので、`MediatorLiveData<List<TimeTable>>().apply { ... }`の中に`syncTimeTables()`を呼び出す処理を入れたい。値を取得する処理の中に更新処理を入れるのは目的違いな気もするけど、他に適当な場所が無いから我慢。で、`syncTimeTables()`はコルーチンで呼び出さなければならないので`viewModelScope.launch { ... }`して呼び出します。今回は`routes`も`departureBusStopName`も変更がないので実は考慮しなくても動作するのですけど、念の為に、`syncTimeTables()`している最中にもう一度`viewModelScope.launch { ... }`が動いてしまっても二重に処理されないための考慮をしておきたい。というわけで、`source`と同様に`job`という変数を作成して、`cancelAndJoin()`するようにしました。`cancelAndJoin()`も`suspend`なメソッドなので、`update()`全体を`viewModelScope.launch { ... }`で囲んでいます。これで`timeTables`プロパティは完成。`syncTimeTables()`が終わればデータベースが更新されたことがLiveDataで通知されて、結果として`timeTables`プロパティに値が設定されます。
+というわけで、まずは`timeTables`プロパティから。`syncTimeTables()`を呼ぶのに一番良いタイミングは`routes`プロパティと`departureBusStopName`プロパティの両方に値が設定された時なので、`MediatorLiveData<List<TimeTable>>().apply { ... }`の中に`syncTimeTables()`を呼び出す処理を入れたい。値を取得する処理の中に更新処理を入れるのは目的違いな気もするけど、他に適当な場所が無いから我慢。で、`syncTimeTables()`はコルーチンで呼び出さなければならないので`viewModelScope.launch { ... }`して呼び出します。今回は`routes`も`departureBusStopName`も変更がないので実は考慮しなくても動作するのですけど、念の為に、`syncTimeTables()`している最中にもう一度`viewModelScope.launch { ... }`が動いてしまっても二重に処理されないための考慮をしておきたい。というわけで、`source`と同様に`job`という変数を作成して、`cancelAndJoin()`でキャンセルされるまで待つようにしました。`cancelAndJoin()`も`suspend`なメソッドなので、`update()`全体を`viewModelScope.launch { ... }`で囲んでいます。これで`timeTables`プロパティは完成。`syncTimeTables()`が終わればデータベースが更新されたことがLiveDataで通知されて、その結果として`timeTables`プロパティに値が設定されます。
 
 `buses`プロパティも同じやり方で作りました。こちらは15,000ミリ秒の間隔で繰り返される無限ループです。コルーチンがあると気軽に無限ループが使えて便利ですな。
 
-最後の`busApproaches`プロパティはゴリゴリにロジックを書いて実現します。で、説明を忘れていたのですけど、このプロパティを作成する前にバスの接近情報を表現する`BusApproach`を追加しておきます。
+最後の`busApproaches`プロパティはゴリゴリにロジックを書いて実現しました。で、説明を忘れていたのですけど、このプロパティを作成する前にバスの接近情報を表現する`BusApproach`を追加しておきます。
 
 ~~~ kotlin
 package com.tail_island.jetbus.model
@@ -4202,9 +4202,9 @@ data class BusApproach(
 )
 ~~~
 
-何秒後に到着するのかを表現する`willArriveAfter`プロパティに加えて`busStopCount`プロパティがあるのは、`TimeTable`を同期する`syncTimeTables()`はかなり時間がかかるので、それまでの間はあといくつバス停があるのかで到着時刻を判断していただくためです。と、こんな感じに`TimeTable`がまだない場合も想定しているので、`busApproaches`プロパティの中の`timeTablesValue`と`timeTableDetailsValue`を設定する部分では、`null`の場合にリターンする処理が省かれているわけですな。
+何秒後に到着するのかを表現する`willArriveAfter`プロパティに加えて`busStopCount`プロパティがあるのは、`TimeTable`を同期する`syncTimeTables()`はかなり時間がかかるので、それまでの間はあといくつバス停があるのかでなんとなく到着時刻を判断していただくためです。と、こんな感じに`TimeTable`がまだない場合も想定しているので、`busApproaches`プロパティの中の`timeTablesValue`と`timeTableDetailsValue`を設定する部分では、`null`の場合にリターンする処理が省かれているわけですな。
 
-さて、`busApproaches`プロパティでは、`buses`の要素である`Bus`単位で`BusApproach`を作成します。関数型プログラミングの`map`ですね。`willArriveAfter`は、TimeTableDetail（出発バス停から手前10バス停分が入っている）を`sortedByDescending()`で逆順にソートして、`takeWhile`で`bus.fromBusStopPoleId`と異なる間だけ取得します。これで、出発バス停からバスが最後に出発したバス停の次のバス停までを入手できるというわけ。あとは、`zipWithNext()`でペアを作成して、時刻の差を求めて、合計する。これで、何秒後に到着するのかの情報を取得できました！　関数型プログラミングは本当に楽ちんですな。
+さて、`busApproaches`プロパティでは、`buses`の要素である`Bus`単位で`BusApproach`を作成します。関数型プログラミングの`map`ですね。`willArriveAfter`は、TimeTableDetail（出発バス停から手前10バス停分が入っている）を`sortedByDescending()`で逆順にソートして、`takeWhile`で`bus.fromBusStopPoleId`と異なる間だけ取得します。これで、出発バス停からバスが最後に出発したバス停の*次*のバス停までを入手できるというわけ。あとは、`zipWithNext()`でペアを作成して、時刻の差を求めて、合計する。これで、何秒後に到着するのかの情報を取得できました！　関数型プログラミングは本当に楽ちんですな。
 
 ## Fragmentを作成する
 
@@ -4437,13 +4437,13 @@ class BusApproachesFragment: Fragment() {
 
 動画
 
-これで通勤が楽になるのでもう少しサラリーマンを続けられそうです。素晴らしい！
+これで通勤が楽になるので、ダメ人間な私でももう少しサラリーマンを続けられそうです。Android Jetpackありがとー！
 
 # [Image Asset Studioでアイコンを作れば、完成！](https://github.com/tail-island/jetbus/tree/master)
 
-でも、まだ不十分。アイコンを作らないとね。Android Studioのメニューから[File] - [New] - [Image Asset]メニューを選んで、アプリのアイコンを作成しましょう。
+でも、まだ不十分。アプリのアイコンを作らないとね。Android Studioのメニューから[File] - [New] - [Image Asset]メニューを選んで、アプリのアイコンを作成しましょう。
 
-私は絵心がないので、Android StudioのClip Artを流用して作るんだけどな。[Source Asset]の[Asset Type]の[Clip Art]ラジオ・ボタンをクリックすると、Android Studioが提供するアイコンから選べるようになります。
+私は絵心がないのから、Android StudioのClip Artの流用で作るんだけどな。[Source Asset]の[Asset Type]の[Clip Art]ラジオ・ボタンをクリックすると、Android Studioが提供するアイコンから選べるようになります。
 
 図
 
@@ -4455,17 +4455,17 @@ Clip Artをクリックして、バスのアイコンをクリックします。
 
 図
 
-背景の絵を考えるのも面倒でしたので、単色でやりましょう。[Background Layer]タブを選択して、Colorをクリックします。背景色は、アプリの`colorPrimaryDark`に設定した色の「006428」です。この色は[Color Tool](https://material.io/resources/color/#!/?view.left=0&view.right=1)で作成しました。Primary Colorに適当な色を設定するだけでPrimary Dark Colorが作成されてとても便利ですよ。
+背景の絵を作るデザインス・センスもありませんので、背景は単色にしました。[Background Layer]タブを選択して、Colorをクリックします。背景色は、アプリの`colorPrimaryDark`に設定した色の「006428」です。この色は[Color Tool](https://material.io/resources/color/#!/?view.left=0&view.right=1)で作成しています。Primary Colorに適当な色を設定するだけでPrimary Dark Colorが作成されてとても便利ですよ。
 
 図
 
-あとは、[Next]ボタンをクリックして[Finish]ボタンをクリックして、ビルドしてインストールして、でも何故かアプリのアイコンが変わりませんでした……。
+あとは、[Next]ボタンをクリックして[Finish]ボタンをクリックして、ビルドしてインストールして、でも何故かアプリのアイコンが変わりません……。
 
-その理由は、drawableのリソースのXMLにはAndroidのバージョンで記述できる事柄に差異があって、Android Studioがデフォルトで作成したアプリのアイコンは新しいバージョン向け、Image Assetで先程作成したアプリのアイコンは古いバージョン向けのファイルを作成していたため。というわけで、不要になった以前のdrawableを消しちゃいましょう。app/src/main/res/drawable-v24フォルダをまるっと削除しました。
+その理由は、drawableのリソースのXMLにはAndroidのバージョンによって記述できる事柄に差異があって、Android Studioがデフォルトで作成したアプリのアイコンは新しいバージョン向け、Image Assetで先程作成したアプリのアイコンは古いバージョン向けのファイルを作成していたため。というわけで、不要になった以前のdrawableを消しちゃいましょう。app/src/main/res/drawable-v24フォルダをまるっと削除しました。
 
 まだ終わりません。今回は単色の背景にしたので、app/src/main/res/valuesフォルダの中にic_launcher_background.xmlが生成されています。でも、以前のアイコンはいろいろ描いてあるベクトル・グラフィックスだったので、app/src/main/res/drawablesにあったんですよ。以前のアイコン向けの背景が悪さをするのを防ぐために、app/src/main/res/drawable/ic_launcher_background.xmlも削除しました。
 
-以上！　これで本当の本当に完了です。いろいろあったけど、Androidアプリの開発って別に難しくない、というか楽チンで美味しいでしょ？
+以上！　これで本当の本当に完了です。いろいろあったけど、Androidアプリの開発ってべつに難しくない、むしろ楽チンで美味しいでしょ？
 
 図
 
