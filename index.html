@@ -2289,7 +2289,7 @@ dependencies {
 <p>5秒後に「日本ユニシス本社前」とつながっているバス停の一覧が表示されて、さらに5秒たったら画面が「深川第八中学校前」とそこにつながっているバス停の一覧に変更されたでしょ？　はい、これで終わり。<code>Transformations</code>は実に便利ですな。</p>
 <h3 id="mediatorlivedata"><code>MediatorLiveData</code></h3>
 <p>でも、あれ、ユーザーIDとパスワードが入力されたらログインして認証済みかどうかの<code>LiveData</code>を更新するような場合、複数の値を監視しなければならない場合にはどうするのでしょうか？　今回のアプリだと、出発バス停と到着バス停から路線を取得するような場合です。<code>Transformations</code>は1つの<code>LiveData</code>しか監視できないですよね？　それでは要求を満たせません……。</p>
-<p>そんな場合は、<code>MediatorLiveData</code>を使いましょう。今回は出発バス停の名称と到着バス停の名称から路線を取得する処理を作りたいので、まずは路線を取得するメソッドを<code>RouteDao</code>に追加します。</p>
+<p>そんな場合は、<code>MediatorLiveData</code>を使いましょう。今回は出発バス停の名称と到着バス停の名称から路線を取得する処理を作りたいので、まずは路線を取得するメソッドを<code>RouteDao</code>に追加します。SQLは前に作ったので、これはとても簡単。</p>
 <div class="sourceCode" id="cb61"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb61-1"><a href="#cb61-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
 <span id="cb61-2"><a href="#cb61-2"></a></span>
 <span id="cb61-3"><a href="#cb61-3"></a><span class="kw">import</span> <span class="im">androidx.lifecycle.LiveData</span></span>
