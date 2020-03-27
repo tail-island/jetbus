@@ -1148,7 +1148,7 @@ getWebServiceResultBody { webService.busroutePattern(consumerKey) }?.let { busro
 
 # [Room](https://github.com/tail-island/jetbus/tree/room)
 
-前章で取得した公共交通オープンデータセンターのデータは、取得に時間がかかる上に変更が少ないので、RDBMSにキャッシュするとしていました。というわけで、Android OS内蔵のSQLite3への抽象化レイヤを提供するRoomを使用してみます。そこそこ便利ですよ。
+前章で取得した公共交通オープンデータセンターのデータは、取得に時間がかかる上に変更が少ないので、RDBMSにキャッシュしたい。というわけで、Android OS内蔵のSQLite3への抽象化レイヤを提供するRoomを使用してみます。そこそこ便利ですよ。
 
 ## Roomが、他のO/Rマッピング・ツールとは異なるところ
 
