@@ -3708,15 +3708,15 @@ class DepartureBusStopFragment: Fragment() {
 }
 ~~~
 
-このコードの中の`AcceleratedSmoothScroller`というのは、[RecyclerViewの長距離スムーズスクロールをスムーズにする](https://qiita.com/chibatching/items/52d9b73d244eac52d0d4)を猿真似して作成した良い感じスクロールさせるためのクラスです。`RecylerView`のAPIには、指定した場所にスクロールする機能（画面がいきなり切り替わるので使いづらいユーザー・インターフェースになる）と指定した場所までスムーズにスクロールする機能（使いやすいユーザー・インターフェースになるけど、スクロールが終わるまで長時間かかる）しかなくて、これだけだと指定場所までスクロールするという機能がとても作りづらいんです。この問題は、[RecyclerViewの長距離スムーズスクロールをスムーズにする](https://qiita.com/chibatching/items/52d9b73d244eac52d0d4)ですべて解決ですので、ぜひ読んでください。なお、今回は少しだけ実装を変えたので、クラス名も少しだけ変更しました。
+このコードの中の`AcceleratedSmoothScroller`というのは、[RecyclerViewの長距離スムーズスクロールをスムーズにする](https://qiita.com/chibatching/items/52d9b73d244eac52d0d4)を猿真似して作成した良い感じスクロールさせるためのクラスです。`RecylerView`のAPIには、指定した場所にスクロールする機能（画面がいきなり切り替わるので使いづらいユーザー・インターフェースになる）と指定した場所までスムーズにスクロールする機能（使いやすいユーザー・インターフェースになるけど、スクロールが終わるまで長時間かかる）しかなくて、これだけだと指定場所までスクロールするという機能がとても作りづらいんです。この問題は、[RecyclerViewの長距離スムーズスクロールをスムーズにする](https://qiita.com/chibatching/items/52d9b73d244eac52d0d4)ですべて解決ですので、ぜひ読んでみてください。なお、今回は少しだけ実装を変えたので、クラス名も少しだけ変更しています。
 
 ## `BookmarksFragment`と`ArrivalBusStopFragment`を同じやり方で作って、`BusApproachesFragment`を少しだけ修正する
 
-あとは、同じやり方で（コピー＆ペーストをやりまくって）`BookmarksFragment`と`ArrivalBusStopFragment`を作りましょう。少しだけ工夫したのは、list_item_bookmark.xmlの`android:text`で`String.format()`を使用したこと、あと、文字列リソースは`@string/id`と書けば参照できて、それはデータ・バインディングの中でも変わらないことを証明するために`String.format()`の中に`@string/start_to_end_arrow`と書いたことと、ついでだったので文字列をres/values/string.xmlに移動させて、都営バスを思わせる緑色で画面が表示されるようにres/values/colors.xmlを修正したくらい。
+あとは、同じやり方で（コピー＆ペーストをやりまくって）`BookmarksFragment`と`ArrivalBusStopFragment`を作りましょう。少しだけ工夫したのは、list_item_bookmark.xmlの`android:text`で`String.format()`を使用したこと、あと、文字列リソースは`@string/id`と書けば参照できて、それはデータ・バインディングの中でも変わらないことを証明するために`String.format()`の中に`@string/start_to_end_arrow`と書いたことと、ついでだったのでリソース中のすべての文字列をres/values/string.xmlに移動させて、都営バスを思わせる緑色で画面が表示されるようにres/values/colors.xmlを修正したくらい。
 
 で、このままだとブックマークが一つもないので`BookmarksFragment`を正しく実装できたか確認できなかったので、`BusApproachesFragment`にブックマークを追加する機能（`BusApproachesViewModel`の`toggleBookmark()`）を追加しました。
 
-コードの詳細は、GitHubのコードのrecycler-viewブランチをご参照ください。ほとんどコピー＆ペーストなので書くこと何もなかったんですよ……。
+詳細なソース・コードは、[GitHub](https://github.com/tail-island/jetbus/tree/recycler-view)で確認してみてください。ほとんどコピー＆ペーストなので書くこと何もなかったんですよ……。
 
 ともあれ、大分見た目もしっかりしてきました。
 
@@ -3734,7 +3734,7 @@ class DepartureBusStopFragment: Fragment() {
 
 ### `RouteBusStopPole`
 
-出発バス停名称と到着バス停名称から`Route`を取得するところまでは実装済みですので、`RouteBusStopPole`から考えましょう。`RouteBusStopPole`は`Route`と`BusStopPole`を関連付けるものなのですけど、バスの「接近」情報を表示する本アプリでは、出発バス停以降の`RouteBusStopPole`の情報は不要です（どれだけ遠ざかったかを表示するプログラムなら、出発バス停以降こそが重要なのでしょうけど）。あと、出発バス停よりも遥かに手前の`RouteBusStopPole`も不要です。あと3時間でバスが到着する（バスは出発バス停よりも300手前のバス停を出発した）なんて表示されても困りますもんね。私の独断と偏見で、出発バス停の手前10個までを取得の対象としました。
+出発バス停名称と到着バス停名称から`Route`を取得するところまでは実装済みですので、`RouteBusStopPole`から考えましょう。`RouteBusStopPole`は`Route`と`BusStopPole`を関連付けるものなのですけど、バスの「接近」情報を表示する本アプリでは、出発バス停以降の`RouteBusStopPole`の情報は不要です（どれだけ遠ざかったかを表示するプログラムなら、出発バス停以降こそが重要なのでしょうけど）。あと、出発バス停よりも遥かに手前の`RouteBusStopPole`も不要です。あと3時間でバスが到着する（バスは出発バス停よりも300手前のバス停を出発した）なんて表示されても困りますもんね。私の独断と偏見で、出発バス停の手前10個までを取得の対象とします。
 
 ~~~ kotlin
 package com.tail_island.jetbus.model
@@ -3796,7 +3796,7 @@ interface BusStopPoleDao {
 
 ### `TimeTable`
 
-前にも述べましたが、バスは一つの路線を日に何回も行き来していますから、`Route`と`TimeTable`の関係は1対多となっています。よって、複数ある`TimeTable`の中から一つを選ばなければなりません。道路が混んでいるときと空いているときは時刻表が変わるかもしれませんから、到着バス停に関連付けられた`TimeTableDetail.arrival`が現在時刻に最も近いものを選ぶのが良いでしょう。ということで、`TimeTableDao`に以下の`@Query`を追加しました。
+前にも述べましたが、バスは一つの路線を日に何回も行き来していますから、`Route`と`TimeTable`の関係は1対多となっています。よって、複数ある`TimeTable`の中から一つを選ばなければなりません。道路が混んでいる時間帯と空いている時間帯では時刻表が変わるかもしれませんから、到着バス停に関連付けられた`TimeTableDetail.arrival`が現在時刻に最も近いものを選ぶのが良いでしょう。ということで、`TimeTableDao`に以下の`@Query`を追加しました。
 
 ~~~ kotlin
 package com.tail_island.jetbus.model

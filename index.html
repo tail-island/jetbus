@@ -3565,11 +3565,11 @@ dependencies {
 <span id="cb99-50"><a href="#cb99-50"></a>        }.root</span>
 <span id="cb99-51"><a href="#cb99-51"></a>    }</span>
 <span id="cb99-52"><a href="#cb99-52"></a>}</span></code></pre></div>
-<p>このコードの中の<code>AcceleratedSmoothScroller</code>というのは、<a href="https://qiita.com/chibatching/items/52d9b73d244eac52d0d4">RecyclerViewの長距離スムーズスクロールをスムーズにする</a>を猿真似して作成した良い感じスクロールさせるためのクラスです。<code>RecylerView</code>のAPIには、指定した場所にスクロールする機能（画面がいきなり切り替わるので使いづらいユーザー・インターフェースになる）と指定した場所までスムーズにスクロールする機能（使いやすいユーザー・インターフェースになるけど、スクロールが終わるまで長時間かかる）しかなくて、これだけだと指定場所までスクロールするという機能がとても作りづらいんです。この問題は、<a href="https://qiita.com/chibatching/items/52d9b73d244eac52d0d4">RecyclerViewの長距離スムーズスクロールをスムーズにする</a>ですべて解決ですので、ぜひ読んでください。なお、今回は少しだけ実装を変えたので、クラス名も少しだけ変更しました。</p>
+<p>このコードの中の<code>AcceleratedSmoothScroller</code>というのは、<a href="https://qiita.com/chibatching/items/52d9b73d244eac52d0d4">RecyclerViewの長距離スムーズスクロールをスムーズにする</a>を猿真似して作成した良い感じスクロールさせるためのクラスです。<code>RecylerView</code>のAPIには、指定した場所にスクロールする機能（画面がいきなり切り替わるので使いづらいユーザー・インターフェースになる）と指定した場所までスムーズにスクロールする機能（使いやすいユーザー・インターフェースになるけど、スクロールが終わるまで長時間かかる）しかなくて、これだけだと指定場所までスクロールするという機能がとても作りづらいんです。この問題は、<a href="https://qiita.com/chibatching/items/52d9b73d244eac52d0d4">RecyclerViewの長距離スムーズスクロールをスムーズにする</a>ですべて解決ですので、ぜひ読んでみてください。なお、今回は少しだけ実装を変えたので、クラス名も少しだけ変更しています。</p>
 <h2 id="bookmarksfragmentとarrivalbusstopfragmentを同じやり方で作ってbusapproachesfragmentを少しだけ修正する"><code>BookmarksFragment</code>と<code>ArrivalBusStopFragment</code>を同じやり方で作って、<code>BusApproachesFragment</code>を少しだけ修正する</h2>
-<p>あとは、同じやり方で（コピー＆ペーストをやりまくって）<code>BookmarksFragment</code>と<code>ArrivalBusStopFragment</code>を作りましょう。少しだけ工夫したのは、list_item_bookmark.xmlの<code>android:text</code>で<code>String.format()</code>を使用したこと、あと、文字列リソースは<code>@string/id</code>と書けば参照できて、それはデータ・バインディングの中でも変わらないことを証明するために<code>String.format()</code>の中に<code>@string/start_to_end_arrow</code>と書いたことと、ついでだったので文字列をres/values/string.xmlに移動させて、都営バスを思わせる緑色で画面が表示されるようにres/values/colors.xmlを修正したくらい。</p>
+<p>あとは、同じやり方で（コピー＆ペーストをやりまくって）<code>BookmarksFragment</code>と<code>ArrivalBusStopFragment</code>を作りましょう。少しだけ工夫したのは、list_item_bookmark.xmlの<code>android:text</code>で<code>String.format()</code>を使用したこと、あと、文字列リソースは<code>@string/id</code>と書けば参照できて、それはデータ・バインディングの中でも変わらないことを証明するために<code>String.format()</code>の中に<code>@string/start_to_end_arrow</code>と書いたことと、ついでだったのでリソース中のすべての文字列をres/values/string.xmlに移動させて、都営バスを思わせる緑色で画面が表示されるようにres/values/colors.xmlを修正したくらい。</p>
 <p>で、このままだとブックマークが一つもないので<code>BookmarksFragment</code>を正しく実装できたか確認できなかったので、<code>BusApproachesFragment</code>にブックマークを追加する機能（<code>BusApproachesViewModel</code>の<code>toggleBookmark()</code>）を追加しました。</p>
-<p>コードの詳細は、GitHubのコードのrecycler-viewブランチをご参照ください。ほとんどコピー＆ペーストなので書くこと何もなかったんですよ……。</p>
+<p>詳細なソース・コードは、<a href="https://github.com/tail-island/jetbus/tree/recycler-view">GitHub</a>で確認してみてください。ほとんどコピー＆ペーストなので書くこと何もなかったんですよ……。</p>
 <p>ともあれ、大分見た目もしっかりしてきました。</p>
 <p>動画</p>
 <p>あとは、バスの接近情報を表示するだけ。表示そのものはRecyclerViewでできそうだけど、表示するデータはどうしましょうか？</p>
@@ -3578,7 +3578,7 @@ dependencies {
 <h2 id="データアクセスオブジェクトを作成する">データ・アクセス・オブジェクトを作成する</h2>
 <p>まずは、バスの接近情報を表示するために必要な情報を取得するデータ・アクセス・オブジェクトを、順を追って作成していきましょう。</p>
 <h3 id="routebusstoppole"><code>RouteBusStopPole</code></h3>
-<p>出発バス停名称と到着バス停名称から<code>Route</code>を取得するところまでは実装済みですので、<code>RouteBusStopPole</code>から考えましょう。<code>RouteBusStopPole</code>は<code>Route</code>と<code>BusStopPole</code>を関連付けるものなのですけど、バスの「接近」情報を表示する本アプリでは、出発バス停以降の<code>RouteBusStopPole</code>の情報は不要です（どれだけ遠ざかったかを表示するプログラムなら、出発バス停以降こそが重要なのでしょうけど）。あと、出発バス停よりも遥かに手前の<code>RouteBusStopPole</code>も不要です。あと3時間でバスが到着する（バスは出発バス停よりも300手前のバス停を出発した）なんて表示されても困りますもんね。私の独断と偏見で、出発バス停の手前10個までを取得の対象としました。</p>
+<p>出発バス停名称と到着バス停名称から<code>Route</code>を取得するところまでは実装済みですので、<code>RouteBusStopPole</code>から考えましょう。<code>RouteBusStopPole</code>は<code>Route</code>と<code>BusStopPole</code>を関連付けるものなのですけど、バスの「接近」情報を表示する本アプリでは、出発バス停以降の<code>RouteBusStopPole</code>の情報は不要です（どれだけ遠ざかったかを表示するプログラムなら、出発バス停以降こそが重要なのでしょうけど）。あと、出発バス停よりも遥かに手前の<code>RouteBusStopPole</code>も不要です。あと3時間でバスが到着する（バスは出発バス停よりも300手前のバス停を出発した）なんて表示されても困りますもんね。私の独断と偏見で、出発バス停の手前10個までを取得の対象とします。</p>
 <div class="sourceCode" id="cb100"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb100-1"><a href="#cb100-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
 <span id="cb100-2"><a href="#cb100-2"></a></span>
 <span id="cb100-3"><a href="#cb100-3"></a><span class="kw">import</span> <span class="im">androidx.lifecycle.LiveData</span></span>
@@ -3628,7 +3628,7 @@ dependencies {
 <span id="cb101-14"><a href="#cb101-14"></a>}</span></code></pre></div>
 <p>取得した<code>RouteBusStopPole</code>の<code>busStopPoleId</code>のリストを引数に渡すわけですな。</p>
 <h3 id="timetable"><code>TimeTable</code></h3>
-<p>前にも述べましたが、バスは一つの路線を日に何回も行き来していますから、<code>Route</code>と<code>TimeTable</code>の関係は1対多となっています。よって、複数ある<code>TimeTable</code>の中から一つを選ばなければなりません。道路が混んでいるときと空いているときは時刻表が変わるかもしれませんから、到着バス停に関連付けられた<code>TimeTableDetail.arrival</code>が現在時刻に最も近いものを選ぶのが良いでしょう。ということで、<code>TimeTableDao</code>に以下の<code>@Query</code>を追加しました。</p>
+<p>前にも述べましたが、バスは一つの路線を日に何回も行き来していますから、<code>Route</code>と<code>TimeTable</code>の関係は1対多となっています。よって、複数ある<code>TimeTable</code>の中から一つを選ばなければなりません。道路が混んでいる時間帯と空いている時間帯では時刻表が変わるかもしれませんから、到着バス停に関連付けられた<code>TimeTableDetail.arrival</code>が現在時刻に最も近いものを選ぶのが良いでしょう。ということで、<code>TimeTableDao</code>に以下の<code>@Query</code>を追加しました。</p>
 <div class="sourceCode" id="cb102"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb102-1"><a href="#cb102-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
 <span id="cb102-2"><a href="#cb102-2"></a></span>
 <span id="cb102-3"><a href="#cb102-3"></a><span class="kw">import</span> <span class="im">androidx.lifecycle.LiveData</span></span>
