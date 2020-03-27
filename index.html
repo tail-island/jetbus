@@ -1786,8 +1786,8 @@ dependencies {
 <p>コードをこんな感じに変更して、単体テスト用の<code>ComponentB</code>のモックを用意して、それを使って単体テストします。使用するオブジェクトを実行時に設定することで、オブジェクトを自由に組み合わせられるようにしているわけですな。で、この組み合わせる部分を自動化したり柔軟にしてくれるのが、Daggerを始めとするDependency Injectionツールなんです。</p>
 <p>ただ、個人的には、Dependency Injectionはあまり好きではありません。だって、インターフェイスを書くのが面倒なんだもん。動的型付けのプログラミング言語（実行時に型チェックされる言語。JavaScriptとか私が大好きなClojureとか）では<code>interface</code>を書かなくてよいから使うし、関数型プログラミング言語（Haskellとか私が愛してやまないClojureとか）なら関数を組み合わせる関数合成を当たり前に使うけど、静的型付けのプログラミング言語（JavaとかKotlinとか。C++は静的型付だけど<code>template</code>を使えばコード上では動的に型付けできるから別）でのDependency Injectionはベネフィットよりもコストが大きいと感じちゃう。</p>
 <h2 id="dependency-injectionツールを敢えて誤用する">Dependency Injectionツールを敢えて誤用する</h2>
-<p>Dependency Injectionのメリットは、オブジェクト間の結合度が減ること。オブジェクト間の結合を変更可能にする技術は、静的型付けのオブジェクト指向プログラミング言語ではインターフェイス。でもインターフェイスを書くのは面倒なので、Dependency Injectionは諦めてオブジェクト間の結合度が増えても我慢する。でも、Dependency InjectionツールであるDaggerは使う。これがここまでの私の主張。……無茶苦茶ですがな。</p>
-<p>なんでこんな無茶な主張になるのかというと、私はただ単に属性に値を設定する便利ツールとしてDaggerを使っているからです。Adnroidアプリの場合、前述したRoomの<code>Database</code>のように<code>Context</code>を引数にしないと実現できない処理が多数存在します。これを関数の引数として表現すると呼び出せる場所が限られてしまってよくない。属性にしてコンストラクタで設定する方式も、<code>Fragment</code>や<code>Activity</code>の生成はAndroidがやるので手を出せないから実現不能です。でも、Daggerを使えば属性を設定できるんですよ。<code>Context</code>をDaggerの中で引き回せば、<code>Fragment</code>や<code>Activity</code>以外でも<code>Context</code>を必要とする属性の設定をやりたい放題にできます。</p>
+<p>Dependency Injectionのメリットは、オブジェクト間の結合度が減ること。で、オブジェクト間の結合を変更可能にする技術は、静的型付けのオブジェクト指向プログラミング言語ではインターフェイス。でもインターフェイスを書くのは面倒なので、Dependency Injectionは諦めてオブジェクト間の結合度が増えても我慢する。でも、Dependency InjectionツールであるDaggerは使う。これがここまでの私の主張。……無茶苦茶ですがな。</p>
+<p>なんでこんな無茶な主張になるのかというと、私はただ単に属性に値を設定する便利ツールとしてDaggerを使っているからです。Adnroidアプリの場合、前述したRoomの<code>Database</code>のように<code>Context</code>を引数にしないと実現できない処理が多数存在します。これを関数の引数として表現すると呼び出せる場所が限られてしまってよくない。属性にしてコンストラクタで設定する方式も、<code>Fragment</code>や<code>Activity</code>等では生成をAndroidがやるため手を出せないので実現不能です。でも、Daggerを使えば属性を設定できるんですよ。<code>Context</code>をDaggerの中で引き回せば、<code>Fragment</code>や<code>Activity</code>以外でも<code>Context</code>を必要とする属性の設定をやりたい放題にできます。</p>
 <p>もちろん、インターフェイスを書いていませんから、オブジェクト間の結合度は大きいままです。Dependency Injectionというのは実はデザイン・パターンで、Dependency Injectionツールはそれを実現する手段の一つ。私の意識が高ければツールへの依存性も減らして独自にDependency Injectionパターンを実装するでしょうし、道具が作成された目的を無視して使用するなんてことは絶対にやらないのでしょうけど、残念なことに私は底辺なのでDependency Injectionツールの誤用くらい全然オッケー。苦情は、結合度が異常に高いAndroidのAPIを最初に作った人に言ってください。</p>
 <p>ただね、Daggerを使っておけば、本来のDependency Injectionパターンが必要になったときに取り入れやすいと思うんですよ。意識が高い人は、その前準備をしているんだと考えてご容赦ください。</p>
 <h2 id="daggerの組み込み">Daggerの組み込み</h2>
@@ -1882,7 +1882,7 @@ dependencies {
 <span id="cb47-44"><a href="#cb47-44"></a>    }.build().create(WebService::<span class="kw">class</span>.java)</span>
 <span id="cb47-45"><a href="#cb47-45"></a>}</span></code></pre></div>
 <p>上のコードで使用している<code>@Singleton</code>は、注入するオブジェクトのインスタンスを1つだけにしたい場合に付加します。今回はたまたま全部についていますけど、異なるインスタンスを使用したい場合は外してください。<code>@Named</code>アノテーションは、何を提供すればよいのかが型だけでは判別できない場合向け。<code>@Inject</code>のときの<code>@field:Named</code>の対になっているわけですな。</p>
-<p>で、上のコードで面白いのは、例えば<code>provideConsumerKey()</code>メソッドの引数の<code>context: Context</code>です。このコードだけを見るとなんだよDagger使っても結局<code>Context</code>を引数にしなければならないのかよと感じるんですけど、Daggerはすぐ上の<code>provideContext()</code>メソッドが<code>Context</code>を提供してくれることを知っています。だから、<code>consumerKey</code>を提供するために<code>provideConsumerKey()</code>メソッドを実行するときには、Daggerが自動的に<code>provideContext()</code>を実行して引数を準備してくれるんです（さらにすごいことに、Lifecycleのところで使用しますけど、引数のすべてを<code>@Provides</code>できるコンストラクタを持っているクラスなら何も書かなくても提供できます）。というわけで、もうこれで<code>Context</code>をどうやって取得しよう問題はクリア！</p>
+<p>で、上のコードで面白いのは、たとえば<code>provideConsumerKey()</code>メソッドの引数の<code>context: Context</code>です。このコードだけを見るとなんだよDagger使っても結局<code>Context</code>を引数にしなければならないのかよと感じるんですけど、Daggerはすぐ上の<code>provideContext()</code>メソッドが<code>Context</code>を提供してくれることを知っています。だから、<code>consumerKey</code>を提供するために<code>provideConsumerKey()</code>メソッドを実行するときには、Daggerが自動的に<code>provideContext()</code>を実行して引数を準備してくれるんです。というわけで、もうこれで<code>Context</code>をどうやって取得しよう問題はクリア！</p>
 <p>まぁ、<code>AppModule</code>生成の引数に<code>Application</code>が含まれているので、問題を先送りしただけなんだけどな。</p>
 <h2 id="app">App</h2>
 <p>というわけで、<code>Application</code>を引数にして<code>AppModule</code>を生成する処理を追加してみましょう。そのために、<code>Application</code>を継承した<code>App</code>クラスを作成します。</p>
@@ -1965,9 +1965,9 @@ dependencies {
 <p><code>requireActivity()</code>で取得した<code>Activity</code>を経由して<code>Application</code>を取得して、そこからDaggerの<code>Component</code>を取得して自分自身を引数に<code>inject()</code>します……って、これ、結局<code>Context</code>の代わりに<code>Application</code>が必要になっただけじゃん！　Daggerで楽するために単純作業に耐えてきたのに、ベネフィットは複数の属性を1行で設定できるようになっただけ？</p>
 <p>こんなの絶対おかしいよ……とどこぞの魔法少女のように絶望したかもしれませんけど、安心してください、幸いなことにDaggerには救いがあります。どう救われるのかは、次に説明するLifecycleの中で！</p>
 <h1 id="lifecycle"><a href="https://github.com/tail-island/jetbus/tree/lifecycle">Lifecycle</a></h1>
-<p>と、かなり強引な引きで始めてみたLifecycleなのですけど、ごめんなさい、やたらと書くことが多いので、Daggerの世界が救われるのはこの章の最後です。</p>
-<p>考えてみれば、Androidアプリの開発が大変だった一番大きな理由は、本稿の最初の方で述べたライフサイクルの管理が大変なためなんです。やたらと複雑な<code>Activity</code>のライフサイクルから、もうとにかく逃げたい。そのために状態をViewModelに分離したというわけ。なので、ViewModelとはなんぞやというアーキテクチャーの話をしなければなりません。あと、<code>Activity</code>や<code>Fragment</code>の状態の変化に合わせて正しく動作するには、データの変更を監視する方式が定まっていないとダメ。そうでなければ、状態の変化に対応するための制御を入れられないですもんね。だから、その手段であるLiveDataについての説明も必要です。で、LiveDataは前述したRoomといい感じに協調して動作するように作られているのでデータベースの話まで戻らなくちゃなりません（Roomで不足しているように感じた機能が、LiveDataと組み合わせると不足していたのではなくて無いことこそが正しいとなるのでとても面白いですよ）。</p>
-<p>覚悟してください。この章はとても長いですよ……。</p>
+<p>と、かなり強引な引きで始めてみたLifecycleなのですけど、ごめんなさい、やたらと書くことが多いので、Daggerの世界が救われるのはこの章の最後になります。</p>
+<p>考えてみれば、Androidアプリの開発が大変だった一番大きな理由は、本稿の最初の方で述べたライフサイクルの管理が大変なためなんです。やたらと複雑な<code>Activity</code>のライフサイクルから、もうとにかく逃げたい。そのために状態をViewModelに分離したというわけ。なので、ViewModelとはなんぞやというアーキテクチャーの話をしなければなりません。あと、<code>Activity</code>や<code>Fragment</code>の状態の変化に合わせて正しく動作するには、データの変更を監視する方式が定まっていないとダメ。そうでなければ、状態の変化に対応するための制御を入れられないですもんね。だから、その手段であるLiveDataについての説明も必要です。で、LiveDataは前述したRoomといい感じに協調して動作するように作られているのでデータベースの話まで戻らなくちゃならないという……。Roomで不足しているように感じた機能が、LiveDataと組み合わせると不足していたのではなくて無いことこそが正しいとなるのでとても面白いんですけどね。</p>
+<p>というわけで、覚悟してください。この章はとても長いですよ……。</p>
 <h2 id="mvvmmodel-view-viewmodelアーキテクチャとは">MVVM（Model-View-ViewModel）アーキテクチャとは？</h2>
 <p>Android Jetpackでは、MVVMアーキテクチャを使うことが推奨されています。このMVVMアーキテクチャを理解するには、その前段であるMVC（Model-View-Controller）アーキテクチャの知識があると楽。しかも、Android JetpackのMVVMアーキテクチャは、普通のMVVMアーキテクチャとは少し違っていたりします。</p>
 <p>というわけで、MVCアーキテクチャ、MVVMアーキテクチャ、Android JetpackのMVVMアーキテクチャの順に説明させてください。</p>
@@ -1976,7 +1976,7 @@ dependencies {
 <p>で、このAltoってのは当時にしてはものすごく先進的なコンピューターで、マウスがついていてGUI（Graphical User Interface）を持っていました。もちろん世界初です。この世界初のGUIをどうにかしていい感じに開発できないかなぁと考えて作られたのが、MVCアーキテクチャなんです。</p>
 <p>図</p>
 <p>Controllerは入力機器（マウスとかキーボードとか）からの入力を監視し、マウス・クリックとかキーボードのAが押されたとかのイベントをもとに、Modelというデータとデータ操作の手続きを管理するオブジェクトにメッセージを送り（メソッドを呼び出し）ます。Modelのデータが変更されたことはViewに通知され（Observerパターン）、通知を受け取ったViewは自分自身を置き換えて出力する。以上がMVCアーキテクチャなんです。</p>
-<p>MVCアーキテクチャには良いところもあったのでしょうけど、GUIが複雑になってくると、GUIの入力と出力を分けるのは無理がある（たとえばボタンがタップされたときのアニメーションを、ControllerとModel経由でやるのは無駄が多すぎる）ということになりました。だから、Androidアプリ開発ではControllerは分割されていません。</p>
+<p>MVCアーキテクチャは依存が片方向になるのでとても良いのですけど、GUIが複雑になってくると、GUIの入力と出力を分けるのは無理がある（たとえば、ボタンがタップされたときのアニメーションをControllerとModel経由でやるのは無駄が多すぎるでしょ？）ということになりました。だから、Androidアプリ開発ではControllerは分割されていません。</p>
 <p>ちなみに、このViewとControllerが一体化した場合のアーキテクチャがDocument-Viewアーキテクチャだったりします。代表例はMFC（Microsoft Foundation Classes）、懐かしいなぁ。</p>
 <p>ただ、世の中には用語を適当に使う人たちがいるので、Webアプリケーションの開発でもMVCアーキテクチャという言葉が使われるようになってしまったんですよ……。</p>
 <p>WebアプリケーションのMVCアーキテクチャはSmalltalkのMVCとは<em>無関係</em>で、一般的にModelはO/Rマッピング・ツールでマッピングされたレコードを表現するオブジェクトです（もちろん普通のクラスが含まれていても構いません）。Controllerはリクエストを受け取ってModelを更新/取得してViewが必要とするデータを用意し、ViewはControllerから渡されたデータをHTMLに変換します。これがWebアプリケーションの場合のMVCアーキテクチャなんですけど、勝手に名乗っているだけな上に無関係なので、今回はこのMVCアーキテクチャは忘れてください。</p>
@@ -1989,7 +1989,7 @@ dependencies {
 <p>図</p>
 <p>Androidが動作するスマートフォンやタブレット、ウェアラブル・デバイスは、インターネットとの親和性が高いデバイスです。だから、我々が作成するアプリもインターネットと頻繁に通信する可能性が高い。しかもローカルのファイルやデータベースだって使用するわけで、だから、モデルはWebサービスに基づく場合とデータベースやファイルに基づく場合がありえます。これらがバラバラのままだと管理が大変になってしまうので、Repositoryという層を追加して一本化してViewModelはRepositoryだけに依存しましょうという感じ。</p>
 <p>で、本来のMVVMのModelはビジネス・ロジックを含む分厚い層で、Android Jetpackのドキュメントでも図だけはそんな感じに書いてあるのですけど、実際としては、ただのRoomによるDAO（Data Access Object）とEntity、Retrofit2によるWebサービスになります（たぶん）。だって、ModelというのはReposirotyでラップできるようなレベルなんですしね。後述するLiveDataとRoomを組み合わせれば、データベースの変更がViewModelに通知されて楽チンだし。結果としてViewModelは少し大きくなるけど、Android JetpackならViewModel上にロジックを書くのがやたらと楽だしね。</p>
-<p>MVVMアーキテクチャ原理派の方々はこんなやり方は認めないのでしょうけど、楽にコードを書けるのだから私的には全然オッケー。</p>
+<p>MVVMアーキテクチャ原理主義派の方々はこんなやり方は認めないのでしょうけど、楽にコードを書けるのだから私的には全然オッケー。</p>
 <h2 id="livedata">LiveData</h2>
 <p>というわけで長いMVVMアーキテクチャの説明が終わったのでさっそくViewModelを作る……前に、MVVMアーキテクチャではViewModelからViewへの情報の伝達は通知で実現されることになっていたことを思い出してください。</p>
 <p>しかも、考えたくもないしLiveDataを使えば考える必要はほとんどなくなるのですけど、<code>Activity</code>や<code>Fragment</code>は複雑なライフサイクルを持っているので、単純にObserverパターンを使うと通知が来たときにはすでに<code>Activity</code>や<code>Fragment</code>が破棄されていて処理を実行したら即クラッシュなんて可能性もあるんですよ。</p>
@@ -2064,7 +2064,7 @@ dependencies {
 <span id="cb54-27"><a href="#cb54-27"></a>        }.root</span>
 <span id="cb54-28"><a href="#cb54-28"></a>    }</span>
 <span id="cb54-29"><a href="#cb54-29"></a>}</span></code></pre></div>
-<p><code>observe()</code>の引数の<code>Observer { ... }</code>は、抽象メソッド一つだったらラムダ式から変換してやる（SAM変換）というKotlinの機能を使用しています。ラムダ式でいいんだったら前に付いている<code>Observer</code>は何なんだとか、どうして<code>(...)</code>の内側に入っているんだこれまでの書き方と違うじゃないかという疑問は、<code>observe()</code>にはいくつもバージョンがあるのでそのどれなのかを指定しなければならないから。普段と書き方が違うので面倒ですけど、普通の書き方をするとコンパイル・エラーになるので発見も書き換えも容易ですのでまぁいいかなぁ。</p>
+<p><code>observe()</code>の引数の<code>Observer { ... }</code>は、抽象メソッド一つだったらラムダ式から変換してやる（SAM変換）というKotlinの機能を使用しています。ラムダ式でいいんだったら前に付いている<code>Observer</code>は何なんだとか、どうして<code>(...)</code>の内側に入っているんだこれまでの書き方と違うじゃないかという疑問は、<code>observe()</code>にはいくつもバージョンがあるのでそのどれなのかを指定しなければならないから。普段と書き方が違うので面倒ですけど、普通の書き方をするとコンパイル・エラーになるので発見も書き換えも容易ですのでまぁいいかな。</p>
 <p>で、これで作業終了です。<code>MutableLiveData</code>に値を設定するには、メイン・スレッドからの場合は<code>value</code>プロパティ、他のスレッドからの場合は<code>postValue()</code>メソッドを使用します。スレッドを作成して5秒経ったら、私の両親が「お前をまだクビにしてないんだから度量が大きい会社だな」と評価した会社の前にあるバス停が設定され、画面に表示されます。</p>
 <p>で、ここで試していただきたいのですけど、バス接近情報を表示する画面に遷移したら、5秒経つ前にホーム画面を表示してアプリをバックグラウンドに移動させてみてください。バックグラウンドに移ったので画面を更新する必要はなくて、だから<code>Observer</code>の呼び出しは無駄です。LiveDataはこのことを知っていて、しかも、<code>Fragment</code>がどのような状態にあるのかを<code>viewLifecycleOwner</code>を経由して知ることができるので、変更を通知しなくなるんです。その証拠に、ほら、logcatを見てください「departureBusStopName.observe()」が表示されていないでしょ？　で、アプリをフォアグランドに戻すと、すぐにlogcatに「departureBusStopName.observe()」が表示されて、私の会社の前にあるバス停の名前が画面に表示される。 というわけで、ほら、LiveDataのおかげで<code>Activity</code>や<code>Fragment</code>のライフサイクルがどうなっているのかを考えながらプログラミングする手間はほぼなくなりました！</p>
 <h3 id="livedataとroomを組み合わせる">LiveDataとRoomを組み合わせる</h3>
