@@ -77,7 +77,7 @@ Android Studioを起動して、[Start a new Android Studio project]を選択し
 
 人類がウホウホ言いながら樹上で暮らしていた大昔、ライブラリの組み込みというのはインターネットからダウンロードしたファイルをプロジェクトのディレクトリにセーブするという作業でした。Windowsでアプリケーションをインストールするために、Webサイトからパッケージをダウンロードしてセットアップするのと似た感じ。
 
-こんな面倒な作業はやってられませんから、Linuxでは`pacman`とか`apt`とか`yum`とか、Mac OSでは`MacPorts`とか`HomeBrew`とかのパッケージ管理システムを使って、アプリケーションをセットアップします。たとえば、LinuxディストリビューションのArch Linuxで今私が本稿の作成に使用しているEmacsをセットアップする場合は、ターミナルから`sudo pacman -S emacs`と入力するだけ。これだけで、パッケージ管理システムが全自動でEmacsをダウンロードし、セットアップしてくれます（私は日本語IMEにMozcを使用しているので、emacs-mozcからEmacsをインストールしたけど）。AndroidのPlay Store、iPhoneのApp Storeと同じですな。
+こんな面倒な作業はやってられませんから、Linuxでは`pacman`とか`apt`とか`yum`とか、Mac OSでは`MacPorts`とか`HomeBrew`とかのパッケージ管理システムを使って、アプリケーションをセットアップします。たとえば、LinuxディストリビューションのArch Linuxで今私が本稿の作成に使用しているEmacsをセットアップする場合は、ターミナルから`sudo pacman -S emacs`と入力するだけで終わり。これだけで、パッケージ管理システムが全自動でEmacsをダウンロードし、セットアップしてくれます（私は日本語IMEにMozcを使用しているので、emacs-mozcからEmacsをインストールしたけど）。AndroidのPlay Store、iPhoneのApp Storeと同じですな。
 
 で、今時の開発では様々なライブラリを使用するのが当たり前で、ライブラリ毎にWebサイトを開いてダウンロードして解凍してセーブなんて作業はやってられませんから、ライブラリの組み込みにも自動化が必要でしょう。ライブラリは他のライブラリに依存していることが多くて、その依存関係を辿る作業を手動でやるなんてのは非現実的ですもんね。
 
@@ -88,7 +88,7 @@ Android Studioを起動して、[Start a new Android Studio project]を選択し
 Jetpackをビルド・システムのGradleに組み込む方法は、各ライブラリのリリース・ノートに書いてあります。たとえばNavigationなら、[https://developer.android.com/jetpack/androidx/releases/navigation](https://developer.android.com/jetpack/androidx/releases/navigation)です。基本はこのリリース・ノートの記載に従うのですけど、いくつか注意点があります。
 
 * ライブラリ名-ktxという名前のライブラリがある場合は、\*-ktxを指定してください。\*-ktxは、Kotlinならではの便利機能が入ったバージョンのライブラリです。Kotlin向けの機能が入っていない基本バージョンのライブラリは、依存関係があるので自動で組み込まれます。
-* Jetpackではコード生成を多用しているのですけど、KotlinやJavaではコード生成の制御にアノテーション（annotation。クラスやメソッドの前に書く`@Foo`みたいなアレ）を使用していて、Javaの場合はGradleのビルド・スクリプトに`annotationProcessor`と書きます。Kotlinの場合は、Kotlin Annotation Processor Toolの略で`kapt`と書いてください。リリース・ノートに`annotationProcessor`の記述があったあとに、Kotlinではkaptを使ってねという知っている人しかわからない意味不明なコメントが書いてある場合は、`kapt`の出番です。
+* Jetpackではコード生成を多用しているのですけど、KotlinやJavaではコード生成の制御にアノテーション（annotation。クラスやメソッドの前に書く`@Foo`みたいなアレ）を使用していて、Javaの場合はGradleのビルド・スクリプトに`annotationProcessor`と書きます。Kotlinの場合は、Kotlin Annotation Processor Toolの略で`kapt`と書いてください。リリース・ノートに`annotationProcessor`の記述があった後に、Kotlinではkaptを使ってねという知っている人しかわからない意味不明なコメントが書いてある場合は、`kapt`の出番です。
 
 と、以上の注意を踏まえて、Android Studioの[Project]ビューのbuild.gradeをダブル・クリックして開いて、修正してみましょう。
 
@@ -202,7 +202,7 @@ dependencies {
 
 これを`Activity`で実現しようとすると、タブレット用の`Activity`を1つと、スマートフォン用の`Acticvity`を2つ作らなければなりません。そして、ほとんどのコードは重複してしまうでしょう。UIの問題なら`View`（UIコンポーネント）で解決すれば……って思うかもしれませんけど、画面に表示するデータをデータベースから取得してくるような機能を`View`に持たせるのは、`View`の責任範囲を逸脱しているのでダメです。
 
-ではどうすればよいかというと、`Activity`の構成要素になりえる「何か」を追加してあげればよい。この「何か」こそが、`Fragment`なのです。
+ではどうすればよいかというと、`Activity`の構成要素になりえる「何か」を追加してあげればよい。この「何か」こそが、`Fragment`です。
 
 でもね、コードの重複が発生しないようなケースで`Fragment`を使って`Activity`で画面遷移をさせると、`Activity`のコードの多くを`Fragment`に移して、で、`Activity`に`Fragment`を管理するコードを追加して、そしてもちろん`Fragment`にも自分自身の初期化処理等が必要となって、結局、コード量が増えただけで誰も得しないという状況になってしまうんです。
 

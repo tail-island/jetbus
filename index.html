@@ -672,14 +672,14 @@ border-color: #4078c0;
 <p>ともあれ、これで無事にプロジェクトが作成されました。でも、まだJetpackが組み込まれていません。さっそく組み込む……前に、ビルド・システムの説明をさせてください。</p>
 <h2 id="ビルドシステム">ビルド・システム</h2>
 <p>人類がウホウホ言いながら樹上で暮らしていた大昔、ライブラリの組み込みというのはインターネットからダウンロードしたファイルをプロジェクトのディレクトリにセーブするという作業でした。Windowsでアプリケーションをインストールするために、Webサイトからパッケージをダウンロードしてセットアップするのと似た感じ。</p>
-<p>こんな面倒な作業はやってられませんから、Linuxでは<code>pacman</code>とか<code>apt</code>とか<code>yum</code>とか、Mac OSでは<code>MacPorts</code>とか<code>HomeBrew</code>とかのパッケージ管理システムを使って、アプリケーションをセットアップします。たとえば、LinuxディストリビューションのArch Linuxで今私が本稿の作成に使用しているEmacsをセットアップする場合は、ターミナルから<code>sudo pacman -S emacs</code>と入力するだけ。これだけで、パッケージ管理システムが全自動でEmacsをダウンロードし、セットアップしてくれます（私は日本語IMEにMozcを使用しているので、emacs-mozcからEmacsをインストールしたけど）。AndroidのPlay Store、iPhoneのApp Storeと同じですな。</p>
+<p>こんな面倒な作業はやってられませんから、Linuxでは<code>pacman</code>とか<code>apt</code>とか<code>yum</code>とか、Mac OSでは<code>MacPorts</code>とか<code>HomeBrew</code>とかのパッケージ管理システムを使って、アプリケーションをセットアップします。たとえば、LinuxディストリビューションのArch Linuxで今私が本稿の作成に使用しているEmacsをセットアップする場合は、ターミナルから<code>sudo pacman -S emacs</code>と入力するだけで終わり。これだけで、パッケージ管理システムが全自動でEmacsをダウンロードし、セットアップしてくれます（私は日本語IMEにMozcを使用しているので、emacs-mozcからEmacsをインストールしたけど）。AndroidのPlay Store、iPhoneのApp Storeと同じですな。</p>
 <p>で、今時の開発では様々なライブラリを使用するのが当たり前で、ライブラリ毎にWebサイトを開いてダウンロードして解凍してセーブなんて作業はやってられませんから、ライブラリの組み込みにも自動化が必要でしょう。ライブラリは他のライブラリに依存していることが多くて、その依存関係を辿る作業を手動でやるなんてのは非現実的ですもんね。</p>
 <p>あと、今時の開発だと、ライブラリを組み込み終わったあとのビルドもなかなかに複雑な作業となります。ビルドついでにテストしたいとか、事前にコード生成させたいとか。このように考えると、ライブラリの管理とビルドを自動化するシステムが必要で、これがいわゆるビルド・システムとなります。Android Studioは、このビルド・システムとしてGradleというソフトウェアを使用しているわけです。</p>
 <h2 id="jetpackの組み込み">Jetpackの組み込み</h2>
 <p>Jetpackをビルド・システムのGradleに組み込む方法は、各ライブラリのリリース・ノートに書いてあります。たとえばNavigationなら、<a href="https://developer.android.com/jetpack/androidx/releases/navigation">https://developer.android.com/jetpack/androidx/releases/navigation</a>です。基本はこのリリース・ノートの記載に従うのですけど、いくつか注意点があります。</p>
 <ul>
 <li>ライブラリ名-ktxという名前のライブラリがある場合は、*-ktxを指定してください。*-ktxは、Kotlinならではの便利機能が入ったバージョンのライブラリです。Kotlin向けの機能が入っていない基本バージョンのライブラリは、依存関係があるので自動で組み込まれます。</li>
-<li>Jetpackではコード生成を多用しているのですけど、KotlinやJavaではコード生成の制御にアノテーション（annotation。クラスやメソッドの前に書く<code>@Foo</code>みたいなアレ）を使用していて、Javaの場合はGradleのビルド・スクリプトに<code>annotationProcessor</code>と書きます。Kotlinの場合は、Kotlin Annotation Processor Toolの略で<code>kapt</code>と書いてください。リリース・ノートに<code>annotationProcessor</code>の記述があったあとに、Kotlinではkaptを使ってねという知っている人しかわからない意味不明なコメントが書いてある場合は、<code>kapt</code>の出番です。</li>
+<li>Jetpackではコード生成を多用しているのですけど、KotlinやJavaではコード生成の制御にアノテーション（annotation。クラスやメソッドの前に書く<code>@Foo</code>みたいなアレ）を使用していて、Javaの場合はGradleのビルド・スクリプトに<code>annotationProcessor</code>と書きます。Kotlinの場合は、Kotlin Annotation Processor Toolの略で<code>kapt</code>と書いてください。リリース・ノートに<code>annotationProcessor</code>の記述があった後に、Kotlinではkaptを使ってねという知っている人しかわからない意味不明なコメントが書いてある場合は、<code>kapt</code>の出番です。</li>
 </ul>
 <p>と、以上の注意を踏まえて、Android Studioの[Project]ビューのbuild.gradeをダブル・クリックして開いて、修正してみましょう。</p>
 <p>図</p>
@@ -775,7 +775,7 @@ dependencies {
 <p>で、大昔のスマートフォンのアプリの単純な画面だったらこれであまり問題なかったんですけど、高機能なアプリを作ったりタブレットのような大きな画面を効率よく使おうとしたりする場合は、この方式だとコードの重複という問題が発生してしまうんです。タブレットの大きな画面では、左に一覧表示して、右にその詳細を表示するような画面が考えられます。でも、スマートフォンの小さな画面では、一覧表示する画面と、それとは別の詳細を表示する画面に分かれて、画面遷移する形で表現しなければなりません。</p>
 <p>図</p>
 <p>これを<code>Activity</code>で実現しようとすると、タブレット用の<code>Activity</code>を1つと、スマートフォン用の<code>Acticvity</code>を2つ作らなければなりません。そして、ほとんどのコードは重複してしまうでしょう。UIの問題なら<code>View</code>（UIコンポーネント）で解決すれば……って思うかもしれませんけど、画面に表示するデータをデータベースから取得してくるような機能を<code>View</code>に持たせるのは、<code>View</code>の責任範囲を逸脱しているのでダメです。</p>
-<p>ではどうすればよいかというと、<code>Activity</code>の構成要素になりえる「何か」を追加してあげればよい。この「何か」こそが、<code>Fragment</code>なのです。</p>
+<p>ではどうすればよいかというと、<code>Activity</code>の構成要素になりえる「何か」を追加してあげればよい。この「何か」こそが、<code>Fragment</code>です。</p>
 <p>でもね、コードの重複が発生しないようなケースで<code>Fragment</code>を使って<code>Activity</code>で画面遷移をさせると、<code>Activity</code>のコードの多くを<code>Fragment</code>に移して、で、<code>Activity</code>に<code>Fragment</code>を管理するコードを追加して、そしてもちろん<code>Fragment</code>にも自分自身の初期化処理等が必要となって、結局、コード量が増えただけで誰も得しないという状況になってしまうんです。</p>
 <p>これでは無意味なので、1つの<code>Activity</code>の中で、複数の<code>Fragment</code>が遷移するというプログラミング・スタイルが編み出されました。このスタイルを実現するのが<code>FragmentTransaction</code>というAPIで、<code>Acticity</code>から<code>Fragment</code>を削除したり追加したり入れ替えたりできます。なんと[戻る]ボタンへの対応機能付き……なのですけど、高機能な分だけ使い方が複雑で、<code>Activity</code>の遷移（<code>Intent</code>のインスタンスを引数に<code>startActivity()</code>するだけ）と比べると面倒だったんですよ。</p>
 <p>なので、Navigationが作成されました。GUIツール（私はほとんど使わないけど）で画面遷移を定義できるかっこいいライブラリです。ただ単に<code>FragmentTransaction</code>を呼び出しているだけな気もしますけど、まぁ、いろいろ楽チンなので良し。SafeArgsという便利機能もありますしね。</p>
