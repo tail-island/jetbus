@@ -1921,15 +1921,15 @@ class BusApproachesFragment: Fragment() {
 
 `observe()`の引数の`Observer { ... }`は、抽象メソッド一つだったらラムダ式から変換してやる（SAM変換）というKotlinの機能を使用しています。ラムダ式でいいんだったら前に付いている`Observer`は何なんだとか、どうして`(...)`の内側に入っているんだこれまでの書き方と違うじゃないかという疑問は、`observe()`にはいくつもバージョンがあるのでそのどれなのかを指定しなければならないから。普段と書き方が違うので面倒ですけど、普通の書き方をするとコンパイル・エラーになるので発見も書き換えも容易ですのでまぁいいかな。
 
-で、これで作業終了です。`MutableLiveData`に値を設定するには、メイン・スレッドからの場合は`value`プロパティ、他のスレッドからの場合は`postValue()`メソッドを使用します。スレッドを作成して5秒経ったら、私の両親が「お前をまだクビにしてないんだから度量が大きい会社だな」と評価した会社の前にあるバス停が設定され、画面に表示されます。
+で、これで作業は終了です。`MutableLiveData`に値を設定するには、メイン・スレッドからの場合は`value`プロパティ、他のスレッドからの場合は`postValue()`メソッドを使用します。スレッドを作成して5秒経ったら、私の両親が「お前をまだクビにしてないんだから度量が大きい会社だな」と評価した会社の前にあるバス停が設定されて、通知が飛んで、画面に表示されます。
 
 で、ここで試していただきたいのですけど、バス接近情報を表示する画面に遷移したら、5秒経つ前にホーム画面を表示してアプリをバックグラウンドに移動させてみてください。バックグラウンドに移ったので画面を更新する必要はなくて、だから`Observer`の呼び出しは無駄です。LiveDataはこのことを知っていて、しかも、`Fragment`がどのような状態にあるのかを`viewLifecycleOwner`を経由して知ることができるので、変更を通知しなくなるんです。その証拠に、ほら、logcatを見てください「departureBusStopName.observe()」が表示されていないでしょ？　で、アプリをフォアグランドに戻すと、すぐにlogcatに「departureBusStopName.observe()」が表示されて、私の会社の前にあるバス停の名前が画面に表示される。 というわけで、ほら、LiveDataのおかげで`Activity`や`Fragment`のライフサイクルがどうなっているのかを考えながらプログラミングする手間はほぼなくなりました！
 
 ### LiveDataとRoomを組み合わせる
 
-まだまだLiveDataはこんなもんではありません。RoomとLiveDataを組みわせるともっとすごいことができるんです。
+まだまだLiveDataはこんなもんではありません。RoomとLiveDataを組みわせるととてもすごいことができるんです。
 
-以前の章でRoomを使ったときのことを思い出してみましょう。Roomはメイン・スレッドからは呼び出せなくて、とても面倒だった記憶が蘇ってきました（SplashFragment.ktを参照してください）。
+以前の章でRoomを使ったときのことを思い出してみましょう。Roomはメイン・スレッドからは呼び出せなくて面倒だった記憶が蘇ってきました（SplashFragment.ktを参照してください）。
 
 この問題、LiveDataを使うととても簡単に解消できるんですよ。出発バス停と路線がつながっている到着バス停の一覧を取得する処理を考えてみましょう。まずは、`BusStopDao`に到着バス停を取得するメソッドを追加してみます。
 
@@ -1965,9 +1965,9 @@ interface BusStopDao {
 
 SQLが複雑に見えますけど、BusStop（到着）→BusStopPole（到着）→RouteBusStopPole（到着）→Route→RouteBusStopPole（出発）→BusStopPole（出発）→BusStop（出発）と`INNER JOIN`で辿っているだけ。Roomの解説の章でダウンロードしたSQLite3のデータベース・ファイルを使って実際に試しながらやれば、そんなに難しくないはず。
 
-で、このコードの重要なところは、`getObservablesByDepartureBusStopName()`メソッドの返り値の「型」です。普通にRoomを使う場合の返り値の型は`List<BusStop>`になるのですけど、上のコードでは`LiveData<List<BusStop>>`になっています。この小さな変更だけで、LiveData対応のデータ・アクセスのメソッドが生成されるんです。
+で、このコードの重要なところは、`getObservablesByDepartureBusStopName()`メソッドの返り値の「型」です。普通にRoomを使う場合の返り値の型は`List<BusStop>`になるのですけど、上のコードでは`LiveData<List<BusStop>>`になっています。この小さな変更だけで（メソッド名の命名規約も変えていますけど、それは分かりやすくしただけなので無関係）、LiveData対応のデータ・アクセスのメソッドが生成されるんです。
 
-次の作業は、`App`へのRoomで作成するLiveData型のプロパティ追加なのですけど、そのためには`AppDatabase`が必要なので、まずは`AppCompoenent`に`fun inject(app: App)`を追加します。そのうえで、`App`を以下に修正してください。
+次の作業は、とりあえずの物置場としている`App`へのRoomで作成するLiveData型のプロパティ追加なのですけど、そのためには`AppDatabase`が必要なので、まずは`AppCompoenent`に`fun inject(app: App)`を追加します。そのうえで、`App`を以下に修正してください。
 
 ~~~ kotlin
 package com.tail_island.jetbus
@@ -2047,11 +2047,11 @@ Kotlinは関数型プログラミングのテクニックが使えてとても�
 
 プログラムが完成したので、早速実行してみます。手早くバス接近情報の画面まで遷移してlogcatを見てみると、何度も何度も「arrivalBusStops.observe()」と表示されて、かなり時間が経ってから、少しづつ到着バス停の候補が画面に表示されていきます。え？　どうしてこうなった？
 
-あの、実はこれこそが、LiveDataとRoomを組み合わせるとできるようになる本当にすごいことなんです。LiveDataとRoomを組み合わせた場合は、データベースに変更があると通知がやってくるんですよ！
+あの、実はこれこそが、LiveDataとRoomを組み合わせるとできるようになるとてもすごいことなんです。LiveDataとRoomを組み合わせた場合は、データベースに変更があると通知がやってくるんですよ！
 
-前にやった作業なのですっかり忘れていましたけど、我々は`SplashFragment`の中でWebサービスを呼び出して、取得したデータでデータベースを書き換える処理を実装していました。その処理はLifecycleを使わずにスレッドとして実装しましたから、SplashFragmentが終了しても動き続けます。なので、手早くバス接近情報の画面まで移動すると、まだデータベースの更新処理が動いているんですよ。で、データが更新されるたびに通知が来るので、何度も何度も「arrivalBusStops.observe()」と表示され、少しづつ到着バス停の候補が画面に表示されるという動きになったわけですな。
+前にやった作業なのですっかり忘れていましたけど、我々は`SplashFragment`の中でWebサービスを呼び出して、取得したデータでデータベースを書き換える処理を実装していました。その処理はLifecycleを使わずにスレッドとして実装しましたから、SplashFragmentが終了しても動き続けます。なので、手早くバス接近情報の画面まで移動した場合は、まだデータベースの更新処理が動いているんですよ。で、データが更新されるたびに通知が来るので、何度も何度も「arrivalBusStops.observe()」と表示され、少しづつ到着バス停の候補が画面に表示されるという動きになったわけですな。
 
-というわけで、LiveDataとRoomを組み合わせれば、MVVMのModelからViewModelへの変更の通知も実現できるんですよ。素晴らしい！
+というわけで、LiveDataとRoomを組み合わせれば、MVVMのModelからViewModelへの変更の通知も実現できるんです！　素晴らしい！
 
 ### `Transformations`
 
@@ -2098,7 +2098,7 @@ class App: Application() {
 
 `Transformations`の`switchMap()`メソッドは、１つ目の引数で指定した`LiveData`が変更になったら、2つ目の引数のラムダ式の結果がセットされる`LiveData`を返します。なお、今回はラムダ式が`LiveData`を返すので`switchMap()`を使用しましたが、`Transformations`には、`LiveData`ではない返り値を使う場合向けの`map()`というメソッドもありますのでいい感じに使い分けてください。
 
-で、この`Transformations`を使うと、Roomにテーブルとテーブルの間を辿る機能がないことが気にならなくなります。たとえば注文と注文明細を表示するような場合は、注文と注文明細を`Transformations`でつないで、注文と関係づけられた注文明細を取得するデータ・アクセス・オブジェクトのメソッドを書けばいいんですから。というわけで、Roomは前に書いたような「こういうのでいいんだよ。こういうので」と表現されるような機能が貧弱なO/Rマッピング・ツールではなくて、不要な機能がついていないとても洗練された最高に出来が良いO/Rマッピング・ツールなんです。もし「Roomは機能が貧弱で」とのたまうRoomの説明を書いていたときの私みたいな人がいたら、分かってないなぁと鼻で笑ってやってください。
+で、この`Transformations`を使うと、Roomにテーブルとテーブルの間を辿る機能がないことが気にならなくなります。たとえば注文と注文明細を表示するような場合は、注文と注文明細を`Transformations`でつないで、注文と関係づけられた注文明細を取得するデータ・アクセス・オブジェクトのメソッドを書けばいいんですから。というわけで、Roomは前に書いたような「こういうのでいいんだよ。こういうので」と表現されるような機能が貧弱なO/Rマッピング・ツールではなくて、不要な機能がついていないとても洗練された最高に出来が良いO/Rマッピング・ツールなのですよ。もし「Roomは機能が貧弱で」とのたまうRoomの説明を書いていたときの私みたいな人がいたら、分かってないなぁと鼻で笑ってやってください。
 
 最後。せっかく`departureBusStopName`が変更になったら`arrivalBusStops`が変更されるようになったのですから、`BusApproachesFragment`を修正して画面も変更されるようにしましょう。
 
@@ -2188,9 +2188,9 @@ class BusApproachesFragment: Fragment() {
 
 ### `MediatorLiveData`
 
-でも、あれ、ユーザーIDとパスワードが入力されたらログインして認証済みかどうかの`LiveData`を更新するような場合、複数の値を監視しなければならない場合はどうするのでしょうか？　今回のアプリだと、出発バス停と到着バス停からルートを取得するような場合です。`Transformations`は1つの`LiveData`しか監視できないですよね？　それでは、要件を満たせません。
+でも、あれ、ユーザーIDとパスワードが入力されたらログインして認証済みかどうかの`LiveData`を更新するような場合、複数の値を監視しなければならない場合にはどうするのでしょうか？　今回のアプリだと、出発バス停と到着バス停から路線を取得するような場合です。`Transformations`は1つの`LiveData`しか監視できないですよね？　それでは要求を満たせません……。
 
-というわけで、そんな場合は`MediatorLiveData`を使いましょう。出発バス停の名称と到着バス停の名称からルートを取得する処理を作りたいので、まずはルートを取得するメソッドを`RouteDao`に追加します。
+そんな場合は、`MediatorLiveData`を使いましょう。今回は出発バス停の名称と到着バス停の名称から路線を取得する処理を作りたいので、まずは路線を取得するメソッドを`RouteDao`に追加します。
 
 ~~~ kotlin
 package com.tail_island.jetbus.model
@@ -2278,7 +2278,7 @@ class App: Application() {
 
 `departureBusStopName`（出発バス停名称）が変更になったら、`arrivalBusStops`（到着バス停のリスト）を設定するところまでは前にやりました。今回は`arrivalBusStopName`（到着バス停名称）も必要なので、`Transformations`の`map()`メソッドを使用して`arrivalBusStops`が変更になったらその中の一つをランダムに選ぶようにしました。
 
-で、`routes`（ルートのリスト）が問題の`MediatorLiveData`です。`MediatorLiveData`では、監視対象の`LiveData`を`addSource()`メソッドで追加できます。`addSource()`メソッドの2つ目の引数はラムダ式で、監視対象が変更になった場合に実行する処理です。今回は、その直前に定義している`update()`関数を呼び出しています。で、`MediatorLiveData`の値を変更したい場合は、`value`プロパティに値を設定すればよくて、監視対象の`LiveData`の値は`LiveData`の`value`プロパティで取得できるのですけど、残念なことに`RouteDao`に定義したのは`LiveData<List<Route>>`を返すメソッドですから、そのままでは`value`に設定できません。
+で、`routes`（路線のリスト）が問題の`MediatorLiveData`です。`MediatorLiveData`では、監視対象の`LiveData`を`addSource()`メソッドで追加できます。`addSource()`メソッドの2つ目の引数はラムダ式で、監視対象が変更になった場合に実行する処理です。今回は、その直前に定義している`update()`関数を呼び出しています。で、`MediatorLiveData`の値を変更したい場合は、`value`プロパティに値を設定すればよくて、監視対象の`LiveData`の値は`LiveData`の`value`プロパティで取得できるのですけど、残念なことに`RouteDao`に定義したのは`LiveData<List<Route>>`を返すメソッドですから、そのままでは`value`に設定できません。
 
 だから、`getObservablesByDepartureBusStopNameAndArrivalBusStopName()`の返り値を格納するための`source`変数を作成して、設定と同時に`also`で`addSource()`して`value`に値を設定するようにしています。`source`が複数になると動作がおかしくなりますから、`source?.let`で過去に設定した`source`がある場合は`removeSource()`しています。
 
@@ -2386,7 +2386,7 @@ class BusApproachesFragment: Fragment() {
 }
 ~~~
 
-これで出発バス停の名称と到着バス停の名称とその2つのバス停をつなぐルートの一覧が表示されるようになりました。あ、このアプリを動かすとルートが複数表示されるのは、ルートの出発バス停や到着バス停が異なる場合があるためです。
+これで出発バス停の名称と到着バス停の名称とその2つのバス停をつなぐ路線の一覧が表示されるようになりました。あ、このアプリを動かすと路線が複数表示されるのは、路線の出発バス停や到着バス停が異なる場合があるためです。
 
 これでLiveDataの説明は完了です。`MediatorLiveData`の使い方が少し面倒でしたけど、全体で見ればとても便利でしょ？　長かった説明が終わってよかった……。
 
@@ -3947,7 +3947,7 @@ class Repository @Inject constructor(private val database: AppDatabase, private 
             val busStopPoleIds = routeBusStopPoles.groupBy { it.routeId }.map { (routeId, routeBusStopPoles) -> Pair(routeId, routeBusStopPoles.map { it.busStopPoleId }.toSet()) }.toMap()
 
             getWebServiceResultBody { webService.bus(consumerKey, routes.map { it.id }.joinToString(",")) }?.filter { bus ->
-                // routeBusStopPolesに含まれるバス停を出発したところ、かつ、routeBusStopPolesの同じルートの最後（つまり出発バス停）を出発したのではない
+                // routeBusStopPolesに含まれるバス停を出発したところ、かつ、routeBusStopPolesの同じ路線の最後（つまり出発バス停）を出発したのではない
                 bus.fromBusStopPoleId in busStopPoleIds.getValue(bus.routeId) && bus.fromBusStopPoleId != routeBusStopPoles.filter { it.routeId == bus.routeId }.sortedByDescending { it.order }.first().busStopPoleId
             }
 

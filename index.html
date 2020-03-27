@@ -2065,11 +2065,11 @@ dependencies {
 <span id="cb54-28"><a href="#cb54-28"></a>    }</span>
 <span id="cb54-29"><a href="#cb54-29"></a>}</span></code></pre></div>
 <p><code>observe()</code>の引数の<code>Observer { ... }</code>は、抽象メソッド一つだったらラムダ式から変換してやる（SAM変換）というKotlinの機能を使用しています。ラムダ式でいいんだったら前に付いている<code>Observer</code>は何なんだとか、どうして<code>(...)</code>の内側に入っているんだこれまでの書き方と違うじゃないかという疑問は、<code>observe()</code>にはいくつもバージョンがあるのでそのどれなのかを指定しなければならないから。普段と書き方が違うので面倒ですけど、普通の書き方をするとコンパイル・エラーになるので発見も書き換えも容易ですのでまぁいいかな。</p>
-<p>で、これで作業終了です。<code>MutableLiveData</code>に値を設定するには、メイン・スレッドからの場合は<code>value</code>プロパティ、他のスレッドからの場合は<code>postValue()</code>メソッドを使用します。スレッドを作成して5秒経ったら、私の両親が「お前をまだクビにしてないんだから度量が大きい会社だな」と評価した会社の前にあるバス停が設定され、画面に表示されます。</p>
+<p>で、これで作業は終了です。<code>MutableLiveData</code>に値を設定するには、メイン・スレッドからの場合は<code>value</code>プロパティ、他のスレッドからの場合は<code>postValue()</code>メソッドを使用します。スレッドを作成して5秒経ったら、私の両親が「お前をまだクビにしてないんだから度量が大きい会社だな」と評価した会社の前にあるバス停が設定されて、通知が飛んで、画面に表示されます。</p>
 <p>で、ここで試していただきたいのですけど、バス接近情報を表示する画面に遷移したら、5秒経つ前にホーム画面を表示してアプリをバックグラウンドに移動させてみてください。バックグラウンドに移ったので画面を更新する必要はなくて、だから<code>Observer</code>の呼び出しは無駄です。LiveDataはこのことを知っていて、しかも、<code>Fragment</code>がどのような状態にあるのかを<code>viewLifecycleOwner</code>を経由して知ることができるので、変更を通知しなくなるんです。その証拠に、ほら、logcatを見てください「departureBusStopName.observe()」が表示されていないでしょ？　で、アプリをフォアグランドに戻すと、すぐにlogcatに「departureBusStopName.observe()」が表示されて、私の会社の前にあるバス停の名前が画面に表示される。 というわけで、ほら、LiveDataのおかげで<code>Activity</code>や<code>Fragment</code>のライフサイクルがどうなっているのかを考えながらプログラミングする手間はほぼなくなりました！</p>
 <h3 id="livedataとroomを組み合わせる">LiveDataとRoomを組み合わせる</h3>
-<p>まだまだLiveDataはこんなもんではありません。RoomとLiveDataを組みわせるともっとすごいことができるんです。</p>
-<p>以前の章でRoomを使ったときのことを思い出してみましょう。Roomはメイン・スレッドからは呼び出せなくて、とても面倒だった記憶が蘇ってきました（SplashFragment.ktを参照してください）。</p>
+<p>まだまだLiveDataはこんなもんではありません。RoomとLiveDataを組みわせるととてもすごいことができるんです。</p>
+<p>以前の章でRoomを使ったときのことを思い出してみましょう。Roomはメイン・スレッドからは呼び出せなくて面倒だった記憶が蘇ってきました（SplashFragment.ktを参照してください）。</p>
 <p>この問題、LiveDataを使うととても簡単に解消できるんですよ。出発バス停と路線がつながっている到着バス停の一覧を取得する処理を考えてみましょう。まずは、<code>BusStopDao</code>に到着バス停を取得するメソッドを追加してみます。</p>
 <div class="sourceCode" id="cb55"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb55-1"><a href="#cb55-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
 <span id="cb55-2"><a href="#cb55-2"></a></span>
@@ -2099,8 +2099,8 @@ dependencies {
 <span id="cb55-26"><a href="#cb55-26"></a>    <span class="kw">fun</span> <span class="fu">getObservablesByDepartureBusStopName</span>(<span class="va">departureBusStopName</span>: <span class="dt">String</span>): <span class="dt">LiveData</span>&lt;<span class="dt">List</span>&lt;<span class="dt">BusStop</span>&gt;&gt;</span>
 <span id="cb55-27"><a href="#cb55-27"></a>}</span></code></pre></div>
 <p>SQLが複雑に見えますけど、BusStop（到着）→BusStopPole（到着）→RouteBusStopPole（到着）→Route→RouteBusStopPole（出発）→BusStopPole（出発）→BusStop（出発）と<code>INNER JOIN</code>で辿っているだけ。Roomの解説の章でダウンロードしたSQLite3のデータベース・ファイルを使って実際に試しながらやれば、そんなに難しくないはず。</p>
-<p>で、このコードの重要なところは、<code>getObservablesByDepartureBusStopName()</code>メソッドの返り値の「型」です。普通にRoomを使う場合の返り値の型は<code>List&lt;BusStop&gt;</code>になるのですけど、上のコードでは<code>LiveData&lt;List&lt;BusStop&gt;&gt;</code>になっています。この小さな変更だけで、LiveData対応のデータ・アクセスのメソッドが生成されるんです。</p>
-<p>次の作業は、<code>App</code>へのRoomで作成するLiveData型のプロパティ追加なのですけど、そのためには<code>AppDatabase</code>が必要なので、まずは<code>AppCompoenent</code>に<code>fun inject(app: App)</code>を追加します。そのうえで、<code>App</code>を以下に修正してください。</p>
+<p>で、このコードの重要なところは、<code>getObservablesByDepartureBusStopName()</code>メソッドの返り値の「型」です。普通にRoomを使う場合の返り値の型は<code>List&lt;BusStop&gt;</code>になるのですけど、上のコードでは<code>LiveData&lt;List&lt;BusStop&gt;&gt;</code>になっています。この小さな変更だけで（メソッド名の命名規約も変えていますけど、それは分かりやすくしただけなので無関係）、LiveData対応のデータ・アクセスのメソッドが生成されるんです。</p>
+<p>次の作業は、とりあえずの物置場としている<code>App</code>へのRoomで作成するLiveData型のプロパティ追加なのですけど、そのためには<code>AppDatabase</code>が必要なので、まずは<code>AppCompoenent</code>に<code>fun inject(app: App)</code>を追加します。そのうえで、<code>App</code>を以下に修正してください。</p>
 <div class="sourceCode" id="cb56"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb56-1"><a href="#cb56-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus</span></span>
 <span id="cb56-2"><a href="#cb56-2"></a></span>
 <span id="cb56-3"><a href="#cb56-3"></a><span class="kw">import</span> <span class="im">android.app.Application</span></span>
@@ -2169,9 +2169,9 @@ dependencies {
 <span id="cb57-34"><a href="#cb57-34"></a>}</span></code></pre></div>
 <p>Kotlinは関数型プログラミングのテクニックが使えてとても便利ですな。<code>map</code>で名前だけのリストに変換して、<code>joinToString()</code>で一つの文字列にまとめています。</p>
 <p>プログラムが完成したので、早速実行してみます。手早くバス接近情報の画面まで遷移してlogcatを見てみると、何度も何度も「arrivalBusStops.observe()」と表示されて、かなり時間が経ってから、少しづつ到着バス停の候補が画面に表示されていきます。え？　どうしてこうなった？</p>
-<p>あの、実はこれこそが、LiveDataとRoomを組み合わせるとできるようになる本当にすごいことなんです。LiveDataとRoomを組み合わせた場合は、データベースに変更があると通知がやってくるんですよ！</p>
-<p>前にやった作業なのですっかり忘れていましたけど、我々は<code>SplashFragment</code>の中でWebサービスを呼び出して、取得したデータでデータベースを書き換える処理を実装していました。その処理はLifecycleを使わずにスレッドとして実装しましたから、SplashFragmentが終了しても動き続けます。なので、手早くバス接近情報の画面まで移動すると、まだデータベースの更新処理が動いているんですよ。で、データが更新されるたびに通知が来るので、何度も何度も「arrivalBusStops.observe()」と表示され、少しづつ到着バス停の候補が画面に表示されるという動きになったわけですな。</p>
-<p>というわけで、LiveDataとRoomを組み合わせれば、MVVMのModelからViewModelへの変更の通知も実現できるんですよ。素晴らしい！</p>
+<p>あの、実はこれこそが、LiveDataとRoomを組み合わせるとできるようになるとてもすごいことなんです。LiveDataとRoomを組み合わせた場合は、データベースに変更があると通知がやってくるんですよ！</p>
+<p>前にやった作業なのですっかり忘れていましたけど、我々は<code>SplashFragment</code>の中でWebサービスを呼び出して、取得したデータでデータベースを書き換える処理を実装していました。その処理はLifecycleを使わずにスレッドとして実装しましたから、SplashFragmentが終了しても動き続けます。なので、手早くバス接近情報の画面まで移動した場合は、まだデータベースの更新処理が動いているんですよ。で、データが更新されるたびに通知が来るので、何度も何度も「arrivalBusStops.observe()」と表示され、少しづつ到着バス停の候補が画面に表示されるという動きになったわけですな。</p>
+<p>というわけで、LiveDataとRoomを組み合わせれば、MVVMのModelからViewModelへの変更の通知も実現できるんです！　素晴らしい！</p>
 <h3 id="transformations"><code>Transformations</code></h3>
 <p>でもちょっと待って。先程のコードで<code>getObservablesByDepartureBusStopName()</code>を呼び出すときの引数をソース・コードに直打ちしていなかった？　それでは実用に耐えないのでは？</p>
 <p>はい。おっしゃるとおり。<code>departureBusStopName</code>が変更されたらその値で<code>getObservablesByDepartureBusStopName()</code>が呼ばれるようになっていないとなりません。もちろん、Android Jetpackはそのための機能を提供していて、それが<code>Transformations</code>です。さっそく<code>Transformations</code>を使ってみましょう。</p>
@@ -2209,7 +2209,7 @@ dependencies {
 <span id="cb58-31"><a href="#cb58-31"></a>    }</span>
 <span id="cb58-32"><a href="#cb58-32"></a>}</span></code></pre></div>
 <p><code>Transformations</code>の<code>switchMap()</code>メソッドは、１つ目の引数で指定した<code>LiveData</code>が変更になったら、2つ目の引数のラムダ式の結果がセットされる<code>LiveData</code>を返します。なお、今回はラムダ式が<code>LiveData</code>を返すので<code>switchMap()</code>を使用しましたが、<code>Transformations</code>には、<code>LiveData</code>ではない返り値を使う場合向けの<code>map()</code>というメソッドもありますのでいい感じに使い分けてください。</p>
-<p>で、この<code>Transformations</code>を使うと、Roomにテーブルとテーブルの間を辿る機能がないことが気にならなくなります。たとえば注文と注文明細を表示するような場合は、注文と注文明細を<code>Transformations</code>でつないで、注文と関係づけられた注文明細を取得するデータ・アクセス・オブジェクトのメソッドを書けばいいんですから。というわけで、Roomは前に書いたような「こういうのでいいんだよ。こういうので」と表現されるような機能が貧弱なO/Rマッピング・ツールではなくて、不要な機能がついていないとても洗練された最高に出来が良いO/Rマッピング・ツールなんです。もし「Roomは機能が貧弱で」とのたまうRoomの説明を書いていたときの私みたいな人がいたら、分かってないなぁと鼻で笑ってやってください。</p>
+<p>で、この<code>Transformations</code>を使うと、Roomにテーブルとテーブルの間を辿る機能がないことが気にならなくなります。たとえば注文と注文明細を表示するような場合は、注文と注文明細を<code>Transformations</code>でつないで、注文と関係づけられた注文明細を取得するデータ・アクセス・オブジェクトのメソッドを書けばいいんですから。というわけで、Roomは前に書いたような「こういうのでいいんだよ。こういうので」と表現されるような機能が貧弱なO/Rマッピング・ツールではなくて、不要な機能がついていないとても洗練された最高に出来が良いO/Rマッピング・ツールなのですよ。もし「Roomは機能が貧弱で」とのたまうRoomの説明を書いていたときの私みたいな人がいたら、分かってないなぁと鼻で笑ってやってください。</p>
 <p>最後。せっかく<code>departureBusStopName</code>が変更になったら<code>arrivalBusStops</code>が変更されるようになったのですから、<code>BusApproachesFragment</code>を修正して画面も変更されるようにしましょう。</p>
 <div class="sourceCode" id="cb59"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb59-1"><a href="#cb59-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;utf-8&quot;<span class="kw">?&gt;</span></span>
 <span id="cb59-2"><a href="#cb59-2"></a><span class="kw">&lt;layout</span></span>
@@ -2288,8 +2288,8 @@ dependencies {
 <p>5秒たったら<code>departureBusStopName</code>を「日本ユニシス本社前」に設定して、また5秒たったら<code>departureBusStopName</code>を私のアパートの最寄りバス停である「深川第八中学校前」に変更するわけですな。<code>SplashFragment</code>でlogcatに「Finish.」が表示されるまで待って（そうしないとデータベースの更新と<code>departureBusStopName</code>の更新が合わさって変な動きになっちゃう）、バス接近情報の画面に遷移します。</p>
 <p>5秒後に「日本ユニシス本社前」とつながっているバス停の一覧が表示されて、さらに5秒たったら画面が「深川第八中学校前」とそこにつながっているバス停の一覧に変更されたでしょ？　はい、これで終わり。<code>Transformations</code>は実に便利ですな。</p>
 <h3 id="mediatorlivedata"><code>MediatorLiveData</code></h3>
-<p>でも、あれ、ユーザーIDとパスワードが入力されたらログインして認証済みかどうかの<code>LiveData</code>を更新するような場合、複数の値を監視しなければならない場合はどうするのでしょうか？　今回のアプリだと、出発バス停と到着バス停からルートを取得するような場合です。<code>Transformations</code>は1つの<code>LiveData</code>しか監視できないですよね？　それでは、要件を満たせません。</p>
-<p>というわけで、そんな場合は<code>MediatorLiveData</code>を使いましょう。出発バス停の名称と到着バス停の名称からルートを取得する処理を作りたいので、まずはルートを取得するメソッドを<code>RouteDao</code>に追加します。</p>
+<p>でも、あれ、ユーザーIDとパスワードが入力されたらログインして認証済みかどうかの<code>LiveData</code>を更新するような場合、複数の値を監視しなければならない場合にはどうするのでしょうか？　今回のアプリだと、出発バス停と到着バス停から路線を取得するような場合です。<code>Transformations</code>は1つの<code>LiveData</code>しか監視できないですよね？　それでは要求を満たせません……。</p>
+<p>そんな場合は、<code>MediatorLiveData</code>を使いましょう。今回は出発バス停の名称と到着バス停の名称から路線を取得する処理を作りたいので、まずは路線を取得するメソッドを<code>RouteDao</code>に追加します。</p>
 <div class="sourceCode" id="cb61"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb61-1"><a href="#cb61-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
 <span id="cb61-2"><a href="#cb61-2"></a></span>
 <span id="cb61-3"><a href="#cb61-3"></a><span class="kw">import</span> <span class="im">androidx.lifecycle.LiveData</span></span>
@@ -2367,7 +2367,7 @@ dependencies {
 <span id="cb62-50"><a href="#cb62-50"></a>    ...</span></code></pre></div>
 <p>うぉ、面倒臭そう……なので、少し解説を。</p>
 <p><code>departureBusStopName</code>（出発バス停名称）が変更になったら、<code>arrivalBusStops</code>（到着バス停のリスト）を設定するところまでは前にやりました。今回は<code>arrivalBusStopName</code>（到着バス停名称）も必要なので、<code>Transformations</code>の<code>map()</code>メソッドを使用して<code>arrivalBusStops</code>が変更になったらその中の一つをランダムに選ぶようにしました。</p>
-<p>で、<code>routes</code>（ルートのリスト）が問題の<code>MediatorLiveData</code>です。<code>MediatorLiveData</code>では、監視対象の<code>LiveData</code>を<code>addSource()</code>メソッドで追加できます。<code>addSource()</code>メソッドの2つ目の引数はラムダ式で、監視対象が変更になった場合に実行する処理です。今回は、その直前に定義している<code>update()</code>関数を呼び出しています。で、<code>MediatorLiveData</code>の値を変更したい場合は、<code>value</code>プロパティに値を設定すればよくて、監視対象の<code>LiveData</code>の値は<code>LiveData</code>の<code>value</code>プロパティで取得できるのですけど、残念なことに<code>RouteDao</code>に定義したのは<code>LiveData&lt;List&lt;Route&gt;&gt;</code>を返すメソッドですから、そのままでは<code>value</code>に設定できません。</p>
+<p>で、<code>routes</code>（路線のリスト）が問題の<code>MediatorLiveData</code>です。<code>MediatorLiveData</code>では、監視対象の<code>LiveData</code>を<code>addSource()</code>メソッドで追加できます。<code>addSource()</code>メソッドの2つ目の引数はラムダ式で、監視対象が変更になった場合に実行する処理です。今回は、その直前に定義している<code>update()</code>関数を呼び出しています。で、<code>MediatorLiveData</code>の値を変更したい場合は、<code>value</code>プロパティに値を設定すればよくて、監視対象の<code>LiveData</code>の値は<code>LiveData</code>の<code>value</code>プロパティで取得できるのですけど、残念なことに<code>RouteDao</code>に定義したのは<code>LiveData&lt;List&lt;Route&gt;&gt;</code>を返すメソッドですから、そのままでは<code>value</code>に設定できません。</p>
 <p>だから、<code>getObservablesByDepartureBusStopNameAndArrivalBusStopName()</code>の返り値を格納するための<code>source</code>変数を作成して、設定と同時に<code>also</code>で<code>addSource()</code>して<code>value</code>に値を設定するようにしています。<code>source</code>が複数になると動作がおかしくなりますから、<code>source?.let</code>で過去に設定した<code>source</code>がある場合は<code>removeSource()</code>しています。</p>
 <p>あと、<code>update()</code>の中でエルビス演算子（<code>:?</code>）を使用しているのは、<code>LiveData</code>のテンプレート引数が<code>null</code>を許容しない型であったとしても、値がまだ設定されていない場合は<code>value</code>プロパティの値が<code>null</code>になってしまうためです。出発バス停名称と到着バス停名称の両方が揃った場合に初めて処理を実施するというわけですな。</p>
 <p>……とまぁ、異常に複雑で、これを少しでも簡単にするには「<code>RouteDao</code>に<code>LiveData</code>を返さないメソッドを定義する」という手があるのですけど、場合によって作り方を変更するのは混乱の元になるので避けたい。まぁ、複雑だとはいっても毎回同じなのでいつかは見慣れるでしょうから、ごめんなさい、このままで。こーゆーもんなんだと無理に飲み込んでください。誰かライブラリ化してくれないかなぁ。KotlinにLISPやRustのマクロがあれば、こんな場合にも簡単にライブラリ化できるのに……。</p>
@@ -2463,7 +2463,7 @@ dependencies {
 <span id="cb64-39"><a href="#cb64-39"></a>        }.root</span>
 <span id="cb64-40"><a href="#cb64-40"></a>    }</span>
 <span id="cb64-41"><a href="#cb64-41"></a>}</span></code></pre></div>
-<p>これで出発バス停の名称と到着バス停の名称とその2つのバス停をつなぐルートの一覧が表示されるようになりました。あ、このアプリを動かすとルートが複数表示されるのは、ルートの出発バス停や到着バス停が異なる場合があるためです。</p>
+<p>これで出発バス停の名称と到着バス停の名称とその2つのバス停をつなぐ路線の一覧が表示されるようになりました。あ、このアプリを動かすと路線が複数表示されるのは、路線の出発バス停や到着バス停が異なる場合があるためです。</p>
 <p>これでLiveDataの説明は完了です。<code>MediatorLiveData</code>の使い方が少し面倒でしたけど、全体で見ればとても便利でしょ？　長かった説明が終わってよかった……。</p>
 <h3 id="データバインディング">データ・バインディング</h3>
 <p>まだだ！　まだ終わらんよ！　だって、<code>Fragment</code>のコードで<code>observe()</code>するのって面倒じゃあないですか？　この処理って、データ・バインディングを使うととても簡単になるんです。</p>
@@ -3764,7 +3764,7 @@ dependencies {
 <span id="cb104-77"><a href="#cb104-77"></a>            <span class="kw">val</span> <span class="va">busStopPoleIds</span> = routeBusStopPoles.groupBy { it.routeId }.map { (routeId, routeBusStopPoles) -&gt; Pair(routeId, routeBusStopPoles.map { it.busStopPoleId }.toSet()) }.toMap()</span>
 <span id="cb104-78"><a href="#cb104-78"></a></span>
 <span id="cb104-79"><a href="#cb104-79"></a>            getWebServiceResultBody { webService.bus(consumerKey, routes.map { it.id }.joinToString(<span class="st">&quot;,&quot;</span>)) }?.filter { bus -&gt;</span>
-<span id="cb104-80"><a href="#cb104-80"></a>                <span class="co">// routeBusStopPolesに含まれるバス停を出発したところ、かつ、routeBusStopPolesの同じルートの最後（つまり出発バス停）を出発したのではない</span></span>
+<span id="cb104-80"><a href="#cb104-80"></a>                <span class="co">// routeBusStopPolesに含まれるバス停を出発したところ、かつ、routeBusStopPolesの同じ路線の最後（つまり出発バス停）を出発したのではない</span></span>
 <span id="cb104-81"><a href="#cb104-81"></a>                bus.fromBusStopPoleId <span class="kw">in</span> busStopPoleIds.getValue(bus.routeId) &amp;&amp; bus.fromBusStopPoleId != routeBusStopPoles.filter { it.routeId == bus.routeId }.sortedByDescending { it.order }.first().busStopPoleId</span>
 <span id="cb104-82"><a href="#cb104-82"></a>            }</span>
 <span id="cb104-83"><a href="#cb104-83"></a></span>
