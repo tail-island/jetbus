@@ -1506,7 +1506,7 @@ dependencies {
 <h2 id="データ構造の設計">データ構造の設計</h2>
 <p>と、他のO/Rマッピング・ツール経験者への言い訳が終わったところで、作業に入りましょう。まずは、データ構造の設計です。私は設計文書を書かないでいきなりコードを書き出すタイプの人間ですけど、そんな私でもプログラミング前にデータ構造だけは設計します。ER図かUMLのクラス図を描くだけですけどね。こんなの。</p>
 <p>図</p>
-<p>今回はER図にしてみました。手書きのなぐり書きですけど、設計はこれで十分。だって、これでアプリが機能を提供できるかを確認できますから。試しにやってみましょう。到着バス停を指定する画面を作れるか、確認してみます。</p>
+<p>今回はER図にしてみました。手書きのなぐり書きですけど、設計はこんなので十分。だって、これでアプリが機能を提供できるかを確認できるのですから。試しにやってみましょう。到着バス停を指定する画面を作れるか、確認してみます。</p>
 <p>出発バス停を指定する画面ではしょうがないのですべてのバス停を表示しますけど、今確認している到着バス停を選ぶ画面では、出発バス停とつながっている（乗り換え無しで行ける）バス停だけを表示して欲しいですよね？　この機能を実現できるかを確認します。</p>
 <p><code>BusStop</code>から<code>BusStopPole</code>を辿れることは、図から明らかです。<code>BusStopPole</code>まで行ければ、<code>RouteBusStopPole</code>を経由して<code>Route</code>を取得できます。<code>Route</code>が分かれば、今度は逆に辿ることで<code>BusStop</code>まで行けます。ほら、出発バス停が指定されれば、そこから、出発バス停とつながっているバス停の一覧を取得できます。これで、到着バス停を指定する画面を余裕で作れることが確認できました。</p>
 <p>あと、出発バス停と到着バス停が分かれば、対象となる<code>Route</code>が上りなのか下りなのかの判断ができます。<code>RouteBusStopPole</code>には<code>order</code>があって、これは<code>Route</code>における順序です。だから、出発の<code>BusStop</code>に関連付けられた<code>RouteBusStopPole.order</code>が到着の<code>BusStop</code>に関連付けられた<code>RouteBusStopPole.order</code>よりも小さい方の<code>Route</code>を選べば、上りか下りのどちらかとなるというわけ。SQLで書くと、こんな感じです。</p>
@@ -1561,7 +1561,7 @@ dependencies {
 <p><code>BusStopPole</code>では、<code>BusStop</code>と関連付けられていることを示すために<code>@Entity</code>アノテーションの<code>foreignKeys</code>を指定してます。参照整合性と呼ばれるアレですな。あと、<code>busStopName</code>で検索するときに速度が出るように<code>@ColumnInfo</code>アノテーションの<code>index</code>に<code>true</code>を指定しています。データベース管理者が検索のパフォーマンス・チューニングのときに貼るインデックスのことですな。</p>
 <p>参照整合性というのは、テーブルのレコード間の関連を正しく保つ仕組みです。存在しない<code>BusStop</code>に関連付けられた<code>BusStopPole</code>は存在しては駄目ですよね？　上のコードのように<code>foreignKeys</code>を指定しておけば、<code>BusStopPole</code>をデータベースに追加する際に、<code>busStopName</code>と同じ値を<code>name</code>に持つ<code>BusStop</code>が存在することを確認してくれるようになります。これでデータの信頼性が高まって素晴らしい。</p>
 <p>インデックスというのは、検索のための索引（インデックス）を作成する仕組みです。インデックスが「ない」場合は、テーブルの行を順に見ていって、条件を満たすものがあるか調べます。Kotlinでいうところの<code>records.filter { record -&gt; record.busStopName = &quot;日本ユニシス本社前&quot; }</code>みたいな感じ。レコード数が100件とかなら別にこれでいいですけど、100万件とか1億件とかになると、これでは遅くてやってられません。なので、検索専用のデータ構造を別に作るわけです。B+木というデータ構造を使うことが多いみたいで、B+木を使うとデータ件数が多くてもあっという間に検索できます。Kotlinでも、<code>Map</code>を使うと検索がとても早くなりますよね？　あんな感じ。データの追加や更新でインデックスを更新する手間がかかって少しだけ遅くなりますけど、検索が圧倒的に速くなるのでトータルでは素晴らしい。</p>
-<p>さて、これで他のエンティティと関係づけられている場合の書き方もわかりましたから、残りもどんどん作っていきます。<code>Route</code>はこんな感じ。</p>
+<p>さて、これで他のエンティティと関係づけられている場合の書き方もわかりましたから、残りもどんどん作っていきましょう。<code>Route</code>はこんな感じ。</p>
 <div class="sourceCode" id="cb34"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb34-1"><a href="#cb34-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
 <span id="cb34-2"><a href="#cb34-2"></a></span>
 <span id="cb34-3"><a href="#cb34-3"></a><span class="kw">import</span> <span class="im">androidx.room.Entity</span></span>
@@ -1596,7 +1596,7 @@ dependencies {
 <span id="cb35-19"><a href="#cb35-19"></a>    <span class="kw">var</span> <span class="va">id</span>: <span class="kw">Long</span> = <span class="dv">0</span></span>
 <span id="cb35-20"><a href="#cb35-20"></a>}</span></code></pre></div>
 <p><code>@PrimaryKey(autoGenerate = true)</code>と書けば、主キーには重複しない値が自動で設定されます。なお、上のコードで<code>var id</code>をコンストラクタの引数にしていないのは、<code>RouteBusStopPole</code>のインスタンスを作成するときに<code>id</code>のことを考えたくないから。<code>data class</code>にも普通のクラスと同じようにメソッドやプロパティは追加できるので、<code>{ ... }</code>で囲んだ中に普通に<code>var id: Long = 0</code>でデフォルト値付きのプロパティを追加したというわけです。</p>
-<p>以上でエンティティの作成に必要な知識は揃いましたので、同様に<code>TimeTable</code>と<code>TimeTableDetail</code>、<code>Bookmark</code>を定義しましょう。何も新しいことはしていませんので、コードは省略で。どうしても見たい場合は、GitHubのコードを参照してみてください。</p>
+<p>以上でエンティティの作成に必要な知識は揃いましたので、同様に<code>TimeTable</code>と<code>TimeTableDetail</code>、<code>Bookmark</code>を定義しましょう。何も新しいことはしていませんので、コードは省略で。どうしても見たい場合は、<a href="https://github.com/tail-island/jetbus/tree/room">GitHubのコード</a>を参照してみてください。</p>
 <h2 id="データアクセスオブジェクトの作成">データ・アクセス・オブジェクトの作成</h2>
 <p>データを入れるエンティティは作成できたので、これを使用してデータベースを操作したい。そのためのオブジェクトがデータ・アクセス・オブジェクト、DAOと省略されるアレですね。さっそく作ってみましょう。<code>BusStop</code>用の<code>BusStopDao</code>を作ります。</p>
 <div class="sourceCode" id="cb36"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb36-1"><a href="#cb36-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus.model</span></span>
