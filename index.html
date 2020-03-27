@@ -3366,7 +3366,7 @@ dependencies {
 <span id="cb93-36"><a href="#cb93-36"></a>}</span></code></pre></div>
 <p>レイアウトのXMLに<code>&lt;data&gt;</code>がなかったのは、上のように<code>BusStopAdapter.submitList()</code>でコード上でやるため。データが変更になったら<code>submitList()</code>し直します（今回はデータが変更になることはないけど、変更があり得る場合と無い場合で記述を変えるのと保守性が落ちるので、変更がある場合向けのコードで統一します）。あとは、バス停がタップされた場合のリスナーに画面遷移をするコードを書いただけ。</p>
 <h2 id="さらに索引用のrecyclerviewを作る">さらに、索引用の<code>RecyclerView</code>を作る</h2>
-<p>うん、これで完成……じゃないんですよ、今回のアプリでは。というのも、バス停の件数があまりに膨大なんです。だから、下の方のバス停を選ぶにはもーひたすらにスクロールしなければならなくて、とても実用にはなりません。実用に耐えられるよう、索引を作りましょう。もう一つ<code>RecyclerView</code>を作って重ねるだけの簡単な作業です。</p>
+<p>うん、これで完成……じゃないんですよ、今回のアプリでは。というのも、バス停の件数があまりに膨大なんです。だから、下の方のバス停を選ぶにはもーひたすらにスクロールしなければならなくて、とても実用にはなりません。実用に耐えられるようにするために、索引を作りましょう。もう一つ<code>RecyclerView</code>を作って重ねるだけの簡単な作業です。</p>
 <p>list_item_index.xmlを追加します。</p>
 <div class="sourceCode" id="cb94"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb94-1"><a href="#cb94-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;utf-8&quot;<span class="kw">?&gt;</span></span>
 <span id="cb94-2"><a href="#cb94-2"></a><span class="kw">&lt;layout</span></span>
