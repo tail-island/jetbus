@@ -2280,11 +2280,11 @@ class App: Application() {
 
 で、`routes`（路線のリスト）が問題の`MediatorLiveData`です。`MediatorLiveData`では、監視対象の`LiveData`を`addSource()`メソッドで追加できます。`addSource()`メソッドの2つ目の引数はラムダ式で、監視対象が変更になった場合に実行する処理です。今回は、その直前に定義している`update()`関数を呼び出しています。で、`MediatorLiveData`の値を変更したい場合は、`value`プロパティに値を設定すればよくて、監視対象の`LiveData`の値は`LiveData`の`value`プロパティで取得できるのですけど、残念なことに`RouteDao`に定義したのは`LiveData<List<Route>>`を返すメソッドですから、そのままでは`value`に設定できません。
 
-だから、`getObservablesByDepartureBusStopNameAndArrivalBusStopName()`の返り値を格納するための`source`変数を作成して、設定と同時に`also`で`addSource()`して`value`に値を設定するようにしています。`source`が複数になると動作がおかしくなりますから、`source?.let`で過去に設定した`source`がある場合は`removeSource()`しています。
+だから、`getObservablesByDepartureBusStopNameAndArrivalBusStopName()`の返り値を格納するための`source`変数を作成して、設定と同時に`also`で`addSource()`して`value`に値を設定するようにしています。あと、`source`が複数にならないように、`source?.let`で過去に設定した`source`がある場合は`removeSource()`しています。
 
 あと、`update()`の中でエルビス演算子（`:?`）を使用しているのは、`LiveData`のテンプレート引数が`null`を許容しない型であったとしても、値がまだ設定されていない場合は`value`プロパティの値が`null`になってしまうためです。出発バス停名称と到着バス停名称の両方が揃った場合に初めて処理を実施するというわけですな。
 
-……とまぁ、異常に複雑で、これを少しでも簡単にするには「`RouteDao`に`LiveData`を返さないメソッドを定義する」という手があるのですけど、場合によって作り方を変更するのは混乱の元になるので避けたい。まぁ、複雑だとはいっても毎回同じなのでいつかは見慣れるでしょうから、ごめんなさい、このままで。こーゆーもんなんだと無理に飲み込んでください。誰かライブラリ化してくれないかなぁ。KotlinにLISPやRustのマクロがあれば、こんな場合にも簡単にライブラリ化できるのに……。
+……とまぁ、異常に複雑で、これを少しでも簡単にするには「`RouteDao`に`LiveData`を返さないメソッドを定義する」という手があるのですけど、場合によって作り方を変更するのは混乱の元になるので避けたい。まぁ、複雑だとはいっても毎回同じなのでそのうち見慣れるでしょうから、ごめんなさい、このままで。こーゆーもんなんだと無理に飲み込んでください。誰かライブラリ化してくれないかなぁ。KotlinにLISPやRustのマクロがあれば、こんな場合にも簡単にライブラリ化できるのに……。
 
 ともあれ、面倒くさいのはここまでで終わり。あとは、これまでと同じです。レイアウトのXMLをいい感じに修正して……
 
@@ -2453,9 +2453,9 @@ class BusApproachesFragment: Fragment() {
 
 `<data>`タグの中の`<variable>`タグで、このレイアウトで扱うデータを定義します。今回は`App`のプロパティを使用して画面を表示するので、`App`にします。
 
-で、`android:text`属性の値の`@{...}`の部分がバインディング先の指定です。`app.departureBusStopName`は`LiveData`型だけど文字列型にしなくていいの？　とお考えになった方がいらっしゃるかもしれませんけど、データ・バインディングは`LiveData`対応ですのでこれで大丈夫なんです。
+で、`android:text`属性の値の`@{...}`の部分がバインディング先の指定です。`app.departureBusStopName`は`LiveData`型だけど文字列型にしなくていいの？　と、お考えになった方がいらっしゃるかもしれませんけど、データ・バインディングは`LiveData`対応ですのでこれで大丈夫なんです。
 
-ただ、良いことばかり続くわけではないのが世の常です。`routeNamesTextView`の`android:text`プロパティを見てください。`map()`や`joinToString()`を使わずに、まだ定義してない`App`の`routeNames`プロパティをバインディングしています。なんでこんなことをしているかというと、データ・バインディングの`@{...}`の中ってKotlinのコードを書けないんためです。詳しい言語仕様は[レイアウトとバインディング式](https://developer.android.com/topic/libraries/data-binding/expressions?hl=ja)に書いてあるので見ていただきたいのですけど、たとえばKotlinの`if`は式なので、Kotlinのプログラマーは`val x = if (condition) "OK" else "BAD"`のように書くのに慣れていますけど、データ・バインディングのときは昔懐かしい三項演算子（`condition ? "OK" : "BAD"`）で書かないとダメだったりします。
+ただ、良いことばかり続くわけではないのが世の常です。`routeNamesTextView`の`android:text`プロパティを見てください。`map()`や`joinToString()`を使わずに、まだ定義してない`App`の`routeNames`プロパティをバインディングしています。なんでこんなことをしているかというと、データ・バインディングの`@{...}`の中ってKotlinのコードを書けないんためです。詳しい言語仕様は[レイアウトとバインディング式](https://developer.android.com/topic/libraries/data-binding/expressions?hl=ja)に書いてあるので読んでいただきたいのですけど、たとえばKotlinの`if`は式なのでKotlinのプログラマーは`val x = if (condition) "OK" else "BAD"`のように書くのに慣れていますけど、データ・バインディングのときは昔懐かしい三項演算子（`condition ? "OK" : "BAD"`）で書かないとダメだったりします。
 
 やってられないので、あっさり諦めて`App`にプロパティを追加しました。`App`に追加というとやっちゃいけないことのように感じられますけど、本章の最後までやればViewModelへの追加となります。ViewModelはViewのためのものなのですから、この程度は良いんじゃないかなぁと。ViewModelがViewを呼び出すのはダメですけど、Viewのことを考えながらViewModelを作るのはアリなのですから。もちろん、こんなプロパティは無いほうがいいのですけど、でも、言語仕様がアレなんだもん。
 
@@ -2605,9 +2605,9 @@ class BusApproachesViewModel(private val repository: Repository): ViewModel() {
 
 同じ問題は`Activity`や`Fragment`で経験済みで、あのときはDaggerによるDependency Injectionで解決できました。でも、`ViewModel`からは`App`にアクセスできないので、同じ解決策は使えません……。
 
-幸いなことに、Daggerは有名なプロダクトですから、いろいろな人が使い方を調べて解説を書いてくださっています。その一つが[ViewModelをDagger2でDIする](https://qiita.com/superman9387/items/bea94e4316c2ccf8fb68)です。ありがてぇ。というわけで、ここに書いてある通りにすればオッケー。ちなみに、難しすぎて私は中身を理解できてません。たぶん、`ViewModelPrividesr`をいい感じに騙しているんだと思う。
+幸いなことに、Daggerは有名なプロダクトですから、いろいろな人が使い方を調べて解説を書いてくださっています。その一つの[ViewModelをDagger2でDIする](https://qiita.com/superman9387/items/bea94e4316c2ccf8fb68)がこの問題を解決してくれます。ありがてぇ。というわけで、ここに書いてある通りにすればオッケー。
 
-というわけで、黙々と作業します。解説と順序は違いますが、まずは`ViewModelKey`アノテーションと`AppViewModelProviderFactory`を作成します。新規にUtility.ktを作成して、以下の内容を入力します。
+解説と順序は違いますが、まずは`ViewModelKey`アノテーションと`AppViewModelProviderFactory`を作成します。新規にUtility.ktを作成して、以下の内容を入力します。
 
 ~~~ kotlin
 package com.tail_island.jetbus
