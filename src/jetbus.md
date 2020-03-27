@@ -2733,7 +2733,7 @@ class BusApproachesFragment: Fragment() {
 
 解説とは`ViewModel`の作成方法が違うじゃんと思われたと思いますが、これ、Android JetpackのKotlin向け便利機能の一つなんです。
 
-この書き方にしておくと、たとえば認証情報のような`Fragment`よりも生存期間が長い（別の`Fragment`に遷移したらまたIDとパスワード入力するなんてやってられないですよね？）ViewModelを使う場合に、`private val authorizationViewModel by activityViewModel<AuthorizationViewModel> { viewModelProviderFactory }`とするだけで、`ViewModel`の生存期間が`Activity`と同じになるのでとても便利なのですよ。
+この書き方にしておくと、`Fragment`とViewModelの生存期間が同じになります。あと、たとえば認証情報のような`Fragment`よりも生存期間が長い（別の`Fragment`に遷移したらまたIDとパスワード入力するなんてやってられないですよね？）ViewModelを使う場合には、`private val authorizationViewModel by activityViewModel<AuthorizationViewModel> { viewModelProviderFactory }`とするだけで`ViewModel`の生存期間が`Activity`と同じになるのでとても便利ですよ。
 
 はい、これで完成！　正しく動くか試してみましょう。
 

@@ -2756,7 +2756,7 @@ dependencies {
 <span id="cb73-38"><a href="#cb73-38"></a>    }</span>
 <span id="cb73-39"><a href="#cb73-39"></a>}</span></code></pre></div>
 <p>解説とは<code>ViewModel</code>の作成方法が違うじゃんと思われたと思いますが、これ、Android JetpackのKotlin向け便利機能の一つなんです。</p>
-<p>この書き方にしておくと、たとえば認証情報のような<code>Fragment</code>よりも生存期間が長い（別の<code>Fragment</code>に遷移したらまたIDとパスワード入力するなんてやってられないですよね？）ViewModelを使う場合に、<code>private val authorizationViewModel by activityViewModel&lt;AuthorizationViewModel&gt; { viewModelProviderFactory }</code>とするだけで、<code>ViewModel</code>の生存期間が<code>Activity</code>と同じになるのでとても便利なのですよ。</p>
+<p>この書き方にしておくと、<code>Fragment</code>とViewModelの生存期間が同じになります。あと、たとえば認証情報のような<code>Fragment</code>よりも生存期間が長い（別の<code>Fragment</code>に遷移したらまたIDとパスワード入力するなんてやってられないですよね？）ViewModelを使う場合には、<code>private val authorizationViewModel by activityViewModel&lt;AuthorizationViewModel&gt; { viewModelProviderFactory }</code>とするだけで<code>ViewModel</code>の生存期間が<code>Activity</code>と同じになるのでとても便利ですよ。</p>
 <p>はい、これで完成！　正しく動くか試してみましょう。</p>
 <p>動画</p>
 <p>うん、動いた……のですけど、確認のために<code>AppModule</code>を開いてソース・コードを眺めていたら、なんかちょっと気持ち悪い。<code>fun provideBusApproachesViewModel(repository: Repository) = BusApproachesViewModel(repository) as ViewModel</code>の<code>repository</code>は、どうやって取得したのでしょうか？　だって、<code>Repository</code>を<code>@Provides</code>するメソッドは定義していないんですよ？</p>
