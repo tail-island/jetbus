@@ -2815,7 +2815,7 @@ dependencies {
 <span id="cb76-22"><a href="#cb76-22"></a>    }</span>
 <span id="cb76-23"><a href="#cb76-23"></a>}</span></code></pre></div>
 <p>このコードを実行すると、<code>useCoroutine()</code>の方ではすべて同じスレッドIDが、<code>useThread()</code>の方ではすべて異なるスレッドIDが出力されます。ほら、<code>useCoroutine()</code>の方は、すべてメイン・スレッドで実行されていてスゴイでしょ？</p>
-<p>でも、一つのスレッドでは一つのことしかできないはずで、だから、「待つ」のと「出力」の両方は実行できないはず。でもできちゃっているのはなぜかといえば、実は<code>delay()</code>は「待つ」のではなく「中断」だからなんです。中断している間は他のコルーチンを実行できるので、だから並列処理に見えたというわけ。たとえば<code>delay(1000)</code>なら、中断して1,000ミリ秒たったら再開するという意味になるんですよ（とはいえ、メイン・スレッドで動く他の処理がいつまでも終わらなかったりするような場合は、1,000ミリ秒たっても再開されなかったりしますけど）。</p>
+<p>でも、一つのスレッドでは一つのことしかできないはずで、だから、「待つ」のと「出力」の両方は実行できないはず。でもできちゃっているのはなぜかといえば、実は<code>delay()</code>は「待つ」のではなく「中断」だからなんです。中断している間は他のコルーチンを実行できるので、だから並列処理に見えたというわけ。たとえば<code>delay(1000)</code>なら、中断して1,000ミリ秒たったら再開するという意味になるんです（とはいえ、メイン・スレッドで動く他の処理がいつまでも終わらなかったりするような場合は、1,000ミリ秒たっても再開されなかったりしますけど）。</p>
 <h2 id="中断して実行するスレッドを変えて再開しちゃえ">中断して、実行するスレッドを変えて、再開しちゃえ！</h2>
 <p>コルーチンのすごいのは、それだけじゃありません。実行するスレッドを変更することができるんです。</p>
 <div class="sourceCode" id="cb77"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb77-1"><a href="#cb77-1"></a>Log.d(<span class="st">&quot;xxx&quot;</span>, <span class="st">&quot;Main thread id: ${Thread.currentThread().id}&quot;</span>)</span>
@@ -2888,7 +2888,7 @@ dependencies {
 <span id="cb79-28"><a href="#cb79-28"></a>    }</span>
 <span id="cb79-29"><a href="#cb79-29"></a>}</span></code></pre></div>
 <p>こんな感じで、先程の無限ループする処理を呼び出しています。<code>delay(1000)</code>の間にメイン・スレッドは別の処理をできるのでユーザー・インターフェースが止まらず、それでいてもちろん、logcatにログが出力されます。で、それだけではなくて、画面が遷移すると無限ループなのに処理が止まるんですよ！</p>
-<p>中断して、再開しなければいい（あと、再開に必要な情報を破棄する）だけですもんね。うん、できるの分かってた。<code>viewModelScope</code>は<code>ViewModel</code>と同じライフサイクルを持っているので、画面が遷移して<code>ViewModel</code>が破棄されると処理が止まるというわけ。</p>
+<p>中断して、再開しなければいい（あと、再開に必要な情報を破棄する）だけですもんね。うん、できるの分かってた。<code>viewModelScope</code>は<code>ViewModel</code>と同じライフサイクルを持っているので、画面が遷移して<code>ViewModel</code>が破棄されると処理が止まるんですな。</p>
 <p>あと、<code>viewModelScope</code>の他に、<code>Activity</code>や<code>Fragment</code>で使用できる<code>lifecycleScope</code>や、アプリと同じライフサイクルを持つ<code>GlobalScope</code>なんてものあります。でも、できるだけ<code>GlobalScope</code>は使わないでくださいね。</p>
 <h2 id="関数に抽出しちゃえ">関数に抽出しちゃえ！</h2>
 <p>さて、ここまでのコードに出てきた<code>launch {}</code>はコルーチンを生成するのですけど、その中に大きな処理を書くと可読性が下がってしまいますから、小さな関数に分割したい。でも、以下のコードはコンパイル・エラーになってしまうんです。</p>
@@ -3131,7 +3131,7 @@ dependencies {
 <span id="cb85-41"><a href="#cb85-41"></a>    &lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;</span>
 <span id="cb85-42"><a href="#cb85-42"></a></span>
 <span id="cb85-43"><a href="#cb85-43"></a>&lt;/layout&gt;</span></code></pre></div>
-<p>アイコンと、何をしているのかの説明と、あとは処理に時間がかかるので<code>&lt;ProgressBar&gt;</code>という名前のぐるぐるアイコンですな。これで<code>SpashFragment</code>は完成です。</p>
+<p>アイコンと、何をしているのかの説明と、あとは処理に時間がかかるので<code>&lt;ProgressBar&gt;</code>という名前のぐるぐるマークですな。これで<code>SpashFragment</code>は完成です。</p>
 <h3 id="mainactivity"><code>MainActivity</code></h3>
 <p>でも、このままだと一回<code>syncDatabase()</code>に成功しちゃうと次からは実行しないので、プログラムが正しく動くのかよく分かりません……。なので、<code>menu_navigation.xml</code>に追加したきりすっかり忘れていた<code>&lt;item android:id=&quot;@+id/clearDatabase&quot; android:title=&quot;バス停と路線のデータを再取得&quot; /&gt;</code>のリスナーを作成しましょう。</p>
 <div class="sourceCode" id="cb86"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb86-1"><a href="#cb86-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus</span></span>
@@ -3209,14 +3209,14 @@ dependencies {
 <span id="cb87-7"><a href="#cb87-7"></a>    suspend <span class="kw">fun</span> <span class="fu">clearDatabase</span>() = repository.clearDatabase()</span>
 <span id="cb87-8"><a href="#cb87-8"></a>}</span></code></pre></div>
 <p><code>Repository</code>のメソッドを呼び出し直しているだけ。あとは、前の章で紹介した手順で<code>ViewModel</code>をDaggerで注入可能にすれば、作業終了です。ぜひ実際に動かしてみてください。ほらこのアプリ、端末を回転させても正常に動作するんです！</p>
-<p>……そんなの当たり前だと思うかもしれませんけど、Androidアプリ開発ではこの程度でも大変だったんだよ。</p>
+<p>……そんなの当たり前だと思うかもしれませんけど、昔のAndroidアプリ開発ではこの程度でも大変だったんだよ。</p>
 <h1 id="recyclerview"><a href="https://github.com/tail-island/jetbus/tree/recycler-view">RecyclerView</a></h1>
 <p>と、ここまでいろいろ作ってきましたけど、なのにいまだに画面がスカスカで悲しい……。画面を作りましょう。使う道具は、これを覚えるだけで閲覧系のアプリなら大体どうにかなっちゃうという噂の<code>RecyclerView</code>です。</p>
 <h2 id="リサイクル">リサイクル？</h2>
 <p><code>RecyclerView</code>は、スクロール可能なリストを作成するGUIウィジェットです。特徴は大規模なデータ・セットに対応可能なこと（大は小を兼ねるので、小さなデータ・セットで使っても特に問題はありませんけど）。</p>
-<p>で、この「大規模」という点が、<code>RecyclerView</code>という名前つながります。Androidの画面は<code>View</code>（本稿でも、文字を表示するための<code>TextView</code>とかを使いましたよね？）で構成されるので、リストの各行も<code>View</code>で構成されます。画面を上にスクロールすると、上の行が画面の外側に消えて下に新しい行が表示されるわけですけど、その画面の外側に消えた行の<code>View</code>をどうしましょうか？　放っておくとメモリに負荷がかかるし、ガベージ・コレクションの際にはCPUに負荷がかかっちゃう。だから、下から出てくる新しい行の<code>View</code>としてリサイクルしたい。これを自動でやってくれるのが<code>RecyclerView</code>というわけ。</p>
+<p>で、この「大規模」という点が、<code>RecyclerView</code>という名前につながります。Androidの画面は<code>View</code>（本稿でも、文字を表示するための<code>TextView</code>とかを使いましたよね？）で構成されるので、リストの各行も<code>View</code>で構成されます。画面を上にスクロールすると、上の行が画面の外側に消えて下に新しい行が表示されるわけですけど、その画面の外側に消えた行の<code>View</code>をどうしましょうか？　放っておくとメモリに負荷がかかるし、ガベージ・コレクションの際にはCPUに負荷がかかっちゃう。だから、下から出てくる新しい行の<code>View</code>としてリサイクルしたい。これを自動でやってくれるのが<code>RecyclerView</code>というわけ。</p>
 <h2 id="viewholderとdiffcallbackとadapterを作る"><code>ViewHolder</code>と<code>DiffCallback</code>とAdapterを作る</h2>
-<p>リストを表示する場合、リストそのものを管理する人とリストの要素を管理する人を分けた方が楽になります。<code>List&lt;MyClass&gt;</code>って分割するのと一緒。<code>RecyclerView</code>の場合、リストの要素は<code>ViewHolder</code>で管理します。で、<code>ViewHolder</code>と<code>RecyclerView</code>を繋げるのが<code>ListAdapter</code>。まずはこの<code>ViewHolder</code>の説明から。</p>
+<p>リストを表示する場合は、リストそのものを管理する人とリストの要素を管理する人を分けた方が楽になります。<code>List&lt;MyClass&gt;</code>って分割するのと一緒。<code>RecyclerView</code>の場合、リストの要素は<code>ViewHolder</code>で管理します。で、<code>ViewHolder</code>と<code>RecyclerView</code>を繋げるのが<code>ListAdapter</code>。まずはこの<code>ViewHolder</code>の説明から。</p>
 <p><code>RecyclerView</code>は<code>View</code>をリサイクルするので、これまでは会社の前のバス停を表示していた<code>View</code>に対して、これからは私のアパートの近くのバス停を表示するように指示できなければなりません。これは、前に説明したデータ・バインディングで実現すれば簡単でしょう。レイアウトのXMLの<code>&lt;data&gt;</code>タグの中身を変えちゃえばいいんですからね。</p>
 <p>というわけで、たとえばバス停をリスト表示する<code>ViewHolder</code>向けのレイアウトXMLは以下のようになります。名前はlist_item_bus_stop.xmlにしましょう。</p>
 <div class="sourceCode" id="cb88"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb88-1"><a href="#cb88-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;utf-8&quot;<span class="kw">?&gt;</span></span>
@@ -3258,9 +3258,9 @@ dependencies {
 <span id="cb89-8"><a href="#cb89-8"></a>        }</span>
 <span id="cb89-9"><a href="#cb89-9"></a>    }</span>
 <span id="cb89-10"><a href="#cb89-10"></a>}</span></code></pre></div>
-<p><code>bind()</code>メソッドは、<code>ViewHolder</code>にデータを設定するためのメソッドです（このメソッドを呼び出す部分は<code>ListAdapter</code>で作るのでちょっと待って）。<code>&lt;data&gt;</code>タグの<code>item</code>を変更して、<code>executePendingBindings()</code>でデータ・バインディングを強制的に実行させて、あと、リスナーを再設定しています。</p>
+<p><code>bind()</code>メソッドは、<code>ViewHolder</code>にデータを設定するためのメソッドです（このメソッドを呼び出す部分は<code>ListAdapter</code>で作るので、ちょっと待って）。<code>&lt;data&gt;</code>タグの<code>item</code>を変更して、<code>executePendingBindings()</code>でデータ・バインディングを強制的に実行させて、あと、リスナーを再設定しています。</p>
 <p>でもちょっと待って。リストが変更された場合のことを考えてみましょう。たとえば最後に1行追加された場合は、残りの行は何もしなくてもよいはず。でも、今回のようにデータベースからデータを取得する場合は、再取得すると異なるインスタンスになってしまいます。以前表示していた<code>BusStop</code>のインスタンスと今回表示する<code>BusStop</code>のインスタンスは、同じバス停を表している場合であっても異るというわけ。異なるインスタンスなのだからもう一度データ・バインディングをやり直しましょうというのは、リソースの無駄遣いなのでやりたくない。あと、<code>RecyclerView.ViewHolder</code>のAPIリファレンスを眺めてみると、リストの中のどの位置なのかを表現する<code>getPosition()</code>というメソッドがありました。他にも、<code>getOldPosition()</code>という位置を移動するアニメーションのためのメソッドも。ということは、<code>ViewHolder</code>はリストの中を上下に移動することが可能なはず。それはそうですよね。最初に一行挿入された場合に、全部を書き直すのは無駄ですもん。</p>
-<p>というわけで、データの変更が無いから再バインディングは不要と判断したり、異なるインスタンスだけど同じデータを表現しているので上下への移動で対応しようと判断したりするための機能が必要です。これが<code>DiffCallback</code>です。コードは以下に示すとおりで、<code>DiffUtil.ItemCallback</code>を継承して作成します。</p>
+<p>というわけで、データの変更が無いから再バインディングは不要と判断したり、異なるインスタンスだけど同じデータを表現しているので上下への移動で対応しようと判断したりするための機能が必要です。これが<code>DiffCallback</code>。コードは以下に示すとおりで、<code>DiffUtil.ItemCallback</code>を継承して作成します。</p>
 <div class="sourceCode" id="cb90"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb90-1"><a href="#cb90-1"></a><span class="kw">class</span> DiffCallback: <span class="dt">DiffUtil</span>.<span class="dt">ItemCallback</span>&lt;<span class="dt">BusStop</span>&gt;() {</span>
 <span id="cb90-2"><a href="#cb90-2"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">areItemsTheSame</span>(<span class="va">oldItem</span>: <span class="dt">BusStop</span>, <span class="va">newItem</span>: <span class="dt">BusStop</span>) = oldItem.name == newItem.name</span>
 <span id="cb90-3"><a href="#cb90-3"></a>    <span class="kw">override</span> <span class="kw">fun</span> <span class="fu">areContentsTheSame</span>(<span class="va">oldItem</span>: <span class="dt">BusStop</span>, <span class="va">newItem</span>: <span class="dt">BusStop</span>) = oldItem == newItem</span>
