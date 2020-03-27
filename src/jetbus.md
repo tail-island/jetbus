@@ -67,7 +67,7 @@ Android Studioを起動して、[Start a new Android Studio project]を選択し
 
 図
 
-[Name]にアプリ名、[Package name]にドメイン名＋アプリ名を入力します。アプリ名は、JetpackのサンプルでBusの接近情報ということで、jetbusにしてみました。あ、英語ダメダメで風呂のbathと乗り物のbusの区別がつかなかったわけじゃなくて、イタリーのミラノのJetbus社のファンなだけですよ（あと、jet bathが和製英語なのだということを、今Webで調べて知ってかなり衝撃を受けています……）。[Language]はもちろん「Kotlin」で。Javaの256倍くらい良いプログラミング言語ですし、Google I/O 2019で「Kotlinファースト」が表明されましたし、Kotlinならさらに有効活用できるJetpackの機能もあるためです。あと、[Minimum API Level]は、「API 23: Android 6.0 (Mashmallow)」にしました。Android 6.0で権限確認の方法が変更になったので、これ以前のバージョンだと権限の確認の処理が面倒なためです（今回は関係ないけどね）。古い端末を平気で使う海外までを対象にしたアプリを作るならもっと古いバージョンにすべきでしょうけど、国内が対象なら、まぁ大丈夫じゃないかな。
+[Name]にアプリ名、[Package name]にドメイン名＋アプリ名を入力します。アプリ名は、JetpackのサンプルでBusの接近情報ということで、jetbusにしてみました。あ、英語ダメダメで風呂のbathと乗り物のbusの区別がつかなかったわけじゃなくて、イタリーのミラノのJetbus社のファンなだけですよ（あと、jet bathが和製英語なのだということを今Webで調べて知って、大きなダメージを受けました……）。[Language]はもちろん「Kotlin」で。Javaの256倍くらい良いプログラミング言語ですし、Google I/O 2019で「Kotlinファースト」が表明されましたし、Kotlinならさらに有効活用できるJetpackの機能もあるためです。あと、[Minimum API Level]は、「API 23: Android 6.0 (Mashmallow)」にしました。Android 6.0で権限確認の方法が変更になったので、これ以前のバージョンだと権限の確認の処理が面倒なためです（今回は関係ないけどね）。古い端末を平気で使う海外までを対象にしたアプリを作るならもっと古いバージョンにすべきでしょうけど、国内が対象なら、まぁ大丈夫じゃないかな。
 
 図
 
@@ -332,7 +332,7 @@ GUIツールはかったるいという私の個人的な趣味嗜好により�
 </navigation>
 ~~~
 
-どのような`Fragment`があるのか、XMLのタグで表現します。`<fragment>`タグでですね。`android:name`属性で`Fragment`を実装するクラスを、`android:label`属性で画面に表示するタイトルを設定します。`tools:layout`属性は、GUIツールでグラフィカルに表示する場合向けの、プレビュー用のレイアウトの指定です。
+どのような`Fragment`があるのかは、XMLのタグで表現します。`<fragment>`タグでですね。`android:name`属性で`Fragment`を実装するクラスを、`android:label`属性で画面に表示するタイトルを設定します。`tools:layout`属性は、GUIツールでグラフィカルに表示する場合向けの、プレビュー用のレイアウトの指定です。
 
 `<fragment>`タグの中の`<action>`タグは、画面遷移を表現します。`app:destination`属性は、遷移先を指定します。`arrivalBusStopFragmentToBusApproachesFragment`で指定されている`app:popUpTo`属性は、[戻る]ボタンが押された場合の行き先を指定しています。出発バス停を選んで、到着バス停を選んで、バスの接近情報が表示されたあとに[戻る]ボタンを押す場合は、多分その路線の情報はもういらない場合でしょうから、`app:popUpTo`属性を使用してブックマーク画面まで一気に戻るようにしました。
 
@@ -4441,7 +4441,7 @@ class BusApproachesFragment: Fragment() {
 
 # [Image Asset Studioでアイコンを作れば、完成！](https://github.com/tail-island/jetbus/tree/master)
 
-でも、まだ不十分。アイコンを作らないとね。Android Studioのメニューから[File] - [New] - [Image Asset]を選んで、アプリのアイコンを作成しましょう。
+でも、まだ不十分。アイコンを作らないとね。Android Studioのメニューから[File] - [New] - [Image Asset]メニューを選んで、アプリのアイコンを作成しましょう。
 
 私は絵心がないので、Android StudioのClip Artを流用して作るんだけどな。[Source Asset]の[Asset Type]の[Clip Art]ラジオ・ボタンをクリックすると、Android Studioが提供するアイコンから選べるようになります。
 

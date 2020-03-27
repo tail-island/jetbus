@@ -667,7 +667,7 @@ border-color: #4078c0;
 <p>図</p>
 <p>作成するプロジェクトは、余計なコードが生成されない「Empty Activity」にします。</p>
 <p>図</p>
-<p>[Name]にアプリ名、[Package name]にドメイン名＋アプリ名を入力します。アプリ名は、JetpackのサンプルでBusの接近情報ということで、jetbusにしてみました。あ、英語ダメダメで風呂のbathと乗り物のbusの区別がつかなかったわけじゃなくて、イタリーのミラノのJetbus社のファンなだけですよ（あと、jet bathが和製英語なのだということを、今Webで調べて知ってかなり衝撃を受けています……）。[Language]はもちろん「Kotlin」で。Javaの256倍くらい良いプログラミング言語ですし、Google I/O 2019で「Kotlinファースト」が表明されましたし、Kotlinならさらに有効活用できるJetpackの機能もあるためです。あと、[Minimum API Level]は、「API 23: Android 6.0 (Mashmallow)」にしました。Android 6.0で権限確認の方法が変更になったので、これ以前のバージョンだと権限の確認の処理が面倒なためです（今回は関係ないけどね）。古い端末を平気で使う海外までを対象にしたアプリを作るならもっと古いバージョンにすべきでしょうけど、国内が対象なら、まぁ大丈夫じゃないかな。</p>
+<p>[Name]にアプリ名、[Package name]にドメイン名＋アプリ名を入力します。アプリ名は、JetpackのサンプルでBusの接近情報ということで、jetbusにしてみました。あ、英語ダメダメで風呂のbathと乗り物のbusの区別がつかなかったわけじゃなくて、イタリーのミラノのJetbus社のファンなだけですよ（あと、jet bathが和製英語なのだということを今Webで調べて知って、大きなダメージを受けました……）。[Language]はもちろん「Kotlin」で。Javaの256倍くらい良いプログラミング言語ですし、Google I/O 2019で「Kotlinファースト」が表明されましたし、Kotlinならさらに有効活用できるJetpackの機能もあるためです。あと、[Minimum API Level]は、「API 23: Android 6.0 (Mashmallow)」にしました。Android 6.0で権限確認の方法が変更になったので、これ以前のバージョンだと権限の確認の処理が面倒なためです（今回は関係ないけどね）。古い端末を平気で使う海外までを対象にしたアプリを作るならもっと古いバージョンにすべきでしょうけど、国内が対象なら、まぁ大丈夫じゃないかな。</p>
 <p>図</p>
 <p>ともあれ、これで無事にプロジェクトが作成されました。でも、まだJetpackが組み込まれていません。さっそく組み込む……前に、ビルド・システムの説明をさせてください。</p>
 <h2 id="ビルドシステム">ビルド・システム</h2>
@@ -883,7 +883,7 @@ dependencies {
 <span id="cb4-79"><a href="#cb4-79"></a>    <span class="kw">&lt;/fragment&gt;</span></span>
 <span id="cb4-80"><a href="#cb4-80"></a></span>
 <span id="cb4-81"><a href="#cb4-81"></a><span class="kw">&lt;/navigation&gt;</span></span></code></pre></div>
-<p>どのような<code>Fragment</code>があるのか、XMLのタグで表現します。<code>&lt;fragment&gt;</code>タグでですね。<code>android:name</code>属性で<code>Fragment</code>を実装するクラスを、<code>android:label</code>属性で画面に表示するタイトルを設定します。<code>tools:layout</code>属性は、GUIツールでグラフィカルに表示する場合向けの、プレビュー用のレイアウトの指定です。</p>
+<p>どのような<code>Fragment</code>があるのかは、XMLのタグで表現します。<code>&lt;fragment&gt;</code>タグでですね。<code>android:name</code>属性で<code>Fragment</code>を実装するクラスを、<code>android:label</code>属性で画面に表示するタイトルを設定します。<code>tools:layout</code>属性は、GUIツールでグラフィカルに表示する場合向けの、プレビュー用のレイアウトの指定です。</p>
 <p><code>&lt;fragment&gt;</code>タグの中の<code>&lt;action&gt;</code>タグは、画面遷移を表現します。<code>app:destination</code>属性は、遷移先を指定します。<code>arrivalBusStopFragmentToBusApproachesFragment</code>で指定されている<code>app:popUpTo</code>属性は、[戻る]ボタンが押された場合の行き先を指定しています。出発バス停を選んで、到着バス停を選んで、バスの接近情報が表示されたあとに[戻る]ボタンを押す場合は、多分その路線の情報はもういらない場合でしょうから、<code>app:popUpTo</code>属性を使用してブックマーク画面まで一気に戻るようにしました。</p>
 <p><code>&lt;fragment&gt;</code>の中の<code>&lt;argument&gt;</code>は、フラグメントに遷移する際のパラメーターです。選択された出発バス停を使って到着バス停の選択肢を抽出しないと、到着バス停を選ぶところで路線がつながっていないバス停が表示されてしまうでしょ？　だから、<code>arrivalBusStopFragment</code>では<code>departureBusStopName</code>というパラメーターを指定しました。</p>
 <p>あとはそう、<code>android:id</code>の説明を忘れていました。AndroidのリソースのXMLでは、<code>@+id/</code>の後に続ける形で識別子を設定します。上のXMLの<code>android:id=&quot;@+id/splashFragment&quot;</code>みたいな感じ。<code>@+id/</code>の部分が何だか分からなくて気持ち悪いという方のために補足しておくと、Androidアプリの開発ではR.javaというファイルが内部で自動生成されていて、R.javaの中にリソースの識別子が32bit整数で定義されています。XMLのような文字列の識別子では照合作業でCPUを大量に消費してしまうからという貧乏実装、でも、CPUを消費するということは電池を消費するということで、電池は今でもとても貴重な資源なので今でも素晴らしい実装です。このR.idにIDを追加して適当な32bit整数を割り振っておいてくださいねって指示が、<code>@+id/</code>なんです。ちなみに、割り振られた32bit整数を参照してくださいってのは<code>@id/</code>です。<code>&lt;action&gt;</code>の中の<code>app:destination=&quot;@id/bookmarksFragment&quot;</code>みたいな感じになります。</p>
@@ -4212,7 +4212,7 @@ dependencies {
 <p>動画</p>
 <p>これで通勤が楽になるのでもう少しサラリーマンを続けられそうです。素晴らしい！</p>
 <h1 id="image-asset-studioでアイコンを作れば完成"><a href="https://github.com/tail-island/jetbus/tree/master">Image Asset Studioでアイコンを作れば、完成！</a></h1>
-<p>でも、まだ不十分。アイコンを作らないとね。Android Studioのメニューから[File] - [New] - [Image Asset]を選んで、アプリのアイコンを作成しましょう。</p>
+<p>でも、まだ不十分。アイコンを作らないとね。Android Studioのメニューから[File] - [New] - [Image Asset]メニューを選んで、アプリのアイコンを作成しましょう。</p>
 <p>私は絵心がないので、Android StudioのClip Artを流用して作るんだけどな。[Source Asset]の[Asset Type]の[Clip Art]ラジオ・ボタンをクリックすると、Android Studioが提供するアイコンから選べるようになります。</p>
 <p>図</p>
 <p>Clip Artをクリックして、バスのアイコンをクリックします。</p>
