@@ -634,8 +634,6 @@ findNavController().navigate(
 
 ![Navigation Drawer](https://tail-island.github.io/jetbus/images/navigation-drawer.png)
 
-![アプリ仕様](https://tail-island.github.io/jetbus/images/app-spec.png)
-
 というわけで、ヘッダーを作成します。プロジェクトを右クリックして、[New] - [Android Resource File]メニューを選択し、[File name]に「item\_navigation\_header」を入力して[Resource type]を「Layout」に設定し、作成されたitem\_navigation\_header.xmlに以下を入力します。
 
 ~~~ xml
