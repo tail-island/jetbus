@@ -1457,7 +1457,7 @@ override fun onStart() {
 
 実行してみます。ログを調べてみると……。
 
-![Roomのログ](https://tail-island.github.io/jetbus/room-log-1.png)
+![Roomのログ](https://tail-island.github.io/jetbus/images/room-log-1.png)
 
 はい。成功です。Room簡単ですな。
 
@@ -1467,11 +1467,11 @@ override fun onStart() {
 
 スマートフォン上に生成されたデータベースのファイルは、AndroidStudioを使用してダウンロードする事ができます。Android Studioで[Device File Explorer]を開いて、data/data/com.tail_island.jetbus/databases」を開くと、その下に「jetbus.db」というファイルがあります。これ、SQLite3のファイルなんですよ。このファイルを右クリックして、[Save As...]メニューでローカルに保存します。
 
-![SQLite3のファイルの保存](https://tail-island.github.io/jetbus/save-sqlite3-file.png)
+![SQLite3のファイルの保存](https://tail-island.github.io/jetbus/images/save-sqlite3-file.png)
 
 ダウンロードしたデータベースのファイルの中を見て、正しく動作したのかを確認してみましょう。sqlite3コマンドでデータベースを開いて`SELECT * FROM BusStop LIMIT 10;`を実行して、はい、たしかにバス停が保存されています。この章の前で書いた、出発バス停名と到着バス停名から`Route`を取得するSQLも実行してみます。うん、上りか下りなのかの判別まで含めてうまく行っています。やっぱり、Room簡単ですな。
 
-![Roomのログ](https://tail-island.github.io/jetbus/room-log-2.png)
+![Roomのログ](https://tail-island.github.io/jetbus/images/room-log-2.png)
 
 # [Dagger](https://github.com/tail-island/jetbus/tree/dagger)
 
