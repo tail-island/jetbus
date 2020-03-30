@@ -555,7 +555,7 @@ dependencies {
 <span id="cb15-67"><a href="#cb15-67"></a><span class="kw">&lt;/layout&gt;</span></span></code></pre></div>
 <p>……長くてごめんなさい。でも、思い出してください。我々はNavigationを使用していますので、画面といえば<code>Fragment</code>なわけです。<code>Activity</code>はアプリ全体でこれ一つだけ。なので、まぁ、一回だけならば長くても許容できるかなぁと。次のアプリの開発でも、ほぼコピー＆ペーストでいけますしね。私もこれ、コピー＆ペーストで作成して、<code>&lt;NavigationView&gt;</code>の子要素の部分を付け加えただけで作っています。本アプリで子要素を追加するという面倒な作業が追加になった理由は、<a href="https://www.odpt.org/">公共交通オープンデータセンター</a>からデータを取得する際には上のコード中の「本アプリが使用する……」のような通知を書く必要があったためです。</p>
 <p>でも、あれ？　<code>&lt;com.google.android.material.navigation.NavigationView&gt;</code>タグの属性を見ていくと、<code>app:headerLayout="@layout/item_navigation_header"</code>や<code>app:menu="@menu/menu_navigation"</code>と書いてあって、こんなリソースは無いとエラーになっています。以下の図のようにNavigation drawerはヘッダーとメニューとそれ以外で構成されていて、それ以外は子要素で定義したので、ヘッダーとメニューを定義しなければならないんですね。</p>
-<p><img src="https://tail-island.github.io/jetbus/images/navigation-drawers.png" alt="Navigation Drawers" /></p>
+<p><img src="https://tail-island.github.io/jetbus/images/navigation-drawer.png" alt="Navigation Drawer" /></p>
 <p>というわけで、ヘッダーを作成します。プロジェクトを右クリックして、[New] - [Android Resource File]メニューを選択し、[File name]に「item_navigation_header」を入力して[Resource type]を「Layout」に設定し、作成されたitem_navigation_header.xmlに以下を入力します。</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb16-1"><a href="#cb16-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;utf-8&quot;<span class="kw">?&gt;</span></span>
 <span id="cb16-2"><a href="#cb16-2"></a><span class="kw">&lt;layout</span></span>
