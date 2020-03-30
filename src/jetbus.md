@@ -4440,7 +4440,7 @@ class BusApproachesFragment: Fragment() {
 
 ![Movie #5](https://tail-island.github.io/jetbus/images/movie-5.gif)
 
-これで通勤が楽になるので、ダメ人間な私でももう少しサラリーマンを続けられそうです。Android Jetpackありがとー！
+これで通勤が楽になって、ダメ人間の私でももう少しサラリーマンを続けられそうです。Android Jetpackありがとー！
 
 # [Image Asset Studioでアイコンを作れば、完成！](https://github.com/tail-island/jetbus/tree/master)
 
