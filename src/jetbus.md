@@ -554,7 +554,7 @@ findNavController().navigate(
 
 ![App bars:top](https://storage.googleapis.com/spec-host/mio-staging%2Fmio-components%2F1584058305895%2Fassets%2F1ekbPWQqJ5sMNvJ0om7XelfzOhaWMaeyM%2Ftopappbars-howtouse-1.png)<br>https://storage.googleapis.com/spec-host/mio-staging%2Fmio-components%2F1584058305895%2Fassets%2F1ekbPWQqJ5sMNvJ0om7XelfzOhaWMaeyM%2Ftopappbars-howtouse-1.png
 
-図
+![Navigation drawer](https://storage.googleapis.com/spec-host/mio-staging%2Fmio-components%2F1584058305895%2Fassets%2F1nsuL8VDpBW_LZYXgabK1H0uq6icmmKYt%2Fnav-drawer-intro.png)<br>https://storage.googleapis.com/spec-host/mio-staging%2Fmio-components%2F1584058305895%2Fassets%2F1nsuL8VDpBW_LZYXgabK1H0uq6icmmKYt%2Fnav-drawer-intro.png
 
 今の画面でもApp barっぽいのはありますけど、Navigation drawerがありません。作ってみましょう。[Project]ビューの[app] - [res] - [layout]の下の「activity\_main.xml」を開いて、右上の[Code]アイコンを選択して、activity\_main.xmlを以下に変更します。`Fragment`のレイアウトと統一するために、ルート要素は`<layuout>`に変更しました。
 
