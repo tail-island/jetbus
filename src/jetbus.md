@@ -38,8 +38,7 @@
 
 具体化しましょう。出発バス停を指定して、到着バス停を指定すると、それらのバス停を結ぶ全ての路線の接近情報が一覧表示されます。あと、毎回出発バス停と到着バス停を選ぶのでは面倒すぎるので、ブックマークの機能を持たせます。以下のような感じ（単純なアプリですけど、サンプルなのでご容赦ください）。
 
-![アプリ仕様](./images/app-spec.png)
-
+![アプリ仕様](https:///images/app-spec.png)
 
 本ガイドでは、このアプリをちゃちゃっと作っていきます。
 
@@ -58,17 +57,17 @@
 
 長い前置きがやっと終わって早速プログラミング……の前に、Androidアプリの開発ではプロジェクトを作成しなければなりません。Android Studioを起動して、プロジェクトを作成しましょう。
 
-Android Studioを起動して、[Start a new Android Studio project]を選択します。
+vAndroid Studioを起動して、[Start a new Android Studio project]を選択します。
 
-図
+![Welcome to Android Studio](https://tail-island.github.io/jetbus/images/welcome-to-android-studio.png)
 
 作成するプロジェクトは、余計なコードが生成されない「Empty Activity」にします。
 
-図
+![Select a Project Template](https://tail-island.github.io/jetbus/images/select-a-project-template.png)
 
 [Name]にアプリ名、[Package name]にドメイン名＋アプリ名を入力します。アプリ名は、JetpackのサンプルでBusの接近情報ということで、jetbusにしてみました。あ、英語ダメダメで風呂のbathと乗り物のbusの区別がつかなかったわけじゃなくて、イタリーのミラノのJetbus社のファンなだけですよ（あと、jet bathが和製英語なのだということを今Webで調べて知って、大きなダメージを受けました……）。[Language]はもちろん「Kotlin」で。Javaの256倍くらい良いプログラミング言語ですし、Google I/O 2019で「Kotlinファースト」が表明されましたし、Kotlinならさらに有効活用できるJetpackの機能もあるためです。あと、[Minimum API Level]は、「API 23: Android 6.0 (Mashmallow)」にしました。Android 6.0で権限確認の方法が変更になったので、これ以前のバージョンだと権限の確認の処理が面倒なためです（今回は関係ないけどね）。古い端末を平気で使う海外までを対象にしたアプリを作るならもっと古いバージョンにすべきでしょうけど、国内が対象なら、まぁ大丈夫じゃないかな。
 
-図
+![Create a New Project](https://tail-island.github.io/jetbus/images/create-a-new-project.png)
 
 ともあれ、これで無事にプロジェクトが作成されました。でも、まだJetpackが組み込まれていません。さっそく組み込む……前に、ビルド・システムの説明をさせてください。
 
@@ -89,13 +88,9 @@ Jetpackをビルド・システムのGradleに組み込む方法は、各ライ�
 * ライブラリ名-ktxという名前のライブラリがある場合は、\*-ktxを指定してください。\*-ktxは、Kotlinならではの便利機能が入ったバージョンのライブラリです。Kotlin向けの機能が入っていない基本バージョンのライブラリは、依存関係があるので自動で組み込まれます。
 * Jetpackではコード生成を多用しているのですけど、KotlinやJavaではコード生成の制御にアノテーション（annotation。クラスやメソッドの前に書く`@Foo`みたいなアレ）を使用していて、Javaの場合はGradleのビルド・スクリプトに`annotationProcessor`と書きます。Kotlinの場合は、Kotlin Annotation Processor Toolの略で`kapt`と書いてください。リリース・ノートに`annotationProcessor`の記述があった後に、Kotlinではkaptを使ってねという知っている人しかわからない意味不明なコメントが書いてある場合は、`kapt`の出番です。
 
-と、以上の注意を踏まえて、Android Studioの[Project]ビューのbuild.gradeをダブル・クリックして開いて、修正してみましょう。
+と、以上の注意を踏まえて、Android Studioの[Project]ビューのbuild.gradeをダブル・クリックして開いて、修正してみましょう。以下が修正した結果で、修正した行は、修正内容をコメントで書いています。
 
-図
-
-で、以下が修正した結果。修正した行は、修正内容をコメントで書いています。
-
-~~~ gradle:build.gradle(Project:jetbus)
+~~~ gradle
 buildscript {
     ext.kotlin_version = '1.3.61'
     repositories {
@@ -121,8 +116,9 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 ~~~
+<small>※「(Project: jetbus)」と書いてある方のbuild.gradle</small>
 
-~~~ gradle:build.gradle(Module:app)
+~~~ gradle
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
@@ -182,6 +178,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
 ~~~
+<small>※「(Module: app)」と書いてある方のbuild.gradle</small>
 
 これで、デモ・アプリに必要なJetpackのライブラリの組み込みが完了しました。やっとプログラミングです。最初は、作成してやった感が大きそうな、画面まわりをやってみましょう。
 
@@ -197,7 +194,7 @@ dependencies {
 
 で、大昔のスマートフォンのアプリの単純な画面だったらこれであまり問題なかったんですけど、高機能なアプリを作ったりタブレットのような大きな画面を効率よく使おうとしたりする場合は、この方式だとコードの重複という問題が発生してしまうんです。タブレットの大きな画面では、左に一覧表示して、右にその詳細を表示するような画面が考えられます。でも、スマートフォンの小さな画面では、一覧表示する画面と、それとは別の詳細を表示する画面に分かれて、画面遷移する形で表現しなければなりません。
 
-図
+![フラグメントで定義された2つのUIモジュールを1つのアクティビティに組み合わせたタブレット用デザインと、それぞれを分けたハンドセット用デザインの例](https://developer.android.com/images/fundamentals/fragments.png?hl=ja)<br>https://developer.android.com/guide/components/fragments?hl=ja
 
 これを`Activity`で実現しようとすると、タブレット用の`Activity`を1つと、スマートフォン用の`Acticvity`を2つ作らなければなりません。そして、ほとんどのコードは重複してしまうでしょう。UIの問題なら`View`（UIコンポーネント）で解決すれば……って思うかもしれませんけど、画面に表示するデータをデータベースから取得してくるような機能を`View`に持たせるのは、`View`の責任範囲を逸脱しているのでダメです。
 
@@ -221,11 +218,11 @@ dependencies {
 
 さっそく追加します。プロジェクトを右クリックして、[New] - [Fragment] - [Fragment (Blank)]メニューを選択してください。
 
-図
+![new-fragment-fragment](https://tail-island.github.io/jetbus/images/new-fragment-fragment.png)
 
 `Fragment`の名前を入力して、[Include fragment factory methods?]チェックボックスを外して、[Finish]ボタンを押します（このチェックボックスを外さないと、余計なコードが生成されてしまうためです。まぁ、生成されたとしても、そのコードを消せば良いだけなんですけど）。この手順を5回繰り返して、必要な`Fragment`をすべて生成してください。
 
-図
+![Configure Component](https://tail-island.github.io/jetbus/images/configure-component.png)
 
 ふう、完了。
 
@@ -233,19 +230,15 @@ dependencies {
 
 さて、Navigation。Navigationでは、画面の遷移をres/navigationの下のXMLファイルで管理します。このファイルを作りましょう。プロジェクトを右クリックして、[File] - [New] - [Android Resource Directory]メニューを選びます。
 
-図
+![New Resource Direcotry](https://tail-island.github.io/jetbus/images/new-resource-directory.png)
 
 [Resource type]を「navigation」にして、[OK]ボタンを押してください。これで、navigationディレクトリが生成されます。
 
 次。画面の遷移を管理するXMLファイルです。プロジェクトを右クリックして、[File] - [New] - [Android Resource File]メニューを選びます。
 
-図
+![New Resource File](https://tail-island.github.io/jetbus/images/new-resource-file.png)
 
-[Resource type]を「Navigation」にして、[File name]に「navigation」と入力して、[OK]ボタンを押します。これで、navigation.xmlが生成されました。
-
-図
-
-GUIツールはかったるいという私の個人的な趣味嗜好により、右上の[Code]アイコンをクリックして、以下のXMLファイルを入力します。
+[Resource type]を「Navigation」にして、[File name]に「navigation」と入力して、[OK]ボタンを押します。これで、navigation.xmlが生成されましたので、開いて編集します。GUIツールはかったるいという私の個人的な趣味嗜好により、右上の[Code]アイコンをクリックし、以下のXMLファイルを入力します。
 
 ~~~ xml
 <?xml version="1.0" encoding="utf-8"?>
