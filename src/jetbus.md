@@ -552,7 +552,7 @@ findNavController().navigate(
 
 さて、AndroidアプリのUIは、[Material Design](https://material.io)というデザイン・ガイドに従うことになっています。このMaterial Designにはいろいろなコンポーネントがあるのですけど、App barというコンポーネントで画面の情報を表示して、Navigation drawerでメニューを実現する方式が一般的みたいです。
 
-図
+![App bars:top](https://storage.googleapis.com/spec-host/mio-staging%2Fmio-components%2F1584058305895%2Fassets%2F1ekbPWQqJ5sMNvJ0om7XelfzOhaWMaeyM%2Ftopappbars-howtouse-1.png)<br>https://storage.googleapis.com/spec-host/mio-staging%2Fmio-components%2F1584058305895%2Fassets%2F1ekbPWQqJ5sMNvJ0om7XelfzOhaWMaeyM%2Ftopappbars-howtouse-1.png
 
 図
 
