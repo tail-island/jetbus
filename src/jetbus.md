@@ -632,7 +632,7 @@ findNavController().navigate(
 
 でも、あれ？　`<com.google.android.material.navigation.NavigationView>`タグの属性を見ていくと、`app:headerLayout="@layout/item_navigation_header"`や`app:menu="@menu/menu_navigation"`と書いてあって、こんなリソースは無いとエラーになっています。以下の図のようにNavigation drawerはヘッダーとメニューとそれ以外で構成されていて、それ以外は子要素で定義したので、ヘッダーとメニューを定義しなければならないんですね。
 
-図
+![Navigation Drawers](https://tail-island.github.io/jetbus/images/navigation-drawers.png)
 
 というわけで、ヘッダーを作成します。プロジェクトを右クリックして、[New] - [Android Resource File]メニューを選択し、[File name]に「item\_navigation\_header」を入力して[Resource type]を「Layout」に設定し、作成されたitem\_navigation\_header.xmlに以下を入力します。
 
