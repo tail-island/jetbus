@@ -860,13 +860,13 @@ dependencies {
 
 バスの運行情報がありますから、バスの車両の接近情報は表示できそうですね。なんかいろいろ細かいことが書いてありますけど、習うより慣れろってことで、Webブラウザを開いて、まずはバス停を取得してみましょう。「https://api.odpt.org/api/v4/odpt:BusstopPole?acl:consumerKey=ACL\_CONSUMERKEY&odpt:operator=odpt.Operator:Toei」（ACL\_CONSUMERKEYの部分には、ユーザー登録で取得したアクセストークンをコピー＆ペーストしてください）を開いてみます。なるほどバス停のデータが取得できている……のですけど、検索しても、こんなダラダラ生きている私を雇用してくださってるとてもありがたい「日本ユニシス本社前」という、私が会社からの帰りに使うバス停が見つかりませんでした。
 
-![日本ユニシス本社前が無い](https://tail-island.github.io/jetbus/unisys-not-exists.png)
+![日本ユニシス本社前が無い](https://tail-island.github.io/jetbus/images/unisys-not-exists.png)
 
 データが欠落しているのは、API仕様の[1.3. インターフェース]の中の[1.3.1. 留意点]に「APIによって出力される結果がシステムの上限件数を超える場合、上限件数以下にフィルターされた結果が返る」とあって、リンクを辿って調べてみたら、その上限件数は1,000件だったためです（2020年3月現在）。`odpt:BusstopPole`はバス停ではなくてバス停の標柱（方面ごとに立っているアレ）で大量なので、余裕で1,000件を超えてしまって切り捨てられちゃったみたい。
 
 というわけで、データ検索APIではなくて、データダンプAPIを使いましょう。「https://api.odpt.org/api/v4/odpt:BusstopPole.json?acl:consumerKey=ACL\_CONSUMERKEY」（URIに「.json」が追加されました。あと、先ほどと同様に、ACL\_CONSUMERKEYの部分には、ユーザー登録で取得したアクセストークンをコピー＆ペーストしてください）を開いて、データの取得が完了するまで、しばし待ちます。日本全国津々浦々のバス停の標柱全てという大量のデータなので、時間がかかるんですよ……。はい、今度は、「日本ユニシス本社前」のデータが見つかりました。
 
-![日本ユニシス本社前が見つかった](https://tail-island.github.io/jetbus/unisys-exists.png)
+![日本ユニシス本社前が見つかった](https://tail-island.github.io/jetbus/images/unisys-exists.png)
 
 ドキュメントによれば、`odpt:BusstopPole`と`odpt:BusroutePattern`は`owl:sameAs`属性で互いに紐付けられるので、出発バス停の標柱群（一つのバス停に複数の標柱がある）と到着バス停の標柱群を指定すれば、その両方に紐付いている`odpt:BusroutePattern`を抽出することで路線を見つけることができそう。ただ、`odpt:BusroutePattern`の検索APIのクエリー・パラメーターには`odpt:BusstopPole`がなかったので、抽出は自前のコードでやらなければなりませんけどね。どうせ抽出を自前のコードでやるのであれば、`odpt:BusroutePattern`もデータダンプAPIでまるっと取得してしまうことにしましょう。
 
