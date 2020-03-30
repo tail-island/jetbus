@@ -1,1 +1,1 @@
-pandoc -f markdown_github+footnotes+link_attributes -s --self-contained -t html5  -c ./resources/github-markdown.css -H ./resources/github-markdown-h.html -B ./resources/github-markdown-b.html -A ./resources/github-markdown-a.html -M pagetitle="私的Androidアプリ開発ガイド" *.md > ../index.html
+pandoc -f markdown_github+footnotes+link_attributes -s --self-contained -t html5 -c ./resources/github-markdown.css -H ./resources/github-markdown-h.html -B ./resources/github-markdown-b.html -A ./resources/github-markdown-a.html -M pagetitle="私的Androidアプリ開発ガイド" *.md > ../index.html
