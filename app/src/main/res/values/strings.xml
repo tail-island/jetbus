@@ -10,7 +10,7 @@
 
     <string name="departure_bus_stop">出発バス停</string>
 
-    <string name="arrival_bus_stop">出発バス停</string>
+    <string name="arrival_bus_stop">到着バス停</string>
 
     <string name="bus_approaches">バス接近情報</string>
 </resources>
