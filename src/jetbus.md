@@ -542,7 +542,7 @@ findNavController().navigate(
 
 こんな感じですべての`Fragment`をプログラミングして、動かしてみると以下のようになります。
 
-動画
+![Movie #1](https://tail-island.github.io/jetbus/images/movie-1.gif)
 
 [到着バス停]画面から[バス接近情報]画面に遷移した後、[戻る]ボタンを押すとレイアウトのXMLの`app:popUpTo`属性が効いて、[ブックマーク一覧]画面に戻ってくれていてとても嬉しい。
 
@@ -803,7 +803,7 @@ NavigationとNavigation drwerとApp barはとても良くできていて、上�
 
 ともあれ、これで作業完了のはず。試してみましょう
 
-動画
+![Movie #1](https://tail-island.github.io/jetbus/images/movie-2.gif)
 
 うん、完璧ですな。Navigationよ今夜もありがとう。Navigationくらいに楽チンな、App barとNavigation drawerをどうにかしてくれるライブラリがJetpackに追加されないかなぁ……。
 
@@ -2729,7 +2729,7 @@ class BusApproachesFragment: Fragment() {
 
 はい、これで完成！　正しく動くか試してみましょう。
 
-動画
+![Movie #3](https://tail-island.github.io/jetbus/images/movie-3.gif)
 
 うん、動いた……のですけど、確認のために`AppModule`を開いてソース・コードを眺めていたら、なんかちょっと気持ち悪い。`fun provideBusApproachesViewModel(repository: Repository) = BusApproachesViewModel(repository) as ViewModel`の`repository`は、どうやって取得したのでしょうか？　だって、`Repository`を`@Provides`するメソッドは定義していないんですよ？
 
@@ -3719,7 +3719,7 @@ class DepartureBusStopFragment: Fragment() {
 
 ともあれ、大分見た目もしっかりしてきました。
 
-動画
+![Movie #4](https://tail-island.github.io/jetbus/images/movie-4.gif)
 
 あとは、バスの接近情報を表示するだけ。表示そのものはRecyclerViewでできそうだけど、表示するデータはどうしましょうか？
 
@@ -4436,7 +4436,7 @@ class BusApproachesFragment: Fragment() {
 
 これだけで、はい。動きました！
 
-動画
+![Movie #5](https://tail-island.github.io/jetbus/images/movie-5.gif)
 
 これで通勤が楽になるので、ダメ人間な私でももう少しサラリーマンを続けられそうです。Android Jetpackありがとー！
 

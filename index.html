@@ -478,7 +478,7 @@ dependencies {
 <p>引数は、プログラムを書く以外はあまねくダメダメと評判のこんな私を雇ってくれる奇特な会社から家まで帰るルートですな。</p>
 <h2 id="navigationを試してみる">Navigationを試してみる</h2>
 <p>こんな感じですべての<code>Fragment</code>をプログラミングして、動かしてみると以下のようになります。</p>
-<p>動画</p>
+<p><img src="https://tail-island.github.io/jetbus/images/movie-1.gif" alt="Movie #1" /></p>
 <p>[到着バス停]画面から[バス接近情報]画面に遷移した後、[戻る]ボタンを押すとレイアウトのXMLの<code>app:popUpTo</code>属性が効いて、[ブックマーク一覧]画面に戻ってくれていてとても嬉しい。</p>
 <p>でも、なんか画面が寂しい気がします……。どうにかならないかな？　あと、ナビゲーションのXMLでわざわざ設定した<code>android:label</code>属性はどうなったのでしょうか？　どの画面でも、画面上部には「jetbus」って表示されているんだけど。</p>
 <h2 id="app-barとnavigation-drawer">App barとNavigation drawer</h2>
@@ -698,7 +698,7 @@ dependencies {
 <p>で、<code>onBackPressed()</code>はメソッドですから、<code>onCreate()</code>と<code>Binding</code>を共有したい場合は属性を追加しなければなりません。だから<code>binding</code>という属性を追加しなければならないのですけど、この<code>binding</code>は、<code>onCreate()</code>が呼ばれるまで値を設定できないという問題があります。しょうがないので最初は<code>null</code>を設定する……のは、KotlinのようなNull安全を目指している言語では悪手です。今回のように、<code>binding</code>の値が設定される前に使用されないことを保証できる（<code>onBackPressed()</code>は<code>onCreate()</code>が終わった後にしか呼び出されないので、保証できます）場合は、プログラマーの責任で属性を<code>lateinit</code>として定義できます。<code>lateinit</code>にすると初期値を設定しなくてよいので、ほら、<code>binding</code>の型を<code>null</code>を許容「しない」<code>ActivityMainBinding</code>に設定できました。</p>
 <p>あと、上のコードでやっているのは、<code>SplashFragment</code>でApp barを消しています。何もしないとApp barに[戻る]アイコンが表示されてしまいますし、調べた限りでは、他のアプリでもスプラッシュ画面にはApp barがありませんでしたから。</p>
 <p>ともあれ、これで作業完了のはず。試してみましょう</p>
-<p>動画</p>
+<p><img src="https://tail-island.github.io/jetbus/images/movie-2.gif" alt="Movie #1" /></p>
 <p>うん、完璧ですな。Navigationよ今夜もありがとう。Navigationくらいに楽チンな、App barとNavigation drawerをどうにかしてくれるライブラリがJetpackに追加されないかなぁ……。</p>
 <h1 id="retrofit2"><a href="https://github.com/tail-island/jetbus/tree/retrofit2">Retrofit2</a></h1>
 <p>さて、本アプリは<a href="https://www.odpt.org/">公共交通オープンデータセンター</a>が提供してくれるデータが無いと動きようがありませんので、個々の画面の機能を作っていく前に、HTTP通信でWebサーバーからデータを取得する処理を作ってみましょう。残念なことにJetpackにはHTTP通信の機能がありませんので、外部のライブラリであるRetrofit2を使用します。</p>
@@ -2208,7 +2208,7 @@ dependencies {
 <p>解説とは<code>ViewModel</code>の作成方法が違うじゃんと思われたと思いますが、これ、Android JetpackのKotlin向け便利機能の一つなんです。</p>
 <p>この書き方にしておくと、<code>Fragment</code>とViewModelの生存期間が同じになります。あと、たとえば認証情報のような<code>Fragment</code>よりも生存期間が長い（別の<code>Fragment</code>に遷移したらまたIDとパスワード入力するなんてやってられないですよね？）ViewModelを使う場合には、<code>private val authorizationViewModel by activityViewModel&lt;AuthorizationViewModel&gt; { viewModelProviderFactory }</code>とするだけで<code>ViewModel</code>の生存期間が<code>Activity</code>と同じになるのでとても便利ですよ。</p>
 <p>はい、これで完成！　正しく動くか試してみましょう。</p>
-<p>動画</p>
+<p><img src="https://tail-island.github.io/jetbus/images/movie-3.gif" alt="Movie #3" /></p>
 <p>うん、動いた……のですけど、確認のために<code>AppModule</code>を開いてソース・コードを眺めていたら、なんかちょっと気持ち悪い。<code>fun provideBusApproachesViewModel(repository: Repository) = BusApproachesViewModel(repository) as ViewModel</code>の<code>repository</code>は、どうやって取得したのでしょうか？　だって、<code>Repository</code>を<code>@Provides</code>するメソッドは定義していないんですよ？</p>
 <p>その答えは「<code>@Inject</code>アノテーションが付いたコンストラクタを持つクラスは、自動で<code>@Provides</code>なメソッドを作成してくれるから」です。先程<code>Repository</code>を作成したときに、<code>@Singleton</code>アノテーションと<code>@Inject</code>アノテーションを追加しましたよね。この<code>@Inject</code>アノテーションが役に立ってくれたんです。</p>
 <p>では<code>@Singleton</code>アノテーションは何なのかというと、<code>@Singleton</code>をDaggerで生成したい型に付加しておくと、<code>@Provides</code>メソッドを生成するときに<code>@Singleton</code>が自動で付くようになるんです。<code>Repository</code>は何個もいらないですもんね。というわけで、<code>AppModule</code>の<code>@Singleton</code>は生成対象の型に移動……させるという手は、<code>provideContext()</code>や<code>provideConsumerKey()</code>では使えません。書き方が統一できないとミスが発生しそうで怖いので、しょうがないので、無駄があるけど念の為に両方に書くという方式にしましょう。<code>AppDatabase</code>と<code>WebService</code>にも<code>@Singleton</code>を付加しておきます。</p>
@@ -3028,7 +3028,7 @@ dependencies {
 <p>で、このままだとブックマークが一つもないので<code>BookmarksFragment</code>を正しく実装できたか確認できなかったので、<code>BusApproachesFragment</code>にブックマークを追加する機能（<code>BusApproachesViewModel</code>の<code>toggleBookmark()</code>）を追加しました。</p>
 <p>詳細なソース・コードは、<a href="https://github.com/tail-island/jetbus/tree/recycler-view">GitHub</a>で確認してみてください。ほとんどコピー＆ペーストなので書くこと何もなかったんですよ……。</p>
 <p>ともあれ、大分見た目もしっかりしてきました。</p>
-<p>動画</p>
+<p><img src="https://tail-island.github.io/jetbus/images/movie-4.gif" alt="Movie #4" /></p>
 <p>あとは、バスの接近情報を表示するだけ。表示そのものはRecyclerViewでできそうだけど、表示するデータはどうしましょうか？</p>
 <h1 id="バス接近情報を表示する"><a href="https://github.com/tail-island/jetbus/tree/bus-approaches">バス接近情報を表示する</a></h1>
 <p>バス接近情報を表示する部分は少し複雑なので、データ・アクセス・オブジェクト、<code>Repository</code>、<code>ViewModel</code>、<code>Fragment</code>の順で説明していきます。</p>
@@ -3668,7 +3668,7 @@ dependencies {
 <span id="cb111-46"><a href="#cb111-46"></a>    }</span>
 <span id="cb111-47"><a href="#cb111-47"></a>}</span></code></pre></div>
 <p>これだけで、はい。動きました！</p>
-<p>動画</p>
+<p><img src="https://tail-island.github.io/jetbus/images/movie-5.gif" alt="Movie #5" /></p>
 <p>これで通勤が楽になるので、ダメ人間な私でももう少しサラリーマンを続けられそうです。Android Jetpackありがとー！</p>
 <h1 id="image-asset-studioでアイコンを作れば完成"><a href="https://github.com/tail-island/jetbus/tree/master">Image Asset Studioでアイコンを作れば、完成！</a></h1>
 <p>でも、まだ不十分。アプリのアイコンを作らないとね。Android Studioのメニューから[File] - [New] - [Image Asset]メニューを選んで、アプリのアイコンを作成しましょう。</p>
