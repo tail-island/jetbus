@@ -632,7 +632,7 @@ findNavController().navigate(
 
 でも、あれ？　`<com.google.android.material.navigation.NavigationView>`タグの属性を見ていくと、`app:headerLayout="@layout/item_navigation_header"`や`app:menu="@menu/menu_navigation"`と書いてあって、こんなリソースは無いとエラーになっています。以下の図のようにNavigation drawerはヘッダーとメニューとそれ以外で構成されていて、それ以外は子要素で定義したので、ヘッダーとメニューを定義しなければならないんですね。
 
-![Navigation Drawer](https://tail-island.github.io/jetbus/images/navigation-drawer.png)
+![Navigation Drawer](https://tail-island.github.io/jetbus/images/navigation-drawer-components.png)
 
 というわけで、ヘッダーを作成します。プロジェクトを右クリックして、[New] - [Android Resource File]メニューを選択し、[File name]に「item\_navigation\_header」を入力して[Resource type]を「Layout」に設定し、作成されたitem\_navigation\_header.xmlに以下を入力します。
 
@@ -4446,30 +4446,26 @@ class BusApproachesFragment: Fragment() {
 
 でも、まだ不十分。アプリのアイコンを作らないとね。Android Studioのメニューから[File] - [New] - [Image Asset]メニューを選んで、アプリのアイコンを作成しましょう。
 
-私は絵心がないのから、Android StudioのClip Artの流用で作るんだけどな。[Source Asset]の[Asset Type]の[Clip Art]ラジオ・ボタンをクリックすると、Android Studioが提供するアイコンから選べるようになります。
+![Asset Studio](https://tail-island.github.io/jetbus/images/asset-studio.png)
 
-図
+私は絵心がないのから、Android StudioのClip Artの流用で作るんだけどな。[Source Asset]の[Asset Type]の[Clip Art]ラジオ・ボタンをクリックすると、Android Studioが提供するアイコンから選びましょう。Clip Artをクリックして、バスのアイコンをクリックします。
 
-Clip Artをクリックして、バスのアイコンをクリックします。
-
-図
+![Clip Art](https://tail-island.github.io/jetbus/images/clip-art.png)
 
 色を設定します。今回は真っ白にしたいので、「FFFFFF」を入力します。
 
-図
+![Select Color](https://tail-island.github.io/jetbus/images/select-color.png)
 
-背景の絵を作るデザインス・センスもありませんので、背景は単色にしました。[Background Layer]タブを選択して、Colorをクリックします。背景色は、アプリの`colorPrimaryDark`に設定した色の「006428」です。この色は[Color Tool](https://material.io/resources/color/#!/?view.left=0&view.right=1)で作成しています。Primary Colorに適当な色を設定するだけでPrimary Dark Colorが作成されてとても便利ですよ。
-
-図
-
-あとは、[Next]ボタンをクリックして[Finish]ボタンをクリックして、ビルドしてインストールして、でも何故かアプリのアイコンが変わりません……。
+背景の絵を作るデザインス・センスもありませんので、背景は単色にしました。[Background Layer]タブを選択して、Colorをクリックします。背景色は、アプリの`colorPrimaryDark`に設定した色の「006428」です。この色は[Color Tool](https://material.io/resources/color/#!/?view.left=0&view.right=1)で作成しています。Primary Colorに適当な色を設定するだけでPrimary Dark Colorが作成されてとても便利ですよ。あとは、[Next]ボタンをクリックして[Finish]ボタンをクリックして、ビルドしてインストールして、でも何故かアプリのアイコンが変わりません……。
 
 その理由は、drawableのリソースのXMLにはAndroidのバージョンによって記述できる事柄に差異があって、Android Studioがデフォルトで作成したアプリのアイコンは新しいバージョン向け、Image Assetで先程作成したアプリのアイコンは古いバージョン向けのファイルを作成していたため。というわけで、不要になった以前のdrawableを消しちゃいましょう。app/src/main/res/drawable-v24フォルダをまるっと削除しました。
 
-まだ終わりません。今回は単色の背景にしたので、app/src/main/res/valuesフォルダの中にic_launcher_background.xmlが生成されています。でも、以前のアイコンはいろいろ描いてあるベクトル・グラフィックスだったので、app/src/main/res/drawablesにあったんですよ。以前のアイコン向けの背景が悪さをするのを防ぐために、app/src/main/res/drawable/ic_launcher_background.xmlも削除しました。
+で、さらにもう一つ。今回は単色の背景にしたので、app/src/main/res/valuesフォルダの中にic_launcher_background.xmlが生成されています。でも、以前のアイコンはいろいろ描いてあるベクトル・グラフィックスだったので、app/src/main/res/drawablesにあったんですよ。以前のアイコン向けの背景が悪さをするのを防ぐために、app/src/main/res/drawable/ic_launcher_background.xmlも削除しました。
 
 以上！　これで本当の本当に完了です。いろいろあったけど、Androidアプリの開発ってべつに難しくない、むしろ楽チンで美味しいでしょ？
 
-図
-
-図
+![Jetbus](https://tail-island.github.io/jetbus/images/navigation-drawer.png)
+![Jetbus](https://tail-island.github.io/jetbus/images/bookmarks.png)
+![Jetbus](https://tail-island.github.io/jetbus/images/departure-bus-stop.png)
+![Jetbus](https://tail-island.github.io/jetbus/images/arrival-bus-stop.png)
+![Jetbus](https://tail-island.github.io/jetbus/images/bus-approaches.png)
