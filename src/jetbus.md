@@ -4462,6 +4462,8 @@ class BusApproachesFragment: Fragment() {
 
 で、さらにもう一つ。今回は単色の背景にしたので、app/src/main/res/valuesフォルダの中にic_launcher_background.xmlが生成されています。でも、以前のアイコンはいろいろ描いてあるベクトル・グラフィックスだったので、app/src/main/res/drawablesにあったんですよ。以前のアイコン向けの背景が悪さをするのを防ぐために、app/src/main/res/drawable/ic_launcher_background.xmlも削除しました。
 
-以上！　これで本当の本当に完了です。いろいろあったけど、Androidアプリの開発ってべつに難しくない、むしろ楽チンで美味しいでしょ？
+以上！　これで本当の本当に完了です。
 
 ![Jetbus](https://tail-island.github.io/jetbus/images/navigation-drawer.png)
+
+いろいろあったけど、Androidアプリの開発ってべつに難しくない、むしろ楽チンで美味しいでしょ？

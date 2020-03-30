@@ -3681,8 +3681,9 @@ dependencies {
 <p>背景の絵を作るデザインス・センスもありませんので、背景は単色にしました。[Background Layer]タブを選択して、Colorをクリックします。背景色は、アプリの<code>colorPrimaryDark</code>に設定した色の「006428」です。この色は<a href="https://material.io/resources/color/#!/?view.left=0&amp;view.right=1">Color Tool</a>で作成しています。Primary Colorに適当な色を設定するだけでPrimary Dark Colorが作成されてとても便利ですよ。あとは、[Next]ボタンをクリックして[Finish]ボタンをクリックして、ビルドしてインストールして、でも何故かアプリのアイコンが変わりません……。</p>
 <p>その理由は、drawableのリソースのXMLにはAndroidのバージョンによって記述できる事柄に差異があって、Android Studioがデフォルトで作成したアプリのアイコンは新しいバージョン向け、Image Assetで先程作成したアプリのアイコンは古いバージョン向けのファイルを作成していたため。というわけで、不要になった以前のdrawableを消しちゃいましょう。app/src/main/res/drawable-v24フォルダをまるっと削除しました。</p>
 <p>で、さらにもう一つ。今回は単色の背景にしたので、app/src/main/res/valuesフォルダの中にic_launcher_background.xmlが生成されています。でも、以前のアイコンはいろいろ描いてあるベクトル・グラフィックスだったので、app/src/main/res/drawablesにあったんですよ。以前のアイコン向けの背景が悪さをするのを防ぐために、app/src/main/res/drawable/ic_launcher_background.xmlも削除しました。</p>
-<p>以上！　これで本当の本当に完了です。いろいろあったけど、Androidアプリの開発ってべつに難しくない、むしろ楽チンで美味しいでしょ？</p>
+<p>以上！　これで本当の本当に完了です。</p>
 <p><img src="https://tail-island.github.io/jetbus/images/navigation-drawer.png" alt="Jetbus" /></p>
+<p>いろいろあったけど、Androidアプリの開発ってべつに難しくない、むしろ楽チンで美味しいでしょ？</p>
 </article>
 </body>
 </html>
