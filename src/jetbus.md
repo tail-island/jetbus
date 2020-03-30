@@ -1162,7 +1162,7 @@ getWebServiceResultBody { webService.busroutePattern(consumerKey) }?.let { busro
 
 と、他のO/Rマッピング・ツール経験者への言い訳が終わったところで、作業に入りましょう。まずは、データ構造の設計です。私は設計文書を書かないでいきなりコードを書き出すタイプの人間ですけど、そんな私でもプログラミング前にデータ構造だけは設計します。ER図かUMLのクラス図を描くだけですけどね。こんなの。
 
-![ER図](https://tail-island.github.io/jetbus/images/er-diagram.png)
+![ER図](https://tail-island.github.io/jetbus/images/erd.png)
 
 今回はER図にしてみました。手書きのなぐり書きですけど、設計はこんなので十分。だって、これでアプリが機能を提供できるかを確認できるのですから。試しにやってみましょう。到着バス停を指定する画面を作れるか、確認してみます。
 
