@@ -941,7 +941,7 @@ dependencies {
 <span id="cb31-12"><a href="#cb31-12"></a></span>
 <span id="cb31-13"><a href="#cb31-13"></a><span class="kw">&lt;/manifest&gt;</span></span></code></pre></div>
 <p>これで本当に全て完了。実行してみましょう。<code>Log</code>で出力した結果は、Android Studioの[Logcat]ビューで見ることができます。</p>
-<p>図</p>
+<p><img src="https://tail-island.github.io/jetbus/images/retrofit2-logcat.png" alt="Retrofit2のログ" /></p>
 <p>うん、正しくデータを取れていますね。Retrofit2ならWebサービス呼び出しはとても楽チン。</p>
 <h1 id="room"><a href="https://github.com/tail-island/jetbus/tree/room">Room</a></h1>
 <p>前章で取得した公共交通オープンデータセンターのデータは、取得に時間がかかる上に変更が少ないので、RDBMSにキャッシュしたい。というわけで、Android OS内蔵のSQLite3への抽象化レイヤを提供するRoomを使用してみます。そこそこ便利ですよ。</p>

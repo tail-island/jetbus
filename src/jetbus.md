@@ -1134,7 +1134,7 @@ getWebServiceResultBody { webService.busroutePattern(consumerKey) }?.let { busro
 
 これで本当に全て完了。実行してみましょう。`Log`で出力した結果は、Android Studioの[Logcat]ビューで見ることができます。
 
-図
+![Retrofit2のログ](https://tail-island.github.io/jetbus/images/retrofit2-logcat.png)
 
 うん、正しくデータを取れていますね。Retrofit2ならWebサービス呼び出しはとても楽チン。
 
