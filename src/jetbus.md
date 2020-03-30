@@ -1790,7 +1790,7 @@ Android Jetpackでは、MVVMアーキテクチャを使うことが推奨され�
 
 で、このAltoってのは当時にしてはものすごく先進的なコンピューターで、マウスがついていてGUI（Graphical User Interface）を持っていました。もちろん世界初です。この世界初のGUIをどうにかしていい感じに開発できないかなぁと考えて作られたのが、MVCアーキテクチャなんです。
 
-図
+![MVCアーキテクチャ](https://tail-island.github.io/jetpack/images/mvc-architecture.png)
 
 Controllerは入力機器（マウスとかキーボードとか）からの入力を監視し、マウス・クリックとかキーボードのAが押されたとかのイベントをもとに、Modelというデータとデータ操作の手続きを管理するオブジェクトにメッセージを送り（メソッドを呼び出し）ます。Modelのデータが変更されたことはViewに通知され（Observerパターン）、通知を受け取ったViewは自分自身を置き換えて出力する。以上がMVCアーキテクチャなんです。
 
@@ -1806,7 +1806,7 @@ WebアプリケーションのMVCアーキテクチャはSmalltalkのMVCとは*�
 
 MVVMアーキテクチャというのは、.NET Framework 3.0のWPF（Windows Presentation Foundation）やSilverlightのために考案されたアーキテクチャです。理屈の上ではModelとViewだけで良さそうなのですけど、WPFやSilverlightではXAMLというViewをXMLで定義する言語を持っていて、この言語はとても高機能で素晴らしいのですけど、XAMLだけでViewを作成した場合は、Model側にViewのためのコードを書く必要がありました。これではModelとViewに分割した意味がありませんから、間にViewModelを挟んで、Model-View-ViewModelとなりました。MVVMアーキテクチャでは、メソッドの呼び出しは片方向（View→ViewModel→Model）だけで、逆の方向は変更の通知で情報を伝えることになっています（ModelとViewModelの間は返り値でもOK）。
 
-図
+![MVVMアーキテクチャ](https://tail-island.github.io/jetpack/images/mvvm-architecture.png)
 
 さて、ViewをレイアウトのXMLとソース・コードの合わせ技で実装するAndroidアプリ開発ではViewModelは不要に感じられるのですけど、AndroidのViewである`Activity`や`Fragment`には状態を持てないという別の制約がありました。このViewの状態を管理するために、ViewModelを使用するというわけ。必要に迫られて仕方なく、という感じのアーキテクチャなんですな。
 
@@ -1814,7 +1814,7 @@ MVVMアーキテクチャというのは、.NET Framework 3.0のWPF（Windows Pr
 
 Android Jetpackでは、もう一つ層を追加することを提案しています。それがRepositoryです。
 
-図
+![Android JetpackのMVVMアーキテクチャ](https://tail-island.github.io/jetpack/images/jetpack-mvvm-architecture.png)
 
 Androidが動作するスマートフォンやタブレット、ウェアラブル・デバイスは、インターネットとの親和性が高いデバイスです。だから、我々が作成するアプリもインターネットと頻繁に通信する可能性が高い。しかもローカルのファイルやデータベースだって使用するわけで、だから、モデルはWebサービスに基づく場合とデータベースやファイルに基づく場合がありえます。これらがバラバラのままだと管理が大変になってしまうので、Repositoryという層を追加して一本化してViewModelはRepositoryだけに依存しましょうという感じ。
 

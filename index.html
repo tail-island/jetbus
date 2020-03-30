@@ -1425,7 +1425,7 @@ dependencies {
 <h3 id="mvcmodel-view-controllerアーキテクチャ">MVC（Model-View-Controller）アーキテクチャ</h3>
 <p>大昔にゼロックス社のパロアルト研究所が開発したSmalltalkという伝説的なプログラミング言語があって（今もあって熱烈なファンがいるけど）、このSmalltalkはパロアルト研究所が開発したAltoというコンピューターのOS（Operating System）でした。プログラミング言語がOSなんておかしいと思ってしまった人は、電源を入れるとMSX-BASICのインタープリターが起動するMSXでコンピューターを始めた私に謝ってください。特定のプログラミング言語を動かすためのコンピューターって、大昔にはけっこうあったんですよ。</p>
 <p>で、このAltoってのは当時にしてはものすごく先進的なコンピューターで、マウスがついていてGUI（Graphical User Interface）を持っていました。もちろん世界初です。この世界初のGUIをどうにかしていい感じに開発できないかなぁと考えて作られたのが、MVCアーキテクチャなんです。</p>
-<p>図</p>
+<p><img src="https://tail-island.github.io/jetpack/images/mvc-architecture.png" alt="MVCアーキテクチャ" /></p>
 <p>Controllerは入力機器（マウスとかキーボードとか）からの入力を監視し、マウス・クリックとかキーボードのAが押されたとかのイベントをもとに、Modelというデータとデータ操作の手続きを管理するオブジェクトにメッセージを送り（メソッドを呼び出し）ます。Modelのデータが変更されたことはViewに通知され（Observerパターン）、通知を受け取ったViewは自分自身を置き換えて出力する。以上がMVCアーキテクチャなんです。</p>
 <p>MVCアーキテクチャは依存が片方向になるのでとても良いのですけど、GUIが複雑になってくると、GUIの入力と出力を分けるのは無理がある（たとえば、ボタンがタップされたときのアニメーションをControllerとModel経由でやるのは無駄が多すぎるでしょ？）ということになりました。だから、Androidアプリ開発ではControllerは分割されていません。</p>
 <p>ちなみに、このViewとControllerが一体化した場合のアーキテクチャがDocument-Viewアーキテクチャだったりします。代表例はMFC（Microsoft Foundation Classes）、懐かしいなぁ。</p>
@@ -1433,11 +1433,11 @@ dependencies {
 <p>WebアプリケーションのMVCアーキテクチャはSmalltalkのMVCとは<em>無関係</em>で、一般的にModelはO/Rマッピング・ツールでマッピングされたレコードを表現するオブジェクトです（もちろん普通のクラスが含まれていても構いません）。Controllerはリクエストを受け取ってModelを更新/取得してViewが必要とするデータを用意し、ViewはControllerから渡されたデータをHTMLに変換します。これがWebアプリケーションの場合のMVCアーキテクチャなんですけど、勝手に名乗っているだけな上に無関係なので、今回はこのMVCアーキテクチャは忘れてください。</p>
 <h3 id="mvvmmodel-view-viewmodelアーキテクチャ">MVVM（Model-View-ViewModel）アーキテクチャ</h3>
 <p>MVVMアーキテクチャというのは、.NET Framework 3.0のWPF（Windows Presentation Foundation）やSilverlightのために考案されたアーキテクチャです。理屈の上ではModelとViewだけで良さそうなのですけど、WPFやSilverlightではXAMLというViewをXMLで定義する言語を持っていて、この言語はとても高機能で素晴らしいのですけど、XAMLだけでViewを作成した場合は、Model側にViewのためのコードを書く必要がありました。これではModelとViewに分割した意味がありませんから、間にViewModelを挟んで、Model-View-ViewModelとなりました。MVVMアーキテクチャでは、メソッドの呼び出しは片方向（View→ViewModel→Model）だけで、逆の方向は変更の通知で情報を伝えることになっています（ModelとViewModelの間は返り値でもOK）。</p>
-<p>図</p>
+<p><img src="https://tail-island.github.io/jetpack/images/mvvm-architecture.png" alt="MVVMアーキテクチャ" /></p>
 <p>さて、ViewをレイアウトのXMLとソース・コードの合わせ技で実装するAndroidアプリ開発ではViewModelは不要に感じられるのですけど、AndroidのViewである<code>Activity</code>や<code>Fragment</code>には状態を持てないという別の制約がありました。このViewの状態を管理するために、ViewModelを使用するというわけ。必要に迫られて仕方なく、という感じのアーキテクチャなんですな。</p>
 <h3 id="android-jetpackでのmodel-view-viewmodelアーキテクチャ">Android JetpackでのModel-View-ViewModelアーキテクチャ</h3>
 <p>Android Jetpackでは、もう一つ層を追加することを提案しています。それがRepositoryです。</p>
-<p>図</p>
+<p><img src="https://tail-island.github.io/jetpack/images/jetpack-mvvm-architecture.png" alt="Android JetpackのMVVMアーキテクチャ" /></p>
 <p>Androidが動作するスマートフォンやタブレット、ウェアラブル・デバイスは、インターネットとの親和性が高いデバイスです。だから、我々が作成するアプリもインターネットと頻繁に通信する可能性が高い。しかもローカルのファイルやデータベースだって使用するわけで、だから、モデルはWebサービスに基づく場合とデータベースやファイルに基づく場合がありえます。これらがバラバラのままだと管理が大変になってしまうので、Repositoryという層を追加して一本化してViewModelはRepositoryだけに依存しましょうという感じ。</p>
 <p>で、本来のMVVMのModelはビジネス・ロジックを含む分厚い層で、Android Jetpackのドキュメントでも図だけはそんな感じに書いてあるのですけど、実際としては、ただのRoomによるDAO（Data Access Object）とEntity、Retrofit2によるWebサービスになります（たぶん）。だって、ModelというのはReposirotyでラップできるようなレベルなんですしね。後述するLiveDataとRoomを組み合わせれば、データベースの変更がViewModelに通知されて楽チンだし。結果としてViewModelは少し大きくなるけど、Android JetpackならViewModel上にロジックを書くのがやたらと楽だしね。</p>
 <p>MVVMアーキテクチャ原理主義派の方々はこんなやり方は認めないのでしょうけど、楽にコードを書けるのだから私的には全然オッケー。</p>
