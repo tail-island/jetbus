@@ -4448,11 +4448,11 @@ class BusApproachesFragment: Fragment() {
 
 ![Asset Studio](https://tail-island.github.io/jetbus/images/asset-studio.png)
 
-私は絵心がないのから、Android StudioのClip Artの流用で作るんだけどな。[Source Asset]の[Asset Type]の[Clip Art]ラジオ・ボタンをクリックすると、Android Studioが提供するアイコンから選びましょう。Clip Artをクリックして、バスのアイコンをクリックします。
+私は絵心がないのから、Android StudioのClip Artの流用で作るんだけどな。[Source Asset]の[Asset Type]の[Clip Art]ラジオ・ボタンをクリックすれば、Android Studioが提供するアイコンから選び放題です。その中から、バスのアイコンを選択しましょう。
 
 ![Clip Art](https://tail-island.github.io/jetbus/images/clip-art.png)
 
-色を設定します。今回は真っ白にしたいので、「FFFFFF」を入力します。
+色を設定しましょう。[Color]をクリックして、今回は真っ白にしたいので「FFFFFF」を入力します。
 
 ![Select Color](https://tail-island.github.io/jetbus/images/select-color.png)
 

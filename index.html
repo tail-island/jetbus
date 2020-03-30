@@ -3674,9 +3674,9 @@ dependencies {
 <h1 id="image-asset-studioでアイコンを作れば完成"><a href="https://github.com/tail-island/jetbus/tree/master">Image Asset Studioでアイコンを作れば、完成！</a></h1>
 <p>でも、まだ不十分。アプリのアイコンを作らないとね。Android Studioのメニューから[File] - [New] - [Image Asset]メニューを選んで、アプリのアイコンを作成しましょう。</p>
 <p><img src="https://tail-island.github.io/jetbus/images/asset-studio.png" alt="Asset Studio" /></p>
-<p>私は絵心がないのから、Android StudioのClip Artの流用で作るんだけどな。[Source Asset]の[Asset Type]の[Clip Art]ラジオ・ボタンをクリックすると、Android Studioが提供するアイコンから選びましょう。Clip Artをクリックして、バスのアイコンをクリックします。</p>
+<p>私は絵心がないのから、Android StudioのClip Artの流用で作るんだけどな。[Source Asset]の[Asset Type]の[Clip Art]ラジオ・ボタンをクリックすれば、Android Studioが提供するアイコンから選び放題です。その中から、バスのアイコンを選択しましょう。</p>
 <p><img src="https://tail-island.github.io/jetbus/images/clip-art.png" alt="Clip Art" /></p>
-<p>色を設定します。今回は真っ白にしたいので、「FFFFFF」を入力します。</p>
+<p>色を設定しましょう。[Color]をクリックして、今回は真っ白にしたいので「FFFFFF」を入力します。</p>
 <p><img src="https://tail-island.github.io/jetbus/images/select-color.png" alt="Select Color" /></p>
 <p>背景の絵を作るデザインス・センスもありませんので、背景は単色にしました。[Background Layer]タブを選択して、Colorをクリックします。背景色は、アプリの<code>colorPrimaryDark</code>に設定した色の「006428」です。この色は<a href="https://material.io/resources/color/#!/?view.left=0&amp;view.right=1">Color Tool</a>で作成しています。Primary Colorに適当な色を設定するだけでPrimary Dark Colorが作成されてとても便利ですよ。あとは、[Next]ボタンをクリックして[Finish]ボタンをクリックして、ビルドしてインストールして、でも何故かアプリのアイコンが変わりません……。</p>
 <p>その理由は、drawableのリソースのXMLにはAndroidのバージョンによって記述できる事柄に差異があって、Android Studioがデフォルトで作成したアプリのアイコンは新しいバージョン向け、Image Assetで先程作成したアプリのアイコンは古いバージョン向けのファイルを作成していたため。というわけで、不要になった以前のdrawableを消しちゃいましょう。app/src/main/res/drawable-v24フォルダをまるっと削除しました。</p>
