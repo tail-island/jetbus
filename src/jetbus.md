@@ -1,4 +1,4 @@
-「Androidアプリの開発は、地球が砕け散ってもイヤです」
+        「Androidアプリの開発は、地球が砕け散ってもイヤです」
 
 上司の問い掛けにノータイムで断りをいれて、でもしがないサラリーマンの私の我儘が通るはずなんかなくて、Androidアプリの開発があまりに辛くて滂沱のごとく涙したあの日の私。私の立場は当時と同じヒラのままですし、やっぱり上司の命令には逆らえないのですけど、Androidアプリの開発は大きく変わりました。
 
@@ -633,6 +633,8 @@ findNavController().navigate(
 でも、あれ？　`<com.google.android.material.navigation.NavigationView>`タグの属性を見ていくと、`app:headerLayout="@layout/item_navigation_header"`や`app:menu="@menu/menu_navigation"`と書いてあって、こんなリソースは無いとエラーになっています。以下の図のようにNavigation drawerはヘッダーとメニューとそれ以外で構成されていて、それ以外は子要素で定義したので、ヘッダーとメニューを定義しなければならないんですね。
 
 ![Navigation Drawer](https://tail-island.github.io/jetbus/images/navigation-drawer.png)
+
+![アプリ仕様](https://tail-island.github.io/jetbus/images/app-spec.png)
 
 というわけで、ヘッダーを作成します。プロジェクトを右クリックして、[New] - [Android Resource File]メニューを選択し、[File name]に「item\_navigation\_header」を入力して[Resource type]を「Layout」に設定し、作成されたitem\_navigation\_header.xmlに以下を入力します。
 
