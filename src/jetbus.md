@@ -4466,4 +4466,4 @@ class BusApproachesFragment: Fragment() {
 
 ![Jetbus](https://tail-island.github.io/jetbus/images/navigation-drawer.png)
 
-いろいろあったけど、Androidアプリの開発ってべつに難しくない、むしろ楽チンで美味しいでしょ？
+いろいろあったけど、Androidアプリの開発ってべつに難しくない、というか、むしろ楽チンで美味しいでしょ？
