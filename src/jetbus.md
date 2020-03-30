@@ -4465,7 +4465,3 @@ class BusApproachesFragment: Fragment() {
 以上！　これで本当の本当に完了です。いろいろあったけど、Androidアプリの開発ってべつに難しくない、むしろ楽チンで美味しいでしょ？
 
 ![Jetbus](https://tail-island.github.io/jetbus/images/navigation-drawer.png)
-![Jetbus](https://tail-island.github.io/jetbus/images/bookmarks.png)
-![Jetbus](https://tail-island.github.io/jetbus/images/departure-bus-stop.png)
-![Jetbus](https://tail-island.github.io/jetbus/images/arrival-bus-stop.png)
-![Jetbus](https://tail-island.github.io/jetbus/images/bus-approaches.png)
