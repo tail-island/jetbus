@@ -4434,7 +4434,7 @@ class BusApproachesFragment: Fragment() {
 }
 ~~~
 
-これだけで、はい。動きました！
+これだけで……はい、動きました！
 
 ![Movie #5](https://tail-island.github.io/jetbus/images/movie-5.gif)
 
