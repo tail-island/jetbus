@@ -2731,11 +2731,11 @@ class BusApproachesFragment: Fragment() {
 
 この書き方にしておくと、`Fragment`とViewModelの生存期間が同じになります。あと、たとえば認証情報のような`Fragment`よりも生存期間が長い（別の`Fragment`に遷移したらまたIDとパスワード入力するなんてやってられないですよね？）ViewModelを使う場合には、`private val authorizationViewModel by activityViewModel<AuthorizationViewModel> { viewModelProviderFactory }`とするだけで`ViewModel`の生存期間が`Activity`と同じになるのでとても便利ですよ。
 
-はい、これで完成！　正しく動くか試してみましょう。
+はい、これで完成！　正しく動くか試してみましょう。処理開始まで5秒待つようにしていますから、かなり長く待たないと動きがなくてイライラするけど……。
 
 ![Movie #3](https://tail-island.github.io/jetbus/images/movie-3.gif)
 
-うん、動いた……のですけど、確認のために`AppModule`を開いてソース・コードを眺めていたら、なんかちょっと気持ち悪い。`fun provideBusApproachesViewModel(repository: Repository) = BusApproachesViewModel(repository) as ViewModel`の`repository`は、どうやって取得したのでしょうか？　だって、`Repository`を`@Provides`するメソッドは定義していないんですよ？
+うん、動いた……のは良いのだけど、確認のために`AppModule`を開いてソース・コードを眺めていたら、なんかちょっと気持ち悪い。`fun provideBusApproachesViewModel(repository: Repository) = BusApproachesViewModel(repository) as ViewModel`の`repository`は、どうやって取得したのでしょうか？　だって、`Repository`を`@Provides`するメソッドは定義していないんですよ？
 
 その答えは「`@Inject`アノテーションが付いたコンストラクタを持つクラスは、自動で`@Provides`なメソッドを作成してくれるから」です。先程`Repository`を作成したときに、`@Singleton`アノテーションと`@Inject`アノテーションを追加しましたよね。この`@Inject`アノテーションが役に立ってくれたんです。
 
