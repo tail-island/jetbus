@@ -1469,9 +1469,11 @@ override fun onStart() {
 
 ![SQLite3のファイルの保存](https://tail-island.github.io/jetbus/images/save-sqlite3-file.png)
 
-ダウンロードしたデータベースのファイルの中を見て、正しく動作したのかを確認してみましょう。sqlite3コマンドでデータベースを開いて`SELECT * FROM BusStop LIMIT 10;`を実行して、はい、たしかにバス停が保存されています。この章の前で書いた、出発バス停名と到着バス停名から`Route`を取得するSQLも実行してみます。うん、上りか下りなのかの判別まで含めてうまく行っています。やっぱり、Room簡単ですな。
+ダウンロードしたデータベースのファイルの中を見て、正しく動作したのかを確認してみましょう。sqlite3コマンドでデータベースを開いて`SELECT * FROM BusStop LIMIT 10;`を実行して、はい、たしかにバス停が保存されています。この章の前で書いた、出発バス停名と到着バス停名から`Route`を取得するSQLも実行してみます。うん、上りか下りなのかの判別まで含めてうまく行っています。
 
 ![Roomのログ](https://tail-island.github.io/jetbus/images/room-log-2.png)
+
+やっぱり、Room簡単ですな。
 
 # [Dagger](https://github.com/tail-island/jetbus/tree/dagger)
 
