@@ -1424,7 +1424,7 @@ dependencies {
 <p>Android Jetpackでは、MVVMアーキテクチャを使うことが推奨されています。このMVVMアーキテクチャを理解するには、その前段であるMVC（Model-View-Controller）アーキテクチャの知識があると楽。しかも、Android JetpackのMVVMアーキテクチャは、普通のMVVMアーキテクチャとは少し違っていたりします。</p>
 <p>というわけで、MVCアーキテクチャ、MVVMアーキテクチャ、Android JetpackのMVVMアーキテクチャの順に説明させてください。</p>
 <h3 id="mvcmodel-view-controllerアーキテクチャ">MVC（Model-View-Controller）アーキテクチャ</h3>
-<p>大昔にゼロックス社のパロアルト研究所が開発したSmalltalkという伝説的なプログラミング言語があって（今もあって熱烈なファンがいるけど）、このSmalltalkはパロアルト研究所が開発したAltoというコンピューターのOS（Operating System）でした。プログラミング言語がOSなんておかしいと思ってしまった人は、電源を入れるとMSX-BASICのインタープリターが起動するMSXでコンピューターを始めた私に謝ってください。特定のプログラミング言語を動かすためのコンピューターって、大昔にはけっこうあったんですよ。</p>
+<p>大昔にXerox社のパロアルト研究所が開発したSmalltalkという伝説的なプログラミング言語があって（今もあって熱烈なファンがいるけど）、このSmalltalkはパロアルト研究所が開発したAltoというコンピューターのOS（Operating System）でした。プログラミング言語がOSなんておかしいと思ってしまった人は、電源を入れるとMSX-BASICのインタープリターが起動するMSXでコンピューターを始めた私に謝ってください。特定のプログラミング言語を動かすためのコンピューターって、大昔にはけっこうあったんですよ。</p>
 <p>で、このAltoってのは当時にしてはものすごく先進的なコンピューターで、マウスがついていてGUI（Graphical User Interface）を持っていました。もちろん世界初です。この世界初のGUIをどうにかしていい感じに開発できないかなぁと考えて作られたのが、MVCアーキテクチャなんです。</p>
 <p><img src="https://tail-island.github.io/jetbus/images/mvc-architecture.png" alt="MVCアーキテクチャ" /></p>
 <p>Controllerは入力機器（マウスとかキーボードとか）からの入力を監視し、マウス・クリックとかキーボードのAが押されたとかのイベントをもとに、Modelというデータとデータ操作の手続きを管理するオブジェクトにメッセージを送り（メソッドを呼び出し）ます。Modelのデータが変更されたことはViewに通知され（Observerパターン）、通知を受け取ったViewは自分自身を置き換えて出力する。以上がMVCアーキテクチャなんです。</p>
@@ -1447,7 +1447,7 @@ dependencies {
 <p>しかも、考えたくもないしLiveDataを使えば考える必要はほとんどなくなるのですけど、<code>Activity</code>や<code>Fragment</code>は複雑なライフサイクルを持っているので、単純にObserverパターンを使うと通知が来たときにはすでに<code>Activity</code>や<code>Fragment</code>が破棄されていて処理を実行したら即クラッシュなんて可能性もあるんですよ。</p>
 <p>これらの課題を、LiveDataでサクサク解決しちゃいましょう。</p>
 <h3 id="mutablelivedata"><code>MutableLiveData</code></h3>
-<p>と思ったのですけど、さて、困りました。LiveDataのオブジェクトはViewModelのプロパティとするのが普通なのですけれど、まだViewModelの作り方を説明できていません……。とりあえずは、<code>Fragment</code>から参照できて<code>Activity</code>や<code>Fragment</code>よりも生存期間が長い<code>App</code>に置くことにしましょう。出発バス停の名前を表現する<code>MutableLiveData</code>を作成します。</p>
+<p>と思ったのですけど、さて、困りました。LiveDataのオブジェクトはViewModelのプロパティとするのがセオリーなのですけれど、まだViewModelの作り方を説明できていません……。とりあえずは、<code>Fragment</code>から参照できて<code>Activity</code>や<code>Fragment</code>よりも生存期間が長い<code>App</code>に置くことにしましょう。出発バス停の名前を表現する<code>MutableLiveData</code>を作成します。</p>
 <div class="sourceCode" id="cb52"><pre class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb52-1"><a href="#cb52-1"></a><span class="kw">package</span> <span class="im">com.tail_island.jetbus</span></span>
 <span id="cb52-2"><a href="#cb52-2"></a></span>
 <span id="cb52-3"><a href="#cb52-3"></a><span class="kw">import</span> <span class="im">android.app.Application</span></span>
@@ -1518,7 +1518,7 @@ dependencies {
 <span id="cb54-29"><a href="#cb54-29"></a>        }.root</span>
 <span id="cb54-30"><a href="#cb54-30"></a>    }</span>
 <span id="cb54-31"><a href="#cb54-31"></a>}</span></code></pre></div>
-<p><code>observe()</code>の引数の<code>Observer { ... }</code>は、抽象メソッド一つだったらラムダ式から変換してやる（SAM変換）というKotlinの機能を使用しています。ラムダ式でいいんだったら前に付いている<code>Observer</code>は何なんだとか、どうして<code>(...)</code>の内側に入っているんだこれまでの書き方と違うじゃないかという疑問は、<code>observe()</code>にはいくつもバージョンがあるのでそのどれなのかを指定しなければならないから。普段と書き方が違うので面倒ですけど、普通の書き方をするとコンパイル・エラーになるので発見も書き換えも容易ですのでまぁいいかな。</p>
+<p><code>observe()</code>の引数の<code>Observer { ... }</code>は、抽象メソッド一つだったらラムダ式から変換してやる（SAM変換）という機能を使用しています。ラムダ式でいいんだったら前に付いている<code>Observer</code>は何なんだとか、どうして<code>(...)</code>の内側に入っているんだこれまでの書き方と違うじゃないかという疑問は、<code>observe()</code>にはいくつもバージョンがあるのでそのどれなのかを指定しなければならないから。普段と書き方が違うので面倒ですけど、いつもどおりの書き方をするとコンパイル・エラーになるので発見も書き換えも容易だからまぁいいかな。</p>
 <p>で、これで作業は終了です。<code>MutableLiveData</code>に値を設定するには、メイン・スレッドからの場合は<code>value</code>プロパティ、他のスレッドからの場合は<code>postValue()</code>メソッドを使用します。スレッドを作成して5秒経ったら、私の両親が「お前をまだクビにしてないんだから度量が大きい会社だな」と評価した会社の前にあるバス停が設定されて、通知が飛んで、画面に表示されます。</p>
 <p>で、ここで試していただきたいのですけど、バス接近情報を表示する画面に遷移したら、5秒経つ前にホーム画面を表示してアプリをバックグラウンドに移動させてみてください。バックグラウンドに移ったので画面を更新する必要はなくて、だから<code>Observer</code>の呼び出しは無駄です。LiveDataはこのことを知っていて、しかも、<code>Fragment</code>がどのような状態にあるのかを<code>viewLifecycleOwner</code>を経由して知ることができるので、変更を通知しなくなるんです。その証拠に、ほら、logcatを見てください「departureBusStopName.observe()」が表示されていないでしょ？　で、アプリをフォアグランドに戻すと、すぐにlogcatに「departureBusStopName.observe()」が表示されて、私の会社の前にあるバス停の名前が画面に表示される。 というわけで、ほら、LiveDataのおかげで<code>Activity</code>や<code>Fragment</code>のライフサイクルがどうなっているのかを考えながらプログラミングする手間はほぼなくなりました！</p>
 <h3 id="livedataとroomを組み合わせる">LiveDataとRoomを組み合わせる</h3>
