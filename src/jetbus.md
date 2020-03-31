@@ -1919,7 +1919,7 @@ class BusApproachesFragment: Fragment() {
 
 `observe()`の引数の`Observer { ... }`は、抽象メソッド一つだったらラムダ式から変換してやる（SAM変換）という機能を使用しています。ラムダ式でいいんだったら前に付いている`Observer`は何なんだとか、どうして`(...)`の内側に入っているんだこれまでの書き方と違うじゃないかという疑問は、`observe()`にはいくつもバージョンがあるのでそのどれなのかを指定しなければならないから。普段と書き方が違うので面倒ですけど、いつもどおりの書き方をするとコンパイル・エラーになるので発見も書き換えも容易だからまぁいいかな。
 
-で、これで作業は終了です。`MutableLiveData`に値を設定するには、メイン・スレッドからの場合は`value`プロパティ、他のスレッドからの場合は`postValue()`メソッドを使用します。スレッドを作成して5秒経ったら、私の両親が「お前をまだクビにしてないんだから度量が大きい会社だな」と評価した会社の前にあるバス停が設定されて、通知が飛んで、画面に表示されます。
+で、これで作業は終了です。`MutableLiveData`に値を設定するには、メイン・スレッドからの場合は`value`プロパティ、他のスレッドからの場合は`postValue()`メソッドを使用します。スレッドを作成して5秒経ったら、私の両親が「お前をまだクビにしてないなんて度量が大きい会社だな」と評価した会社の前にあるバス停が設定されて、通知が飛んで、画面に表示されます。
 
 で、ここで試していただきたいのですけど、バス接近情報を表示する画面に遷移したら、5秒経つ前にホーム画面を表示してアプリをバックグラウンドに移動させてみてください。バックグラウンドに移ったので画面を更新する必要はなくて、だから`Observer`の呼び出しは無駄です。LiveDataはこのことを知っていて、しかも、`Fragment`がどのような状態にあるのかを`viewLifecycleOwner`を経由して知ることができるので、変更を通知しなくなるんです。その証拠に、ほら、logcatを見てください「departureBusStopName.observe()」が表示されていないでしょ？　で、アプリをフォアグランドに戻すと、すぐにlogcatに「departureBusStopName.observe()」が表示されて、私の会社の前にあるバス停の名前が画面に表示される。 というわけで、ほら、LiveDataのおかげで`Activity`や`Fragment`のライフサイクルがどうなっているのかを考えながらプログラミングする手間はほぼなくなりました！
 
@@ -2089,7 +2089,7 @@ class App: Application() {
 
 `Transformations`の`switchMap()`メソッドは、１つ目の引数で指定した`LiveData`が変更になったら、2つ目の引数のラムダ式の結果がセットされる`LiveData`を返します。なお、今回はラムダ式が`LiveData`を返すので`switchMap()`を使用しましたが、`Transformations`には、`LiveData`ではない返り値を使う場合向けの`map()`というメソッドもありますのでいい感じに使い分けてください。
 
-で、この`Transformations`を使うと、Roomにテーブルとテーブルの間を辿る機能がないことが気にならなくなります。たとえば注文と注文明細を表示するような場合は、注文と注文明細を`Transformations`でつないで、注文と関係づけられた注文明細を取得するデータ・アクセス・オブジェクトのメソッドを書けばいいんですから。というわけで、Roomは前に書いたような「こういうのでいいんだよ。こういうので」と表現されるような機能が貧弱なO/Rマッピング・ツールではなくて、不要な機能がついていないとても洗練された最高に出来が良いO/Rマッピング・ツールなのですよ。もし「Roomは機能が貧弱で」とのたまうRoomの説明を書いていたときの私みたいな人がいたら、分かってないなぁと鼻で笑ってやってください。
+で、この`Transformations`を使うと、Roomにテーブルとテーブルの間を辿る機能がないことが気にならなくなります。たとえば注文と注文明細を表示するような場合は、注文と注文明細を`Transformations`でつないで、注文と関係づけられた注文明細を取得するデータ・アクセス・オブジェクトのメソッドを書けばいいんですから。というわけで、Roomは前に書いたような「こういうのでいいんだよ。こういうので」と表現されるような機能が貧弱なO/Rマッピング・ツールではなくて、不要な機能がついていないとても洗練された最高に出来が良い十分な機能を持つO/Rマッピング・ツールなのですよ。もし「Roomは機能が貧弱で」とのたまうRoomの説明を書いていたときの私みたいな人がいたら、分かってないなぁと鼻で笑ってやってください。
 
 最後。せっかく`departureBusStopName`が変更になったら`arrivalBusStops`が変更されるようになったのですから、`BusApproachesFragment`を修正して画面も変更されるようにしましょう。
 
@@ -2447,7 +2447,7 @@ class BusApproachesFragment: Fragment() {
 
 で、`android:text`属性の値の`@{...}`の部分がバインディング先の指定です。`app.departureBusStopName`は`LiveData`型だけど文字列型にしなくていいの？　と、お考えになった方がいらっしゃるかもしれませんけど、データ・バインディングは`LiveData`対応ですのでこれで大丈夫なんです。
 
-ただ、良いことばかり続くわけではないのが世の常です。`routeNamesTextView`の`android:text`プロパティを見てください。`map()`や`joinToString()`を使わずに、まだ定義してない`App`の`routeNames`プロパティをバインディングしています。なんでこんなことをしているかというと、データ・バインディングの`@{...}`の中ってKotlinのコードを書けないんためです。詳しい言語仕様は[レイアウトとバインディング式](https://developer.android.com/topic/libraries/data-binding/expressions?hl=ja)に書いてあるので読んでいただきたいのですけど、たとえばKotlinの`if`は式なのでKotlinのプログラマーは`val x = if (condition) "OK" else "BAD"`のように書くのに慣れていますけど、データ・バインディングのときは昔懐かしい三項演算子（`condition ? "OK" : "BAD"`）で書かないとダメだったりします。
+ただ、良いことばかり続くわけではないのが世の常です。`routeNamesTextView`の`android:text`プロパティを見てください。`map()`や`joinToString()`を使わずに、まだ定義してない`App`の`routeNames`プロパティをバインディングしています。なんでこんなことをしているかというと、データ・バインディングの`@{...}`の中ってKotlinのコードを書けないんため。詳しい言語仕様は[レイアウトとバインディング式](https://developer.android.com/topic/libraries/data-binding/expressions?hl=ja)に書いてあるので読んでいただきたいのですけど、たとえばKotlinの`if`は式なのでKotlinのプログラマーは`val x = if (condition) "OK" else "BAD"`のように書くのに慣れていますけど、データ・バインディングのときは昔懐かしい三項演算子（`condition ? "OK" : "BAD"`）で書かないとダメだったりします。
 
 やってられないので、あっさり諦めて`App`にプロパティを追加しました。`App`に追加というとやっちゃいけないことのように感じられますけど、本章の最後までやればViewModelへの追加となります。ViewModelはViewのためのものなのですから、この程度は良いんじゃないかなぁと。ViewModelがViewを呼び出すのはダメですけど、Viewのことを考えながらViewModelを作るのはアリなのですから。もちろん、こんなプロパティは無いほうがいいのですけど、でも、言語仕様がアレなんだもん。
 
@@ -2600,7 +2600,7 @@ class BusApproachesViewModel(private val repository: Repository): ViewModel() {
 
 同じ問題は`Activity`や`Fragment`で経験済みで、あのときはDaggerによるDependency Injectionで解決できました。でも、`ViewModel`からは`App`にアクセスできないので、同じ解決策は使えません……。
 
-幸いなことに、Daggerは有名なプロダクトですから、いろいろな人が使い方を調べて解説を書いてくださっています。その一つの[ViewModelをDagger2でDIする](https://qiita.com/superman9387/items/bea94e4316c2ccf8fb68)がこの問題を解決してくれます。ありがてぇ。というわけで、ここに書いてある通りにすればすべてオッケー。
+幸いなことに、Daggerは有名なプロダクトですから、いろいろな人が使い方を調べて解説を書いてくださっています。その一つの「[ViewModelをDagger2でDIする](https://qiita.com/superman9387/items/bea94e4316c2ccf8fb68)」がこの問題を解決してくれます。ありがてぇ。というわけで、ここに書いてある通りにすればすべてオッケー。
 
 解説と順序は違いますが、まずは`ViewModelKey`アノテーションと`AppViewModelProviderFactory`を作成します。新規にUtility.ktを作成して、以下の内容を入力します。
 
@@ -2739,7 +2739,7 @@ class BusApproachesFragment: Fragment() {
 
 その答えは「`@Inject`アノテーションが付いたコンストラクタを持つクラスは、自動で`@Provides`なメソッドを作成してくれるから」です。先程`Repository`を作成したときに、`@Singleton`アノテーションと`@Inject`アノテーションを追加しましたよね。この`@Inject`アノテーションが役に立ってくれたんです。
 
-では`@Singleton`アノテーションは何なのかというと、`@Singleton`をDaggerで生成したい型に付加しておくと、`@Provides`メソッドを生成するときに`@Singleton`が自動で付くようになるんです。`Repository`は何個もいらないですもんね。というわけで、`AppModule`の`@Singleton`は生成対象の型に移動……させるという手は、`provideContext()`や`provideConsumerKey()`では使えません。書き方が統一できないとミスが発生しそうで怖いので、しょうがないので、無駄があるけど念の為に両方に書くという方式にしましょう。`AppDatabase`と`WebService`にも`@Singleton`を付加しておきます。
+では`@Singleton`アノテーションは何なのかというと、`@Singleton`をDaggerで生成したい型に付加しておくと、`@Provides`メソッドを生成するときに`@Singleton`が自動で付くようになるんです。`Repository`は何個もいらないですもんね。というわけで、`AppModule`の`@Singleton`は生成対象の型に移動……させるという手は、`provideContext()`や`provideConsumerKey()`では使えません。書き方が統一できないとミスが発生しそうで怖いので、しょうがないから、無駄があるけど念の為に両方に書くという方式にしましょう。`AppDatabase`と`WebService`にも`@Singleton`を付加しておきます。
 
 というわけで、コンストラクタに`@Inject`を書くだけで依存性を注入しまくれるんです。注入した依存性を活用できるのは`ViewModel`経由で呼び出す場合だけですけど、MVVMアーキテクチャを採用してアプリを組むのですから問題にはならないはず。ほら、前章からの宿題だったDaggerをどうやって使うかが決まったでしょ？　これ以降は、依存性を注入したいならコンストラクタに`@Inject`を書くだけでよくなったんですよ。
 
@@ -2747,7 +2747,7 @@ class BusApproachesFragment: Fragment() {
 
 # [コルーチン](https://github.com/tail-island/jetbus/tree/coroutines)
 
-もろもろ片付いたのでよーしパパ残りのViewModelも作っちゃうぞーと考えたのですけど、最初の画面の`SplashFragment`向けのViewModelでいきなり詰まってしまいました。RoomやRetrofit2はメイン・スレッドからは呼び出せないのですけど、スレッドどうしましょ？
+もろもろ片付いたのでよーしパパ残りのViewModelも作っちゃうぞーと考えたのですけど、最初の画面の`SplashFragment`向けのViewModelでいきなり躓いてしまいました。RoomやRetrofit2はメイン・スレッドからは呼び出せないのですけど、スレッドどうしましょ？
 
 ViewModelの中で`thread`で別スレッドを生成する……のは前の章で書いておいてアレなのですけど、ダメ、絶対。だって、生成されたスレッドは終了するまで生き残ってしまうんですから。ViewModelを作成してその中でスレッドを生成して、画面遷移して`Fragment`が終了するとかでViewModelを終了する。この場合でも、スレッドは処理が終わるまで動き続けます。で、もう一度同じ`Fragment`が表示されたりしてViewModelが生成されると、またスレッドが生成されちゃう。負荷が大きいことに加えて、処理が2重に動いてしまうんですよ。実は前の章までで作成したアプリにはこの問題に起因するバグがあって、`SplashFragment`でスレッドを生成してデータベースを更新しているときにスマートフォンを回転させたりすると、`Activity`が再生成されて`Fragment`の`onStart()`が再実行されてデータベースを更新するスレッドがもう一つ動いて、データの不整合ができてアプリが落ちちゃうんですよ。これじゃあ困る。
 
@@ -2760,10 +2760,10 @@ ViewModelの中で`thread`で別スレッドを生成する……のは前の章
 ~~~ kotlin
 fun useCoroutine() {
     runBlocking {  // とりあえず、runBlockingは無視してください……
-        for (i in 3.downTo(1)) {
+        for (i in 3.downTo(1)) {  // iの値は3, 2, 1の順になります
             launch {
                 delay(i.toLong() * 1000)
-                Log.d("xxx", "${i}")
+                Log.d("xxx", "${i}")  // 出力は1, 2, 3の順になります
             }
         }
     }
@@ -2789,12 +2789,12 @@ fun useThread() {
 
 ~~~ kotlin
 fun useCoroutine() {
-    Log.d("xxx", "Main thread id: ${Thread.currentThread().id}")
+    Log.d("xxx", "Main thread id: ${Thread.currentThread().id}")  // スレッドのIDを出力します
 
     runBlocking {
-        for (i in 3.downTo(1)) {  // 3, 2, 1の順になります
+        for (i in 3.downTo(1)) {
             launch {
-                delay(i.toLong() * 1000)  // i * 1000なので、i == 3のときは3秒、2のときは2秒、1のときは1秒待ちます
+                delay(i.toLong() * 1000)
                 Log.d("xxx", "${i}: ${Thread.currentThread().id}")
             }
         }
@@ -2906,7 +2906,7 @@ class BusApproachesFragment: Fragment() {
 
 こんな感じで、先程の無限ループする処理を呼び出しています。`delay(1000)`の間にメイン・スレッドは別の処理をできるのでユーザー・インターフェースが止まらず、それでいてもちろん、logcatにログが出力されます。で、それだけではなくて、画面が遷移すると無限ループなのに処理が止まるんですよ！
 
-中断して、再開しなければいい（あと、再開に必要な情報を破棄する）だけですもんね。うん、できるの分かってた。`viewModelScope`は`ViewModel`と同じライフサイクルを持っているので、画面が遷移して`ViewModel`が破棄されると処理が止まるんですな。
+中断して、再開しなければいい（あと、再開に必要な情報を破棄する）だけですもんね。で、`viewModelScope`は`ViewModel`と同じライフサイクルを持っているので、画面が遷移して`ViewModel`が破棄されると処理が止まるんですな。
 
 あと、`viewModelScope`の他に、`Activity`や`Fragment`で使用できる`lifecycleScope`や、アプリと同じライフサイクルを持つ`GlobalScope`なんてものあります。でも、できるだけ`GlobalScope`は使わないでくださいね。
 
@@ -3344,9 +3344,9 @@ class ViewHolder(private val binding: ListItemBusStopBinding): RecyclerView.View
 }
 ~~~
 
-`bind()`メソッドは、`ViewHolder`にデータを設定するためのメソッドです（このメソッドを呼び出す部分は`ListAdapter`で作るので、ちょっと待って）。`<data>`タグの`item`を変更して、`executePendingBindings()`でデータ・バインディングを強制的に実行させて、あと、リスナーを再設定しています。
+`bind()`メソッドは、`ViewHolder`にデータを設定するためのメソッドです（このメソッドを呼び出す部分は`ListAdapter`で作ります）。`<data>`タグの`item`を変更して、`executePendingBindings()`でデータ・バインディングを強制的に実行させて、あと、リスナーを再設定しています。
 
-でもちょっと待って。リストが変更された場合のことを考えてみましょう。たとえば最後に1行追加された場合は、残りの行は何もしなくてもよいはず。でも、今回のようにデータベースからデータを取得する場合は、再取得すると異なるインスタンスになってしまいます。以前表示していた`BusStop`のインスタンスと今回表示する`BusStop`のインスタンスは、同じバス停を表している場合であっても異るというわけ。異なるインスタンスなのだからもう一度データ・バインディングをやり直しましょうというのは、リソースの無駄遣いなのでやりたくない。あと、`RecyclerView.ViewHolder`のAPIリファレンスを眺めてみると、リストの中のどの位置なのかを表現する`getPosition()`というメソッドがありました。他にも、`getOldPosition()`という位置を移動するアニメーションのためのメソッドも。ということは、`ViewHolder`はリストの中を上下に移動することが可能なはず。それはそうですよね。最初に一行挿入された場合に、全部を書き直すのは無駄ですもん。
+でもちょっと待って。リストが変更された場合のことを考えてみましょう。たとえば最後に1行追加された場合は、残りの行は何もしなくてもよいはず。でも、今回のようにデータベースからデータを取得する場合は、再取得すると異なるインスタンスになってしまいます。以前表示していた`BusStop`のインスタンスと今回表示する`BusStop`のインスタンスは、同じバス停を表している場合であっても異るというわけ。異なるインスタンスなのだからもう一度データ・バインディングをやり直しましょうというのは、リソースの無駄遣いなのでやりたくない。あと、`RecyclerView.ViewHolder`のAPIリファレンスを眺めてみると、リストの中のどの位置なのかを表現する`getPosition()`というメソッドがありました。他にも、`getOldPosition()`という位置を移動するアニメーションのためのメソッドも。ということは、`ViewHolder`はリストの中を上下に移動することが可能なはず。それはそうですよね。最初に一行挿入された場合に、全部の行を書き直すのは無駄ですもん。
 
 というわけで、データの変更が無いから再バインディングは不要と判断したり、異なるインスタンスだけど同じデータを表現しているので上下への移動で対応しようと判断したりするための機能が必要です。これが`DiffCallback`。コードは以下に示すとおりで、`DiffUtil.ItemCallback`を継承して作成します。
 
@@ -3398,7 +3398,7 @@ class BusStopAdapter: ListAdapter<BusStop, BusStopAdapter.ViewHolder>(DiffCallba
 
 先程作成した`ViewHolder`と`DiffCallback`は、管理を簡単にするためにAdapterの中に入れました。Kotlinでは、単純に`class`の内側に`class`を作成しただけだと、外側の`class`の属性やメソッドを参照することはできません。だから、`ViewHolder`は外側のクラスの`onBusStopClick`を使用できるよう、`inner class`にしました。
 
-あとは、`ViewHolder`を作成する`onCreateViewHolder()`メソッドと、データ・バインディングのときに呼ばれる`onBindViewHolder()`メソッドを定義するだけです。[GitHubのコード](https://github.com/tail-island/jetbus/tree/recycler-view)を見ていただければ分かるのですけど、Adapterはすべてほぼ同じコードです。コピー＆ペーストして少しだけ置換すれば完成しちゃうので、一度上のコードを覚えてしまえばとても簡単に作れますよ。
+あとは、`ViewHolder`を作成する`onCreateViewHolder()`メソッドと、データ・バインディングのときに呼ばれる`onBindViewHolder()`メソッドを定義しただけです。[GitHubのコード](https://github.com/tail-island/jetbus/tree/recycler-view)を見ていただければ分かるのですけど、Adapterはすべてほぼ同じコードです。コピー＆ペーストして少しだけ置換すれば完成しちゃうので、一度上のコードを覚えてしまえばとても簡単に作れますよ。
 
 ## RecyclerViewを組み込む
 
@@ -3711,7 +3711,7 @@ class DepartureBusStopFragment: Fragment() {
 }
 ~~~
 
-このコードの中の`AcceleratedSmoothScroller`というのは、[RecyclerViewの長距離スムーズスクロールをスムーズにする](https://qiita.com/chibatching/items/52d9b73d244eac52d0d4)を猿真似して作成した良い感じスクロールさせるためのクラスです。`RecylerView`のAPIには、指定した場所にスクロールする機能（画面がいきなり切り替わるので使いづらいユーザー・インターフェースになる）と指定した場所までスムーズにスクロールする機能（使いやすいユーザー・インターフェースになるけど、スクロールが終わるまで長時間かかる）しかなくて、これだけだと指定場所までスクロールするという機能がとても作りづらいんです。この問題は、[RecyclerViewの長距離スムーズスクロールをスムーズにする](https://qiita.com/chibatching/items/52d9b73d244eac52d0d4)ですべて解決ですので、ぜひ読んでみてください。なお、今回は少しだけ実装を変えたので、クラス名も少しだけ変更しています。
+このコードの中の`AcceleratedSmoothScroller`は、「[RecyclerViewの長距離スムーズスクロールをスムーズにする](https://qiita.com/chibatching/items/52d9b73d244eac52d0d4)」を猿真似して作成した良い感じスクロールさせるためのクラスです。`RecylerView`のAPIには、指定した場所にスクロールする機能（画面がいきなり切り替わるので使いづらいユーザー・インターフェースになる）と指定した場所までスムーズにスクロールする機能（使いやすいユーザー・インターフェースになるけど、スクロールが終わるまで長時間かかる）しかなくて、これだけだと指定場所までスクロールするという機能がとても作りづらいんです。この問題は、「[RecyclerViewの長距離スムーズスクロールをスムーズにする](https://qiita.com/chibatching/items/52d9b73d244eac52d0d4)」ですべて解決できますので、ぜひ読んでみてください。なお、今回は少しだけ実装を変えたので、クラス名も少しだけ変更しています。
 
 ## `BookmarksFragment`と`ArrivalBusStopFragment`を同じやり方で作って、`BusApproachesFragment`を少しだけ修正する
 
@@ -3839,7 +3839,7 @@ interface TimeTableDao {
 }
 ~~~
 
-ある特定の条件下での集約や分析を実現するSQLのwindow関数を使えば簡単に作れそうなのですけど、残念なことにSQLite3がwindow関数をサポートしたのはバージョン3.25.0で、2020年3月現在で最新のAndroid 10であってもSQLite3のバージョンは3.22.0です……。だから、上のSQLでは`NOT EXISTS`の中の副問合せで代用しました。副問合せの外側の行よりも到着バス停に関連付けられた`TimeTableDetail.arrival`から現在時刻を引いた結果の絶対値が小さいものが存在しない（`NOT EXISTS`）なので、結果として到着バス停に関連付けられた`TimeTableDetail.arrival`が現在時刻に最も近いものが`SELECT`されます。……現在時刻との差が同じものが複数ある場合に、全部取得されちゃうんだけどな。なので、`INNER JOIN`でもう一回副問合せして、`GROUP BY`して最小（順序が付いて一つに絞れるなら何でもいいので、最大とかでも大丈夫）の`TimeTable.id`と`INNER JOIN`しています。ちょっと（かなり）複雑なSQL文ですけど、でもたぶん、普通のプログラミング言語でループを回してデータを取得する処理を書くよりは楽だと思いますよ。O/Rマッピング・ツールがなかった頃にプログラムを書いていた私のようなおっさんに頼めば、この程度のSQLは大喜びで一瞬で書いてくれるはずです。おっさんとハサミは使いようですよ。職場のおっさんを大事にしましょう。
+ある特定の条件下での集約や分析を実現するSQLのwindow関数を使えば簡単に作れそうなのですけど、残念なことにSQLite3がwindow関数をサポートしたのはバージョン3.25.0で、2020年3月現在で最新のAndroid 10であってもSQLite3のバージョンは3.22.0です……。だから、上のSQLでは`NOT EXISTS`の中の副問合せで代用しました。副問合せの外側の行よりも到着バス停に関連付けられた`TimeTableDetail.arrival`から現在時刻を引いた結果の絶対値が小さいものが存在しない（`NOT EXISTS`）なので、結果として到着バス停に関連付けられた`TimeTableDetail.arrival`が現在時刻に最も近いものが`SELECT`されます。……現在時刻との差が同じものが複数ある場合は、それらが全部取得されちゃうんだけどな。なので、`INNER JOIN`でもう一回副問合せして、`GROUP BY`して最小（順序が付いて一つに絞れるなら何でもいいので、最大とかでも大丈夫）の`TimeTable.id`と`INNER JOIN`しています。ちょっと（かなり）複雑なSQL文ですけど、でもたぶん、普通のプログラミング言語でループを回してデータを取得する処理を書くよりは楽だと思いますよ。O/Rマッピング・ツールがなかった頃にプログラムを書いていた私のようなおっさんに頼めば、この程度のSQLは大喜びで一瞬で書いてくれるはずです。おっさんとハサミは使いようですよ。職場のおっさんを大事にしましょう。
 
 ### `TimeTableDetail`
 
@@ -4186,7 +4186,7 @@ class BusApproachesViewModel(private val repository: Repository): ViewModel() {
 
 でも、`departureBusStopName`と`arrivalBusStopName`、`bookmark`、`routes`、`routeBusStopPoles`、`busStopPoles`、`timeTableDetails`については、これまでに説明したやり方をそのまま繰り返しただけなので簡単です。
 
-問題は`timeTables`プロパティと`buses`プロパティ、`busApproaches`プロパティです。`Repository`の`syncTimeTables()`メソッドを実行しないとデータベースは空なので、だからどこかで`syncTimeTables()`を呼ばなければ`timeTables`はいつまでも空集合のまま。あと、`buses`はWebサービスから取得する値で、変更通知が来ませんから自分で値を定期的に更新しなければなりません。バスの接近情報そのものである`busApproaches`は、全ての情報を手作りしなければなりませんし……。
+少し難しいのは`timeTables`プロパティと`buses`プロパティ、`busApproaches`プロパティです。`Repository`の`syncTimeTables()`メソッドを実行しないとデータベースは空なので、だからどこかで`syncTimeTables()`を呼ばなければ`timeTables`はいつまでも空集合のまま。あと、`buses`はWebサービスから取得する値で、変更通知が来ませんから自分で値を定期的に更新しなければなりません。バスの接近情報そのものである`busApproaches`は、全ての情報を手作りしなければなりませんし……。
 
 というわけで、まずは`timeTables`プロパティから。`syncTimeTables()`を呼ぶのに一番良いタイミングは`routes`プロパティと`departureBusStopName`プロパティの両方に値が設定された時なので、`MediatorLiveData<List<TimeTable>>().apply { ... }`の中に`syncTimeTables()`を呼び出す処理を入れたい。値を取得する処理の中に更新処理を入れるのは目的違いな気もするけど、他に適当な場所が無いから我慢。で、`syncTimeTables()`はコルーチンで呼び出さなければならないので`viewModelScope.launch { ... }`して呼び出します。今回は`routes`も`departureBusStopName`も変更がないので実は考慮しなくても動作するのですけど、念の為に、`syncTimeTables()`している最中にもう一度`viewModelScope.launch { ... }`が動いてしまっても二重に処理されないための考慮をしておきたい。というわけで、`source`と同様に`job`という変数を作成して、`cancelAndJoin()`でキャンセルされるまで待つようにしました。`cancelAndJoin()`も`suspend`なメソッドなので、`update()`全体を`viewModelScope.launch { ... }`で囲んでいます。これで`timeTables`プロパティは完成。`syncTimeTables()`が終わればデータベースが更新されたことがLiveDataで通知されて、その結果として`timeTables`プロパティに値が設定されます。
 
