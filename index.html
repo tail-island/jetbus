@@ -107,6 +107,7 @@
 <p>なので、複数の路線の車両の接近情報を集めて表示するアプリを作成します。タイミングが良いことに、2019年5月31日に、<a href="https://metro.tokyo.jp.tosei/hodohappyo/press/2019/05/31/04.html">都営交通の運行情報等をオープンデータとして提供開始します</a>というニュースがありました。<a href="https://developer.odpt.org">公共交通オープンデータセンター開発者サイト</a>でユーザー登録すれば、誰でも無料でデータを使用できます（利用者への通知が必要などの、いくつかの制約はありますけど）。Webサイトのクローリングが不要なのでアプリ開発は容易だろうから、サンプル・アプリに適しているんじゃないかな。</p>
 <p>やることが決まったので、具体化しましょう。出発バス停を指定して、到着バス停を指定すると、それらのバス停を結ぶ全ての路線の接近情報が一覧表示されます。あと、毎回出発バス停と到着バス停を選ぶのでは面倒すぎるので、ブックマークの機能を持たせます。以下のような感じ（単純なアプリですけど、サンプルなのでご容赦ください）。</p>
 <p><img src="https://tail-island.github.io/jetbus/images/app-spec.png" alt="アプリ仕様" /></p>
+<p>実際にアプリを試してみたい場合は、<a href="https://play.google.com/store/apps/details?id=com.tail_island.jetbus">Google Play</a>でインストールできます。ぜひ試してみてください。</p>
 <p>本ガイドでは、このアプリをちゃちゃっと作っていきます。</p>
 <p>ソース・コードは<a href="https://github.com/tail-island/jetbus/">GitHub</a>で公開（しかも章単位にブランチを分けるというサービス付き）しているので、必要に応じて参照してみてください（すげーコード量が少ないので、見るのはそんなに大変じゃないはず）。ただし、このコードをビルドして動かすには、後の章で説明する<a href="https://developer.odpt.org">公共交通オープンデータセンター開発者サイト</a>にユーザー登録すると貰えるアクセス・トークンをが必要です。コードをcloneしたら./app/src/main/res/valuesディレクトリにodpt.xmlを作成し、以下を参考に<code>consumerKey</code>を設定してください。</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">&lt;?xml</span> version=&quot;1.0&quot; encoding=&quot;utf-8&quot;<span class="kw">?&gt;</span></span>

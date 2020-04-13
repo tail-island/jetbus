@@ -42,6 +42,8 @@
 
 ![アプリ仕様](https://tail-island.github.io/jetbus/images/app-spec.png)
 
+実際にアプリを試してみたい場合は、[Google Play](https://play.google.com/store/apps/details?id=com.tail_island.jetbus)でインストールできます。ぜひ試してみてください。
+
 本ガイドでは、このアプリをちゃちゃっと作っていきます。
 
 ソース・コードは[GitHub](https://github.com/tail-island/jetbus/)で公開（しかも章単位にブランチを分けるというサービス付き）しているので、必要に応じて参照してみてください（すげーコード量が少ないので、見るのはそんなに大変じゃないはず）。ただし、このコードをビルドして動かすには、後の章で説明する[公共交通オープンデータセンター開発者サイト](https://developer.odpt.org)にユーザー登録すると貰えるアクセス・トークンをが必要です。コードをcloneしたら./app/src/main/res/valuesディレクトリにodpt.xmlを作成し、以下を参考に`consumerKey`を設定してください。
